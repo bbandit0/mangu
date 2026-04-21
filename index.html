@@ -287,26 +287,15 @@ async function fnSaveMyPublicProfile(){
     .map(s=>({title:s.title,completed:s.completed.length,total:s.total,cover:s.coverIsUrl?s.cover:"",status:s.status,lastUpdated:s.lastUpdated||0}));
   const allManga=data.manga.map(s=>({title:s.title,completed:s.completed.length,total:s.total,cover:s.coverIsUrl?s.cover:"",status:s.status,lastUpdated:s.lastUpdated||0}));
   const allAnime=data.anime.map(s=>({title:s.title,completed:s.completed.length,total:s.total,cover:s.coverIsUrl?s.cover:"",status:s.status,lastUpdated:s.lastUpdated||0}));
+  // Nota: usamos merge:true para no sobreescribir el username si ya existe
   try{
-    // Leer username existente ANTES de escribir para no borrarlo nunca
-    let existingUsername="";
-    try{
-      const existing=await fbDb.collection("public_profiles").doc(uid).get();
-      if(existing.exists && existing.data().username){
-        existingUsername=existing.data().username;
-      }
-    }catch(e){}
-    const payload={
+    await fbDb.collection("public_profiles").doc(uid).set({
       uid,
       displayName:fbUser.displayName||"",
       avatarUrl:fbUser.photoURL||"",
       mangaCount,animeCount,topManga,topAnime,allManga,allAnime,
       lastActive:firebase.firestore.FieldValue.serverTimestamp()
-    };
-    // Solo incluir username en el payload si ya existe — merge:true lo preserva igual,
-    // pero al incluirlo explicitamente evitamos cualquier condicion de carrera
-    if(existingUsername) payload.username=existingUsername;
-    await fbDb.collection("public_profiles").doc(uid).set(payload,{merge:true});
+    },{merge:true});
   }catch(e){console.warn("fnSaveMyPublicProfile:",e);}
 }
 
@@ -337,18 +326,15 @@ async function fnRegisterUsername(username){
       uid:fbUser.uid,
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Escribir el perfil publico con merge:true para no pisar campos existentes
-    // El username se incluye explicitamente para garantizar que quede guardado
+    // Escribir el perfil publico con merge:false para set completo
     await fbDb.collection("public_profiles").doc(fbUser.uid).set({
-      uid:fbUser.uid,
-      username:clean,
+      uid:fbUser.uid,username:clean,
       displayName:fbUser.displayName||"",
       avatarUrl:fbUser.photoURL||"",
-      mangaCount:data.manga.length,
-      animeCount:data.anime.length,
+      mangaCount:data.manga.length,animeCount:data.anime.length,
       topManga:[],topAnime:[],allManga:[],allAnime:[],
       lastActive:firebase.firestore.FieldValue.serverTimestamp()
-    },{merge:true});
+    });
     return {ok:true};
   }catch(e){
     console.error("fnRegisterUsername error:",e.code,e.message);
@@ -452,6 +438,14 @@ async function fnRemoveFriend(friendUid){
   }catch(e){showToast("Error: "+e.message);}
 }
 
+// Helper: timeout para cualquier promesa de Firestore (evita cuelgues infinitos)
+function withTimeout(promise,ms=8000){
+  return Promise.race([
+    promise,
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))
+  ]);
+}
+
 async function renderFriendsPanel(){
   const container=document.getElementById("friends-panel-container");
   if(!container) return;
@@ -460,15 +454,29 @@ async function renderFriendsPanel(){
     container.innerHTML=`<div class="fn-status">Inicia sesion con Google para usar el sistema de amigos</div>`;
     return;
   }
+  try{
+    await _renderFriendsPanelInner(container);
+  }catch(err){
+    console.warn("renderFriendsPanel error:",err);
+    const msg=err.message==="timeout"?"Tiempo de espera agotado — revisa tu conexion":"Error al cargar: "+err.message;
+    container.innerHTML=`<div class="fn-status error" style="padding:24px;text-align:center">
+      ${msg}<br><br>
+      <button class="fn-btn sec" onclick="renderFriendsPanel()" style="margin:0 auto">Reintentar</button>
+    </div>`;
+  }
+}
+
+async function _renderFriendsPanelInner(container){
   fnSaveMyPublicProfile().catch(()=>{});
-  const myUsername=await fnGetMyUsername();
+  const myUsername=await withTimeout(fnGetMyUsername());
   const ac=theme.accentManga||"#e74c6f";
 
   // Vista perfil de amigo
   if(friendsState.view==="profile" && friendsState.viewingUid){
     let pData=friendsState.viewingData;
     if(!pData){
-      try{const doc=await fbDb.collection("public_profiles").doc(friendsState.viewingUid).get();pData=doc.exists?doc.data():null;}catch(e){}
+      const doc=await withTimeout(fbDb.collection("public_profiles").doc(friendsState.viewingUid).get());
+      pData=doc.exists?doc.data():null;
     }
     if(!pData){container.innerHTML=`<div class="fn-status error">No se pudo cargar el perfil</div>`;return;}
     const av=pData.avatarUrl?`<img class="fn-profile-avatar" src="${pData.avatarUrl}">`:
@@ -515,10 +523,16 @@ async function renderFriendsPanel(){
     return;
   }
 
-  // Vista lista
+  // Vista lista — todas las queries con timeout
   let received=[], friends=[];
-  try{const rSnap=await fbDb.collection("users").doc(fbUser.uid).collection("friends_received").get();received=rSnap.docs.map(d=>({id:d.id,...d.data()}));}catch(e){}
-  try{const fSnap=await fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").get();friends=fSnap.docs.map(d=>({id:d.id,...d.data()}));}catch(e){}
+  try{
+    const rSnap=await withTimeout(fbDb.collection("users").doc(fbUser.uid).collection("friends_received").get());
+    received=rSnap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){console.warn("friends_received:",e.message);}
+  try{
+    const fSnap=await withTimeout(fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").get());
+    friends=fSnap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){console.warn("friends_accepted:",e.message);}
 
   let html=`<div class="friends-panel"><div class="friends-title">&#128101; Amigos</div>`;
 
@@ -560,7 +574,7 @@ async function renderFriendsPanel(){
       const sr=friendsState.searchResult;
       const isFriend=friends.some(f=>f.uid===sr.uid);
       let hasSent=false;
-      try{hasSent=(await fbDb.collection("users").doc(fbUser.uid).collection("friends_sent").doc(sr.uid).get()).exists;}catch(e){}
+      try{hasSent=(await withTimeout(fbDb.collection("users").doc(fbUser.uid).collection("friends_sent").doc(sr.uid).get())).exists;}catch(e){}
       const avS=sr.profile.avatarUrl?`<img class="fn-fc-avatar" src="${sr.profile.avatarUrl}">`:
         `<div class="fn-fc-avatar-ph">&#128100;</div>`;
       html+=`<div class="fn-friend-card" style="margin-top:10px;cursor:default">
@@ -605,7 +619,10 @@ async function renderFriendsPanel(){
   }else{
     for(const f of friends){
       let fProfile=null;
-      try{const fDoc=await fbDb.collection("public_profiles").doc(f.uid).get();fProfile=fDoc.exists?fDoc.data():null;}catch(e){}
+      try{
+        const fDoc=await withTimeout(fbDb.collection("public_profiles").doc(f.uid).get());
+        fProfile=fDoc.exists?fDoc.data():null;
+      }catch(e){console.warn("fProfile load:",e.message);}
       const nm=fProfile?.displayName||f.displayName||"Usuario";
       const un=fProfile?.username||f.username||"";
       const avF=f.avatarUrl?`<img class="fn-fc-avatar" src="${f.avatarUrl}">`:
