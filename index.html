@@ -305,23 +305,28 @@ async function fnRegisterUsername(username){
   if(clean.length<3) return {ok:false,msg:"Minimo 3 caracteres (letras, numeros, _)"};
   if(clean.length>20) return {ok:false,msg:"Maximo 20 caracteres"};
   try{
-    // Intentar verificar si username existe (puede fallar si la regla de lectura
-    // aun no esta activa en cache — en ese caso asumimos que no existe y continuamos)
+    // Verificar si username ya existe
+    let checkDoc=null;
     try{
-      const check=await fbDb.collection("usernames").doc(clean).get();
-      if(check.exists) return {ok:false,msg:"Ese username ya esta tomado"};
+      checkDoc=await fbDb.collection("usernames").doc(clean).get();
     }catch(readErr){
-      // Si falla la lectura de verificacion, continuamos igual (worst case: error al escribir)
-      console.warn("check username read failed, proceeding:",readErr.code);
+      if(readErr.code==="permission-denied"){
+        return {ok:false,msg:"Error de permisos — publica las reglas de Firestore (boton Publicar en la consola)"};
+      }
+      console.warn("check username read failed:",readErr.code);
     }
-    // Escribir el username — set() puro sin merge para que Firestore lo trate como CREATE
-    // y la regla allow create pueda validar request.resource.data.uid correctamente
+    if(checkDoc&&checkDoc.exists){
+      // Si el doc existe y ya le pertenece a este usuario, permitir re-registro
+      if(checkDoc.data().uid!==fbUser.uid){
+        return {ok:false,msg:"Ese username ya esta tomado"};
+      }
+    }
+    // Escribir el username — set() puro: si no existe = CREATE, si ya es del mismo user = OVERWRITE (permitido por la regla update)
     await fbDb.collection("usernames").doc(clean).set({
       uid:fbUser.uid,
-      createdAt:Date.now()
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Escribir el perfil publico — NO usar merge:true para evitar conflicto con
-    // documentos parciales previos creados por fnInitFriendsSystem
+    // Escribir el perfil publico con merge:false para set completo
     await fbDb.collection("public_profiles").doc(fbUser.uid).set({
       uid:fbUser.uid,username:clean,
       displayName:fbUser.displayName||"",
@@ -332,9 +337,9 @@ async function fnRegisterUsername(username){
     });
     return {ok:true};
   }catch(e){
-    // Mensaje de error mas claro para el usuario
+    console.error("fnRegisterUsername error:",e.code,e.message);
     if(e.code==="permission-denied"){
-      return {ok:false,msg:"Error de permisos — asegurate de que las reglas de Firestore esten publicadas correctamente"};
+      return {ok:false,msg:"Error de permisos — ve a Firebase Console → Firestore → Reglas y haz clic en Publicar"};
     }
     return {ok:false,msg:"Error: "+e.message};
   }
