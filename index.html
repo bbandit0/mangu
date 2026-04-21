@@ -287,15 +287,26 @@ async function fnSaveMyPublicProfile(){
     .map(s=>({title:s.title,completed:s.completed.length,total:s.total,cover:s.coverIsUrl?s.cover:"",status:s.status,lastUpdated:s.lastUpdated||0}));
   const allManga=data.manga.map(s=>({title:s.title,completed:s.completed.length,total:s.total,cover:s.coverIsUrl?s.cover:"",status:s.status,lastUpdated:s.lastUpdated||0}));
   const allAnime=data.anime.map(s=>({title:s.title,completed:s.completed.length,total:s.total,cover:s.coverIsUrl?s.cover:"",status:s.status,lastUpdated:s.lastUpdated||0}));
-  // Nota: usamos merge:true para no sobreescribir el username si ya existe
   try{
-    await fbDb.collection("public_profiles").doc(uid).set({
+    // Leer username existente ANTES de escribir para no borrarlo nunca
+    let existingUsername="";
+    try{
+      const existing=await fbDb.collection("public_profiles").doc(uid).get();
+      if(existing.exists && existing.data().username){
+        existingUsername=existing.data().username;
+      }
+    }catch(e){}
+    const payload={
       uid,
       displayName:fbUser.displayName||"",
       avatarUrl:fbUser.photoURL||"",
       mangaCount,animeCount,topManga,topAnime,allManga,allAnime,
       lastActive:firebase.firestore.FieldValue.serverTimestamp()
-    },{merge:true});
+    };
+    // Solo incluir username en el payload si ya existe — merge:true lo preserva igual,
+    // pero al incluirlo explicitamente evitamos cualquier condicion de carrera
+    if(existingUsername) payload.username=existingUsername;
+    await fbDb.collection("public_profiles").doc(uid).set(payload,{merge:true});
   }catch(e){console.warn("fnSaveMyPublicProfile:",e);}
 }
 
@@ -326,15 +337,18 @@ async function fnRegisterUsername(username){
       uid:fbUser.uid,
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Escribir el perfil publico con merge:false para set completo
+    // Escribir el perfil publico con merge:true para no pisar campos existentes
+    // El username se incluye explicitamente para garantizar que quede guardado
     await fbDb.collection("public_profiles").doc(fbUser.uid).set({
-      uid:fbUser.uid,username:clean,
+      uid:fbUser.uid,
+      username:clean,
       displayName:fbUser.displayName||"",
       avatarUrl:fbUser.photoURL||"",
-      mangaCount:data.manga.length,animeCount:data.anime.length,
+      mangaCount:data.manga.length,
+      animeCount:data.anime.length,
       topManga:[],topAnime:[],allManga:[],allAnime:[],
       lastActive:firebase.firestore.FieldValue.serverTimestamp()
-    });
+    },{merge:true});
     return {ok:true};
   }catch(e){
     console.error("fnRegisterUsername error:",e.code,e.message);
