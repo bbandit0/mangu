@@ -287,11 +287,10 @@ async function fnSaveMyPublicProfile(){
     .map(s=>({title:s.title,completed:s.completed.length,total:s.total,cover:s.coverIsUrl?s.cover:"",status:s.status,lastUpdated:s.lastUpdated||0}));
   const allManga=data.manga.map(s=>({title:s.title,completed:s.completed.length,total:s.total,cover:s.coverIsUrl?s.cover:"",status:s.status,lastUpdated:s.lastUpdated||0}));
   const allAnime=data.anime.map(s=>({title:s.title,completed:s.completed.length,total:s.total,cover:s.coverIsUrl?s.cover:"",status:s.status,lastUpdated:s.lastUpdated||0}));
+  // Nota: usamos merge:true para no sobreescribir el username si ya existe
   try{
-    const existing=await fbDb.collection("public_profiles").doc(uid).get();
-    const username=existing.exists?(existing.data().username||""):"";
     await fbDb.collection("public_profiles").doc(uid).set({
-      uid,username,
+      uid,
       displayName:fbUser.displayName||"",
       avatarUrl:fbUser.photoURL||"",
       mangaCount,animeCount,topManga,topAnime,allManga,allAnime,
@@ -306,17 +305,37 @@ async function fnRegisterUsername(username){
   if(clean.length<3) return {ok:false,msg:"Minimo 3 caracteres (letras, numeros, _)"};
   if(clean.length>20) return {ok:false,msg:"Maximo 20 caracteres"};
   try{
-    const check=await fbDb.collection("usernames").doc(clean).get();
-    if(check.exists) return {ok:false,msg:"Ese username ya esta tomado"};
-    await fbDb.collection("usernames").doc(clean).set({uid:fbUser.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    // Intentar verificar si username existe (puede fallar si la regla de lectura
+    // aun no esta activa en cache — en ese caso asumimos que no existe y continuamos)
+    try{
+      const check=await fbDb.collection("usernames").doc(clean).get();
+      if(check.exists) return {ok:false,msg:"Ese username ya esta tomado"};
+    }catch(readErr){
+      // Si falla la lectura de verificacion, continuamos igual (worst case: error al escribir)
+      console.warn("check username read failed, proceeding:",readErr.code);
+    }
+    // Escribir el username
+    await fbDb.collection("usernames").doc(clean).set({
+      uid:fbUser.uid,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Escribir / actualizar el perfil publico
     await fbDb.collection("public_profiles").doc(fbUser.uid).set({
-      uid:fbUser.uid,username:clean,displayName:fbUser.displayName||"",
-      avatarUrl:fbUser.photoURL||"",mangaCount:data.manga.length,animeCount:data.anime.length,
+      uid:fbUser.uid,username:clean,
+      displayName:fbUser.displayName||"",
+      avatarUrl:fbUser.photoURL||"",
+      mangaCount:data.manga.length,animeCount:data.anime.length,
       topManga:[],topAnime:[],allManga:[],allAnime:[],
       lastActive:firebase.firestore.FieldValue.serverTimestamp()
     },{merge:true});
     return {ok:true};
-  }catch(e){return {ok:false,msg:"Error: "+e.message};}
+  }catch(e){
+    // Mensaje de error mas claro para el usuario
+    if(e.code==="permission-denied"){
+      return {ok:false,msg:"Error de permisos — asegurate de que las reglas de Firestore esten publicadas correctamente"};
+    }
+    return {ok:false,msg:"Error: "+e.message};
+  }
 }
 
 async function fnGetMyUsername(){
@@ -339,16 +358,24 @@ async function fnSearchUser(username){
     const profile=await fbDb.collection("public_profiles").doc(uid).get();
     if(!profile.exists) return "not-found";
     return {uid,profile:profile.data()};
-  }catch(e){return null;}
+  }catch(e){
+    if(e.code==="permission-denied") return "perm-error";
+    return null;
+  }
 }
 
 async function fnSendRequest(toUid){
   if(!fbUser||!fbDb) return {ok:false,msg:"Sin sesion"};
   try{
-    const existing=await fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").doc(toUid).get();
-    if(existing.exists) return {ok:false,msg:"Ya son amigos"};
-    const sentCheck=await fbDb.collection("users").doc(fbUser.uid).collection("friends_sent").doc(toUid).get();
-    if(sentCheck.exists) return {ok:false,msg:"Solicitud ya enviada"};
+    let isFriend=false,hasSent=false;
+    try{
+      const existing=await fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").doc(toUid).get();
+      isFriend=existing.exists;
+      const sentCheck=await fbDb.collection("users").doc(fbUser.uid).collection("friends_sent").doc(toUid).get();
+      hasSent=sentCheck.exists;
+    }catch(readErr){console.warn("send request pre-check:",readErr.code);}
+    if(isFriend) return {ok:false,msg:"Ya son amigos"};
+    if(hasSent) return {ok:false,msg:"Solicitud ya enviada"};
     const ts=firebase.firestore.FieldValue.serverTimestamp();
     const myProfile=await fbDb.collection("public_profiles").doc(fbUser.uid).get();
     const myUsername=myProfile.exists?myProfile.data().username:"";
@@ -502,7 +529,9 @@ async function renderFriendsPanel(){
         <input class="fn-input" id="fn-search-input" placeholder="@username del amigo" value="${friendsState.searchUsername}">
         <button class="fn-btn" id="fn-search-btn">Buscar</button>
       </div>`;
-    if(friendsState.searchResult==="not-found"){
+    if(friendsState.searchResult==="perm-error"){
+      html+=`<div class="fn-status error" style="margin-top:10px">Error de permisos &mdash; publica las reglas de Firestore</div>`;
+    }else if(friendsState.searchResult==="not-found"){
       html+=`<div class="fn-status error" style="margin-top:10px">Usuario no encontrado</div>`;
     }else if(friendsState.searchResult==="self"){
       html+=`<div class="fn-status" style="margin-top:10px">Ese eres tu</div>`;
