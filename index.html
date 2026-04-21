@@ -227,7 +227,7 @@
 //         }
 //         match /usernames/{username} {
 //           allow read: if request.auth != null;
-//           allow create: if request.auth != null
+//           allow write: if request.auth != null
 //                         && request.resource.data.uid == request.auth.uid;
 //         }
 //       }
@@ -314,10 +314,10 @@ async function fnRegisterUsername(username){
       // Si falla la lectura de verificacion, continuamos igual (worst case: error al escribir)
       console.warn("check username read failed, proceeding:",readErr.code);
     }
-    // Escribir el username
+    // Escribir el username (sin serverTimestamp para evitar conflicto con regla allow create)
     await fbDb.collection("usernames").doc(clean).set({
       uid:fbUser.uid,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      createdAt:Date.now()
     });
     // Escribir / actualizar el perfil publico
     await fbDb.collection("public_profiles").doc(fbUser.uid).set({
