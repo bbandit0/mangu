@@ -528,12 +528,13 @@ async function fnAcceptRequest(fromUid,fromData){
 async function fnRejectRequest(fromUid){
   if(!fbUser||!fbDb) return;
   try{
-    const batch=fbDb.batch();
-    batch.delete(fbDb.collection("users").doc(fbUser.uid).collection("friends_received").doc(fromUid));
-    batch.delete(fbDb.collection("users").doc(fromUid).collection("friends_sent").doc(fbUser.uid));
-    await batch.commit();
+    await fbDb.collection("users").doc(fbUser.uid).collection("friends_received").doc(fromUid).delete();
+    try{
+      await fbDb.collection("users").doc(fromUid).collection("friends_sent").doc(fbUser.uid).delete();
+    }catch(e){console.warn("No se pudo limpiar friends_sent del remitente:",e.code);}
     renderFriendsPanel();
   }catch(e){showToast("Error al rechazar: "+e.message);}
+}
 }
 
 async function fnCancelRequest(toUid){
@@ -551,10 +552,12 @@ async function fnCancelRequest(toUid){
 async function fnRemoveFriend(friendUid){
   if(!fbUser||!fbDb) return;
   try{
-    const batch=fbDb.batch();
-    batch.delete(fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").doc(friendUid));
-    batch.delete(fbDb.collection("users").doc(friendUid).collection("friends_accepted").doc(fbUser.uid));
-    await batch.commit();
+    // Eliminamos NUESTRO propio friends_accepted (no necesitamos tocar el del otro)
+    await fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").doc(friendUid).delete();
+    // Intentar eliminar el nuestro del lado del amigo (puede fallar por permisos — no crítico)
+    try{
+      await fbDb.collection("users").doc(friendUid).collection("friends_accepted").doc(fbUser.uid).delete();
+    }catch(e){console.warn("No se pudo limpiar friends_accepted del otro usuario:",e.code);}
     friendsState.view="list";friendsState.viewingUid=null;friendsState.viewingData=null;
     showToast("Amigo eliminado");
     renderFriendsPanel();
