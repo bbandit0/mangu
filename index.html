@@ -457,39 +457,65 @@ async function fnAcceptRequest(fromUid,fromData){
     const ts=firebase.firestore.FieldValue.serverTimestamp();
     const myProfile=await fbDb.collection("public_profiles").doc(fbUser.uid).get();
     const myUsername=myProfile.exists?myProfile.data().username:"";
-    await fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").doc(fromUid).set({
+    // Batch para hacer todo atómico
+    const batch=fbDb.batch();
+    // Mi friends_accepted
+    batch.set(fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").doc(fromUid),{
       since:ts,uid:fromUid,
       displayName:fromData.displayName||"",username:fromData.username||"",avatarUrl:fromData.avatarUrl||""
     });
-    await fbDb.collection("users").doc(fromUid).collection("friends_accepted").doc(fbUser.uid).set({
+    // Su friends_accepted (requiere regla: allow create si request.auth.uid == docId)
+    batch.set(fbDb.collection("users").doc(fromUid).collection("friends_accepted").doc(fbUser.uid),{
       since:ts,uid:fbUser.uid,
       displayName:fbUser.displayName||"",username:myUsername,avatarUrl:fbUser.photoURL||""
     });
-    await fbDb.collection("users").doc(fbUser.uid).collection("friends_received").doc(fromUid).delete();
-    await fbDb.collection("users").doc(fromUid).collection("friends_sent").doc(fbUser.uid).delete();
-    showToast("Amigo agregado!");
+    // Limpiar la solicitud de mi friends_received
+    batch.delete(fbDb.collection("users").doc(fbUser.uid).collection("friends_received").doc(fromUid));
+    // Limpiar su friends_sent (requiere regla: allow delete si request.auth.uid == docId)
+    batch.delete(fbDb.collection("users").doc(fromUid).collection("friends_sent").doc(fbUser.uid));
+    await batch.commit();
+    showToast("✓ Amigo agregado!");
     renderFriendsPanel();
-  }catch(e){showToast("Error: "+e.message);}
+  }catch(e){
+    console.error("fnAcceptRequest error:",e.code,e.message);
+    showToast("Error al aceptar: "+e.message);
+  }
 }
 
 async function fnRejectRequest(fromUid){
   if(!fbUser||!fbDb) return;
   try{
-    await fbDb.collection("users").doc(fbUser.uid).collection("friends_received").doc(fromUid).delete();
-    await fbDb.collection("users").doc(fromUid).collection("friends_sent").doc(fbUser.uid).delete();
+    const batch=fbDb.batch();
+    batch.delete(fbDb.collection("users").doc(fbUser.uid).collection("friends_received").doc(fromUid));
+    batch.delete(fbDb.collection("users").doc(fromUid).collection("friends_sent").doc(fbUser.uid));
+    await batch.commit();
     renderFriendsPanel();
-  }catch(e){showToast("Error: "+e.message);}
+  }catch(e){showToast("Error al rechazar: "+e.message);}
+}
+
+async function fnCancelRequest(toUid){
+  if(!fbUser||!fbDb) return;
+  try{
+    const batch=fbDb.batch();
+    batch.delete(fbDb.collection("users").doc(fbUser.uid).collection("friends_sent").doc(toUid));
+    batch.delete(fbDb.collection("users").doc(toUid).collection("friends_received").doc(fbUser.uid));
+    await batch.commit();
+    showToast("Solicitud cancelada");
+    renderFriendsPanel();
+  }catch(e){showToast("Error al cancelar: "+e.message);}
 }
 
 async function fnRemoveFriend(friendUid){
   if(!fbUser||!fbDb) return;
   try{
-    await fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").doc(friendUid).delete();
-    await fbDb.collection("users").doc(friendUid).collection("friends_accepted").doc(fbUser.uid).delete();
+    const batch=fbDb.batch();
+    batch.delete(fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").doc(friendUid));
+    batch.delete(fbDb.collection("users").doc(friendUid).collection("friends_accepted").doc(fbUser.uid));
+    await batch.commit();
     friendsState.view="list";friendsState.viewingUid=null;friendsState.viewingData=null;
     showToast("Amigo eliminado");
     renderFriendsPanel();
-  }catch(e){showToast("Error: "+e.message);}
+  }catch(e){showToast("Error al eliminar: "+e.message);}
 }
 
 // Helper: timeout para cualquier promesa de Firestore (evita cuelgues infinitos)
@@ -611,7 +637,7 @@ async function _renderFriendsPanelInner(container){
   }
 
   // Vista lista — todas las queries con timeout
-  let received=[], friends=[], receivedError=null, friendsError=null;
+  let received=[], friends=[], sent=[], receivedError=null, friendsError=null;
   try{
     const rSnap=await withTimeout(fbDb.collection("users").doc(fbUser.uid).collection("friends_received").get());
     received=rSnap.docs.map(d=>({id:d.id,...d.data()}));
@@ -620,6 +646,10 @@ async function _renderFriendsPanelInner(container){
     const fSnap=await withTimeout(fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").get());
     friends=fSnap.docs.map(d=>({id:d.id,...d.data()}));
   }catch(e){friendsError=e.code||e.message;console.warn("friends_accepted:",e.code,e.message);}
+  try{
+    const sSnap=await withTimeout(fbDb.collection("users").doc(fbUser.uid).collection("friends_sent").get());
+    sent=sSnap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){console.warn("friends_sent:",e.message);}
 
   let html=`<div class="friends-panel">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -687,6 +717,24 @@ async function _renderFriendsPanelInner(container){
     html+=`</div>`;
   }
 
+  // Solicitudes enviadas
+  if(sent.length>0){
+    html+=`<div class="friends-section"><div class="friends-section-lbl">📤 Solicitudes enviadas (${sent.length})</div>`;
+    for(const s of sent){
+      let sp=null;
+      try{const sd=await withTimeout(fbDb.collection("public_profiles").doc(s.id).get());sp=sd.exists?sd.data():null;}catch(e){}
+      const nm=sp?.displayName||s.id;
+      const un=sp?.username||s.id;
+      const av=sp?.avatarUrl?`<img class="fn-fc-avatar" src="${sp.avatarUrl}">`:`<div class="fn-fc-avatar-ph">&#128100;</div>`;
+      html+=`<div class="fn-req-card">${av}
+        <div><div class="fn-req-name">${nm}</div><div class="fn-req-user">@${un}</div></div>
+        <div style="margin-left:auto">
+          <button class="fn-req-btn reject" data-cancel="${s.id}">✕ Cancelar</button>
+        </div></div>`;
+    }
+    html+=`</div>`;
+  }
+
   // Solicitudes recibidas — siempre visible
   html+=`<div class="friends-section"><div class="friends-section-lbl">📨 Solicitudes recibidas (${received.length})</div>`;
   if(receivedError){
@@ -729,7 +777,7 @@ async function _renderFriendsPanelInner(container){
       html+=`<div class="fn-friend-card" data-view-uid="${f.uid}">
         <div class="fn-fc-header">${avF}
           <div class="fn-fc-info"><div class="fn-fc-name">${nm}</div><div class="fn-fc-user">@${un}</div></div>
-          <span style="font-size:10px;color:var(--t3)">${reading} activos</span>
+          <button onclick="event.stopPropagation();if(confirm('¿Eliminar a ${nm} de amigos?'))fnRemoveFriend('${f.uid}')" style="flex-shrink:0;padding:4px 10px;border:1px solid rgba(231,76,76,.3);background:transparent;color:var(--t3);font-size:10px;border-radius:var(--r);cursor:pointer" onmouseover="this.style.color='var(--dng)';this.style.borderColor='var(--dng)'" onmouseout="this.style.color='var(--t3)';this.style.borderColor='rgba(231,76,76,.3)'">✕ Eliminar</button>
         </div>
         <div class="fn-fc-stats">
           <div class="fn-fc-stat"><div class="fn-fc-stat-v" style="color:${ac}">${mC}</div><div class="fn-fc-stat-l">Manga</div></div>
@@ -768,11 +816,15 @@ async function _renderFriendsPanelInner(container){
   container.querySelectorAll("[data-accept]").forEach(btn=>{
     btn.onclick=async(e)=>{
       e.stopPropagation();
+      btn.disabled=true;btn.textContent="Aceptando...";
       await fnAcceptRequest(btn.dataset.accept,{displayName:btn.dataset.dname,username:btn.dataset.uname,avatarUrl:btn.dataset.avatar});
     };
   });
   container.querySelectorAll("[data-reject]").forEach(btn=>{
     btn.onclick=async(e)=>{e.stopPropagation();await fnRejectRequest(btn.dataset.reject);};
+  });
+  container.querySelectorAll("[data-cancel]").forEach(btn=>{
+    btn.onclick=async(e)=>{e.stopPropagation();if(confirm("¿Cancelar la solicitud enviada?"))await fnCancelRequest(btn.dataset.cancel);};
   });
   container.querySelectorAll("[data-view-uid]").forEach(card=>{
     card.onclick=async()=>{
