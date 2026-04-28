@@ -201,7 +201,7 @@
 ══════════════════════════════════════════════════════ */
 
 /* ── STREAK BANNER ── */
-.streak-banner{margin:12px 0 0;padding:9px 14px;background:linear-gradient(135deg,rgba(251,191,36,.13),rgba(251,191,36,.06));border:1px solid rgba(251,191,36,.28);border-radius:14px;display:flex;align-items:center;gap:10px;animation:streakPop .4s cubic-bezier(.175,.885,.32,1.275)}
+.streak-banner{display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 8px;background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,191,36,.07));border:1px solid rgba(251,191,36,.3);border-radius:20px;animation:streakPop .4s cubic-bezier(.175,.885,.32,1.275);font-size:12px;font-weight:700;margin:8px 0 0;cursor:default}
 @keyframes streakPop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
 .streak-fire{font-size:20px;animation:flamePulse .8s ease-in-out infinite alternate}
 @keyframes flamePulse{from{transform:scale(1) rotate(-3deg)}to{transform:scale(1.12) rotate(3deg)}}
@@ -428,6 +428,96 @@
 .fn-status.success{color:var(--suc)}
 .fn-remove-btn{padding:5px 10px;border:1px solid rgba(231,76,76,.3);background:transparent;color:var(--t3);font-size:10px;border-radius:var(--r);cursor:pointer;transition:.15s}
 .fn-remove-btn:hover{color:var(--dng);border-color:var(--dng)}
+
+
+/* ── COMUNIDAD MEJORADA v3.0 ── */
+.friends-panel{padding-bottom:8px}
+.fn-friend-card{
+  background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.02) 100%);
+  border:1px solid var(--bd);
+  border-radius:16px;
+  overflow:hidden;
+  margin-bottom:10px;
+  cursor:pointer;
+  transition:.2s;
+  position:relative;
+}
+.fn-friend-card::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--am),var(--aa));
+  border-radius:0 2px 2px 0;
+}
+.fn-friend-card:hover{
+  background:linear-gradient(135deg,rgba(99,179,237,.08),rgba(255,255,255,.03));
+  border-color:rgba(99,179,237,.3);
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.fn-fc-header{display:flex;align-items:center;gap:12px;padding:14px 14px 10px 18px}
+.fn-fc-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid rgba(99,179,237,.3);flex-shrink:0}
+.fn-fc-avatar-ph{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--am),var(--aa));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:2px solid rgba(99,179,237,.2)}
+.fn-fc-info{flex:1;min-width:0}
+.fn-fc-name{font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Space Mono',monospace}
+.fn-fc-user{font-size:11px;color:var(--am);margin-top:2px;font-family:'Space Mono',monospace}
+.fn-fc-stats{display:flex;gap:0;border-top:1px solid var(--bd);padding:0 0 0 18px}
+.fn-fc-stat{flex:1;padding:10px 14px 10px 0;text-align:left;border-right:1px solid var(--bd)}
+.fn-fc-stat:last-child{border-right:none}
+.fn-fc-stat-v{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;line-height:1}
+.fn-fc-stat-l{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+/* Request cards */
+.fn-req-card{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:8px;
+  transition:.15s;
+}
+.fn-req-card:hover{background:rgba(255,255,255,.055);border-color:var(--bdl)}
+/* Mi usuario card mejorado */
+.fn-my-user{
+  background:linear-gradient(135deg,rgba(99,179,237,.1),rgba(104,211,145,.05));
+  border:1px solid rgba(99,179,237,.25);
+  border-radius:14px;
+  padding:14px 16px;
+  display:flex;align-items:center;gap:12px;
+}
+.fn-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--am);flex-shrink:0}
+.fn-avatar-ph{width:46px;height:46px;border-radius:50%;background:var(--amd);border:2px solid var(--am);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.fn-display-name{font-size:15px;font-weight:700;color:var(--am);font-family:'Space Mono',monospace}
+.fn-username{font-size:11px;color:var(--t2);margin-top:2px;font-family:'Space Mono',monospace}
+.fn-tag{font-size:10px;color:var(--t3);margin-top:3px}
+/* Friends section labels */
+.friends-section{margin-bottom:14px}
+.friends-section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--t3);margin-bottom:8px;padding-left:2px}
+/* Search row */
+.fn-search-row{display:flex;gap:8px;align-items:center}
+.fn-input{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;color:var(--t1);font-family:'Outfit',sans-serif;font-size:13px;outline:none;transition:.15s}
+.fn-input:focus{border-color:rgba(99,179,237,.4);box-shadow:0 0 0 3px rgba(99,179,237,.08)}
+.fn-btn{padding:9px 16px;border:none;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;transition:.15s;background:var(--am);color:#fff;white-space:nowrap}
+.fn-btn:hover{filter:brightness(1.1)}
+.fn-btn.sec{background:rgba(255,255,255,.06);border:1px solid var(--bd);color:var(--t2)}
+.fn-btn.sec:hover{background:rgba(255,255,255,.1);color:var(--t1)}
+/* Perfil de amigo mejorado */
+.fn-profile{background:var(--bg3);border:1px solid var(--bd);border-radius:16px;overflow:hidden;margin-bottom:20px;animation:slideDown .2s}
+.fn-profile-header{display:flex;align-items:center;gap:14px;padding:20px;padding-bottom:16px;border-bottom:1px solid var(--bd);position:relative;z-index:1}
+.fn-profile-avatar{width:56px;height:56px;border-radius:50%;border:3px solid var(--am);object-fit:cover;box-shadow:0 4px 16px rgba(99,179,237,.3)}
+.fn-profile-avatar-ph{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--am),var(--aa));border:3px solid var(--am);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 16px rgba(99,179,237,.3)}
+.fn-profile-name{font-size:18px;font-weight:700;color:var(--am);font-family:'Space Mono',monospace}
+.fn-profile-uname{font-size:11px;color:var(--t2);font-family:'Space Mono',monospace;margin-top:3px}
+.fn-profile-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:0 20px 16px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.fn-ps{padding:12px 8px;text-align:center;border-right:1px solid var(--bd)}
+.fn-ps:last-child{border-right:none}
+.fn-ps-v{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;line-height:1}
+.fn-ps-l{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.fn-profile-list-title{font-size:11px;font-weight:700;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.6px;padding:0 20px}
+.fn-series-item{display:flex;align-items:center;gap:10px;padding:8px 12px 8px 20px;background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.04);transition:.15s}
+.fn-series-item:last-child{border-bottom:none}
+.fn-series-item:hover{background:rgba(255,255,255,.04)}
+.friends-section .fn-series-item:last-child{border-bottom:none}
+/* Streak compact chip */
+.streak-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,191,36,.06));border:1px solid rgba(251,191,36,.3);border-radius:20px;font-size:12px;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;vertical-align:middle}
 
 </style>
 </head>
@@ -922,7 +1012,7 @@ async function _renderFriendsPanelInner(container){
         <div class="fn-profile-header">
           ${av}
           <div class="fn-profile-info">
-            <div class="fn-profile-name">${pData.displayName||"Usuario"}</div>
+            <div class="fn-profile-name">@${pData.username||pData.displayName||"Usuario"}</div>
             <div class="fn-profile-uname">@${pData.username||"&mdash;"}</div>
           </div>
           <button class="fn-remove-btn" onclick="if(confirm('Eliminar de amigos?'))fnRemoveFriend('${vuid}')">Eliminar</button>
@@ -934,7 +1024,18 @@ async function _renderFriendsPanelInner(container){
           <div class="fn-ps"><div class="fn-ps-v" style="color:var(--fav);font-size:14px">${totalMangaCh}</div><div class="fn-ps-l">📖 Caps</div></div>
           <div class="fn-ps"><div class="fn-ps-v" style="color:var(--inf);font-size:14px">${totalAnimEp}</div><div class="fn-ps-l">▶ Eps</div></div>
         </div>`;})()}
-        ${(()=>{const myTitles=new Set([...data.manga,...data.anime].map(s=>s.title.toLowerCase().trim()));const friendSeries=[...(pData.allManga||pData.topManga||[]),...(pData.allAnime||pData.topAnime||[])];const common=friendSeries.filter(s=>myTitles.has((s.title||"").toLowerCase().trim())).map(s=>s.title).slice(0,5);return common.length>0?`<div class="friends-section" style="margin-bottom:14px;padding:12px;background:rgba(99,179,237,.07);border:1px solid rgba(99,179,237,.2);border-radius:var(--rm)"><div style="font-size:11px;font-weight:700;color:var(--am);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🤝 Ambos leen</div><div style="display:flex;flex-wrap:wrap;gap:6px">${common.map(t=>`<span style="background:rgba(99,179,237,.12);border:1px solid rgba(99,179,237,.25);color:var(--t1);font-size:11px;padding:3px 10px;border-radius:12px">${t}</span>`).join("")}</div></div>`:"";})()}
+        ${(()=>{
+          const myMangaTitles=new Set(data.manga.map(s=>s.title.toLowerCase().trim()));
+          const myAnimeTitles=new Set(data.anime.map(s=>s.title.toLowerCase().trim()));
+          const friendManga=(pData.allManga||pData.topManga||[]);
+          const friendAnime=(pData.allAnime||pData.topAnime||[]);
+          const commonManga=friendManga.filter(s=>myMangaTitles.has((s.title||"").toLowerCase().trim())).map(s=>s.title).slice(0,5);
+          const commonAnime=friendAnime.filter(s=>myAnimeTitles.has((s.title||"").toLowerCase().trim())).map(s=>s.title).slice(0,5);
+          let html="";
+          if(commonManga.length>0){html+=`<div class="friends-section" style="margin-bottom:10px;padding:12px;background:rgba(99,179,237,.07);border:1px solid rgba(99,179,237,.2);border-radius:var(--rm)"><div style="font-size:11px;font-weight:700;color:${ac};text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📚 Ambos leen</div><div style="display:flex;flex-wrap:wrap;gap:6px">${commonManga.map(t=>`<span style="background:rgba(99,179,237,.12);border:1px solid rgba(99,179,237,.25);color:var(--t1);font-size:11px;padding:3px 10px;border-radius:12px">${t}</span>`).join("")}</div></div>`;}
+          if(commonAnime.length>0){html+=`<div class="friends-section" style="margin-bottom:14px;padding:12px;background:rgba(104,211,145,.07);border:1px solid rgba(104,211,145,.2);border-radius:var(--rm)"><div style="font-size:11px;font-weight:700;color:var(--aa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎬 Ambos ven</div><div style="display:flex;flex-wrap:wrap;gap:6px">${commonAnime.map(t=>`<span style="background:rgba(104,211,145,.12);border:1px solid rgba(104,211,145,.25);color:var(--t1);font-size:11px;padding:3px 10px;border-radius:12px">${t}</span>`).join("")}</div></div>`;}
+          return html;
+        })()}
         ${readingManga.length>0?`
         <div class="friends-section" style="margin-bottom:14px">
           <div class="fn-profile-list-title">📚 Manga en progreso (${readingManga.length})</div>
@@ -1004,7 +1105,7 @@ async function _renderFriendsPanelInner(container){
     html+=`<div class="friends-section"><div class="fn-my-user">
       ${avImg}
       <div class="fn-user-info">
-        <div class="fn-display-name">${fbUser.displayName||"Usuario"}</div>
+        <div class="fn-display-name">@${myUsername}</div>
         <div class="fn-username">@${myUsername}</div>
         <div class="fn-tag">Comparte tu @username con amigos</div>
       </div>
@@ -1041,7 +1142,7 @@ async function _renderFriendsPanelInner(container){
       html+=`<div class="fn-friend-card" style="margin-top:10px;cursor:default">
         <div class="fn-fc-header">${avS}
           <div class="fn-fc-info">
-            <div class="fn-fc-name">${sr.profile.displayName||"Usuario"}</div>
+            <div class="fn-fc-name">@${sr.profile.username||sr.profile.displayName||"Usuario"}</div>
             <div class="fn-fc-user">@${sr.profile.username||""}</div>
           </div>
           ${isFriend?`<span style="font-size:11px;color:var(--suc)">&#10003; Amigos</span>`:
@@ -1065,7 +1166,7 @@ async function _renderFriendsPanelInner(container){
     for(const s of sent){
       let sp=null;
       try{const sd=await withTimeout(fbDb.collection("public_profiles").doc(s.id).get());sp=sd.exists?sd.data():null;}catch(e){}
-      const nm=sp?.displayName||s.id;
+      const nm=sp?.username||s.id;
       const un=sp?.username||s.id;
       const av=sp?.avatarUrl?`<img class="fn-fc-avatar" src="${sp.avatarUrl}">`:`<div class="fn-fc-avatar-ph">&#128100;</div>`;
       html+=`<div class="fn-req-card">${av}
@@ -1088,7 +1189,7 @@ async function _renderFriendsPanelInner(container){
       const avR=req.avatarUrl?`<img class="fn-fc-avatar" src="${req.avatarUrl}">`:
         `<div class="fn-fc-avatar-ph">&#128100;</div>`;
       html+=`<div class="fn-req-card">${avR}
-        <div><div class="fn-req-name">${req.displayName||"Usuario"}</div><div class="fn-req-user">@${req.username||""}</div></div>
+        <div><div class="fn-req-name">@${req.username||req.displayName||"Usuario"}</div><div class="fn-req-user">${req.username?"":req.displayName||""}</div></div>
         <div class="fn-req-btns" style="margin-left:auto">
           <button class="fn-req-btn accept" data-accept="${req.id}" data-dname="${(req.displayName||"").replace(/"/g,"&quot;")}" data-uname="${req.username||""}" data-avatar="${req.avatarUrl||""}">✓ Aceptar</button>
           <button class="fn-req-btn reject" data-reject="${req.id}">✕</button>
@@ -1108,7 +1209,7 @@ async function _renderFriendsPanelInner(container){
         const fDoc=await withTimeout(fbDb.collection("public_profiles").doc(f.uid).get());
         fProfile=fDoc.exists?fDoc.data():null;
       }catch(e){console.warn("fProfile load:",e.message);}
-      const nm=fProfile?.displayName||f.displayName||"Usuario";
+      const nm=fProfile?.username||f.username||"@"+((fProfile?.displayName||f.displayName||"usuario").split(" ")[0].toLowerCase());
       const un=fProfile?.username||f.username||"";
       const avF=f.avatarUrl?`<img class="fn-fc-avatar" src="${f.avatarUrl}">`:
         `<div class="fn-fc-avatar-ph">&#128100;</div>`;
@@ -1427,10 +1528,20 @@ function p29RenderGoalBar(root){
   const bar=document.createElement("div");
   bar.className="daily-goal-bar";
   const mc=window._p29ac||"#63b3ed";
-  bar.innerHTML=`<div class="daily-goal-header"><span class="daily-goal-label">🎯 Meta diaria</span><span class="daily-goal-count">${done}/${goal} caps</span></div><div class="daily-goal-track"><div class="daily-goal-fill" style="width:${pct}%;background:${mc}"></div></div>`;
-  // click to change goal
-  bar.querySelector(".daily-goal-label").style.cursor="pointer";
-  bar.querySelector(".daily-goal-label").onclick=()=>{const v=prompt("Meta diaria de capítulos:",String(goal));if(v&&+v>0){const nd=p29GetGoalData();nd.goal=Math.min(+v,99);p29SaveGoalData(nd);render();}};
+  bar.innerHTML=`<div class="daily-goal-header">
+    <span class="daily-goal-label">🎯 Meta diaria</span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <input id="goal-input-inline" type="number" min="1" max="99" value="${goal}"
+        style="width:44px;padding:2px 6px;background:rgba(255,255,255,.08);border:1px solid var(--bd);border-radius:6px;color:var(--t1);font-family:'Space Mono',monospace;font-size:12px;font-weight:700;text-align:center;outline:none;"
+        title="Cambia tu meta diaria">
+      <span class="daily-goal-count">${done} caps hoy</span>
+    </div>
+  </div><div class="daily-goal-track"><div class="daily-goal-fill" style="width:${pct}%;background:${mc}"></div></div>`;
+  const gi=bar.querySelector("#goal-input-inline");
+  if(gi){
+    gi.onchange=()=>{const v=parseInt(gi.value);if(v>0&&v<=99){const nd=p29GetGoalData();nd.goal=v;p29SaveGoalData(nd);render();}};
+    gi.onclick=(e)=>e.stopPropagation();
+  }
   root.appendChild(bar);
 }
 // Poll every 6 hours
@@ -1524,7 +1635,10 @@ const syncBar=h("div","sync-bar");
 if(FIREBASE_ENABLED){if(fbUser){syncBar.innerHTML=`<div class="dot on"></div><div class="sync-user">${fbUser.photoURL?`<img class="sync-avatar" src="${fbUser.photoURL}">`:""}<span>${(friendsState.cachedUsername&&friendsState.usernameCacheUid===fbUser.uid)?"@"+friendsState.cachedUsername:"Sin @username"}</span></div><div class="fill"></div>`;const ob=h("button","sync-btn out","Salir");ob.onclick=signOut;syncBar.appendChild(ob);const sb=h("button","sync-btn","↻ Sync");sb.onclick=loadFromCloud;syncBar.appendChild(sb);}else{syncBar.innerHTML=`<div class="dot off"></div><span>Sin sincronizar</span><div class="fill"></div>`;const lb=h("button","sync-btn ggl","Iniciar con Google");lb.onclick=signIn;syncBar.appendChild(lb);}}else{syncBar.innerHTML=`<div class="dot no"></div><span>Firebase no configurado — ver comentarios en el código</span>`;}
 root.appendChild(syncBar);
 // ── P2.8: Streak Banner ──
-p28RenderStreakBanner(root);
+const _streakWrap=document.createElement("div");
+_streakWrap.style.cssText="display:flex;align-items:center;gap:10px;margin-top:0;";
+p28RenderStreakBanner(_streakWrap);
+if(_streakWrap.querySelector(".streak-banner"))root.appendChild(_streakWrap);
 // ── P2.9: Meta Diaria ──
 window._p29ac=ac;
 p29RenderGoalBar(root);
@@ -1851,9 +1965,9 @@ function p28RenderStreakBanner(root){
   const streak=p28GetStreak();
   if(streak<2)return;// solo mostrar si ≥2 días
   const sb=document.createElement("div");
-  sb.className="streak-banner";
+  sb.className="streak-banner"; sb.style.cssText="";
   const msg=streak>=7?"¡Racha épica! No la rompas":streak>=3?"¡Sigue así! Lee hoy para mantenerla":"¡Buen comienzo! Lee hoy para crecer";
-  sb.innerHTML=`<div class="streak-fire">🔥</div><div class="streak-info"><div class="streak-days">${streak} días seguidos</div><div class="streak-sub">${msg}</div></div><div class="streak-count">${streak}</div>`;
+  sb.innerHTML=`<span style="font-size:14px">🔥</span><span style="color:#fbbf24;font-family:'Space Mono',monospace;font-weight:700">${streak}</span><span style="color:rgba(251,191,36,.8);font-size:11px;font-weight:500">${streak===1?"día":"días"} seguidos</span>`;
   root.appendChild(sb);
 }
 
