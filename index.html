@@ -1472,15 +1472,67 @@ function h(tag,cls,html,attrs){const el=document.createElement(tag);if(cls)el.cl
 // ═══ JIKAN HELPERS ═══
 // Función central para obtener el número del último capítulo/episodio publicado.
 // Intenta múltiples endpoints y nunca pide al usuario si puede evitarlo.
+async function jikanFetchJSON(url,retries=4){
+  let waitMs=450;
+  for(let i=0;i<retries;i++){
+    try{
+      const res=await fetch(url);
+      if(res.status===429){
+        const ra=parseInt(res.headers.get("Retry-After")||"0",10);
+        const delay=Number.isFinite(ra)&&ra>0?ra*1000:waitMs;
+        await new Promise(r=>setTimeout(r,delay));
+        waitMs=Math.min(waitMs*2,2600);
+        continue;
+      }
+      if(!res.ok){
+        await new Promise(r=>setTimeout(r,waitMs));
+        waitMs=Math.min(waitMs*2,2600);
+        continue;
+      }
+      return await res.json();
+    }catch(e){
+      await new Promise(r=>setTimeout(r,waitMs));
+      waitMs=Math.min(waitMs*2,2600);
+    }
+  }
+  return null;
+}
+
+function jikanExtractPublishedNumber(entry,type){
+  if(!entry)return 0;
+  const toPosInt=v=>{
+    const n=Number(v);
+    return Number.isFinite(n)&&n>0?Math.floor(n):0;
+  };
+  const direct=type==="manga"
+    ? [entry.chapter,entry.chapters,entry.number,entry.no]
+    : [entry.episode,entry.episodes,entry.number,entry.no];
+  for(const v of direct){
+    const n=toPosInt(v);
+    if(n>0)return n;
+  }
+  const txt=String(entry.title||entry.name||entry.title_english||"");
+  const tagged=txt.match(/\b(?:chapter|cap(?:[ií]tulo)?|episode|ep)\s*\.?\s*#?\s*(\d+(?:\.\d+)?)/i);
+  if(tagged&&tagged[1]){
+    const n=toPosInt(parseFloat(tagged[1]));
+    if(n>0)return n;
+  }
+  const loose=txt.match(/(\d+(?:\.\d+)?)/);
+  if(loose&&loose[1]){
+    const n=toPosInt(parseFloat(loose[1]));
+    if(n>0)return n;
+  }
+  return 0;
+}
+
 async function jikanGetLatestCount(malId, type){
   const ep = type==="manga"?"manga":"anime";
   let cnt = 0;
 
   // ── Paso 1: endpoint individual (MAL a veces sí entrega chapters/episodes) ──
   try{
-    const r1 = await fetch(`https://api.jikan.moe/v4/${ep}/${malId}`);
-    const d1 = await r1.json();
-    const det = d1.data;
+    const d1 = await jikanFetchJSON(`https://api.jikan.moe/v4/${ep}/${malId}`);
+    const det = d1?.data;
     if(det){
       cnt = type==="manga" ? (det.chapters||0) : (det.episodes||0);
     }
@@ -1493,14 +1545,14 @@ async function jikanGetLatestCount(malId, type){
   // pero la lista de episodios sí tiene los publicados.
   // Jikan ordena ASC (ep 1 primero) → el ÚLTIMO item es el más reciente.
   try{
-    await new Promise(r=>setTimeout(r,300));
     const listUrl = type==="manga"
       ? `https://api.jikan.moe/v4/manga/${malId}/chapters?page=1`
       : `https://api.jikan.moe/v4/anime/${malId}/episodes?page=1`;
-    const r2 = await fetch(listUrl);
-    const d2 = await r2.json();
+    const d2 = await jikanFetchJSON(listUrl);
+    if(!d2||!d2.data)return 0;
     const items = d2.data || [];
     const tot   = d2.pagination?.items?.total || 0;
+    const perPage = d2.pagination?.items?.per_page || 100;
     const lp    = d2.pagination?.last_visible_page || 1;
 
     // MAL a veces reporta total exacto en la paginación
@@ -1510,34 +1562,25 @@ async function jikanGetLatestCount(malId, type){
       if(lp <= 1){
         // Una sola página: intentar leer el número del ÚLTIMO item (orden ASC)
         const lastItem = items[items.length-1];
-        const rawStr = type==="manga"
-          ? String(lastItem?.chapter ?? lastItem?.mal_id ?? items.length)
-          : String(lastItem?.mal_id ?? lastItem?.episode_id ?? items.length);
-        const nm = rawStr.match(/\d+(\.\d+)?/);
-        cnt = nm ? Math.floor(parseFloat(nm[0])) : items.length;
+        const fromItem = jikanExtractPublishedNumber(lastItem,type);
+        cnt = fromItem>0 ? fromItem : items.length;
       } else {
         // Múltiples páginas → ir a la última para leer el número del último ep/cap publicado
         try{
-          await new Promise(r=>setTimeout(r,300));
           const lastUrl = type==="manga"
             ? `https://api.jikan.moe/v4/manga/${malId}/chapters?page=${lp}`
             : `https://api.jikan.moe/v4/anime/${malId}/episodes?page=${lp}`;
-          const rL = await fetch(lastUrl);
-          const dL = await rL.json();
-          const lastItems = dL.data || [];
+          const dL = await jikanFetchJSON(lastUrl);
+          const lastItems = dL?.data || [];
           if(lastItems.length > 0){
             const lastItem = lastItems[lastItems.length-1];
-            const rawStr = type==="manga"
-              ? String(lastItem?.chapter ?? lastItem?.mal_id ?? 0)
-              : String(lastItem?.mal_id ?? lastItem?.episode_id ?? 0);
-            const nm = rawStr.match(/\d+(\.\d+)?/);
-            const fromNum = nm ? Math.floor(parseFloat(nm[0])) : 0;
+            const fromNum = jikanExtractPublishedNumber(lastItem,type);
             // Si el número del último ep/cap es coherente, usarlo; si no, estimar
-            cnt = fromNum > 0 ? fromNum : (lp-1)*100 + lastItems.length;
+            cnt = fromNum > 0 ? fromNum : (lp-1)*perPage + lastItems.length;
           } else {
-            cnt = (lp-1)*100;
+            cnt = Math.max((lp-1)*perPage,0);
           }
-        }catch(e3){cnt = (lp-1)*100;}
+        }catch(e3){cnt = Math.max((lp-1)*perPage,0);}
       }
     }
   }catch(e2){}
