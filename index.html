@@ -149,8 +149,11 @@
 .add-m .jikan-wrap input:focus{border-color:rgba(34,197,94,.5);box-shadow:0 0 0 3px rgba(34,197,94,.12),0 0 20px rgba(34,197,94,.06);background:rgba(255,255,255,.07)}
 
 /* ── SCROLL TO TOP BUTTON ── */
-.btn-top{position:fixed;bottom:20px;right:16px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(99,179,237,.25);background:linear-gradient(135deg,#1a6fa8,var(--am));color:#fff;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(99,179,237,.32);z-index:999;opacity:0;pointer-events:none;transition:opacity .25s}
+.btn-top{position:fixed;bottom:74px;right:16px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(99,179,237,.25);background:linear-gradient(135deg,#1a6fa8,var(--am));color:#fff;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(99,179,237,.32);z-index:999;opacity:0;pointer-events:none;transition:opacity .25s}
 .btn-top.vis{opacity:1;pointer-events:auto}
+/* ── GO TO INICIO BUTTON ── */
+.btn-home-fab{position:fixed;bottom:124px;right:16px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(104,211,145,.28);background:linear-gradient(135deg,#0e5c32,var(--aa));color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(104,211,145,.28);z-index:999;opacity:0;pointer-events:none;transition:opacity .25s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.btn-home-fab.vis{opacity:1;pointer-events:auto}
 
 /* ── FIX P2.8: MOBILE LAYOUT ── */
 @media(max-width:540px){
@@ -360,7 +363,7 @@
 .pubprof-share-btn-disabled{width:100%;padding:13px;border:none;background:rgba(255,255,255,.04);color:var(--t3);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;border-radius:0;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;cursor:default}
 
 /* ── MODO LECTURA RÁPIDA ── */
-.quick-read-fab{position:fixed;bottom:80px;right:16px;z-index:500;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.quick-read-fab{position:fixed;bottom:178px;right:16px;z-index:500;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
 .qr-toggle{width:48px;height:48px;border-radius:50%;border:1px solid rgba(99,179,237,.3);background:linear-gradient(135deg,rgba(99,179,237,.2),rgba(99,179,237,.1));color:var(--am);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(99,179,237,.2);transition:.2s;backdrop-filter:blur(8px)}
 .qr-toggle:hover{background:rgba(99,179,237,.28)}
 .qr-panel{background:rgba(14,18,32,.95);border:1px solid var(--bdl);border-radius:16px;padding:12px;min-width:200px;max-width:260px;backdrop-filter:blur(16px);animation:slideDown .2s;display:none}
@@ -1412,8 +1415,8 @@ function h(tag,cls,html,attrs){const el=document.createElement(tag);if(cls)el.cl
 async function jikanGetLatestCount(malId, type){
   const ep = type==="manga"?"manga":"anime";
   let cnt = 0;
-  
-  // Paso 1: endpoint individual (a veces tiene chapters/episodes)
+
+  // ── Paso 1: endpoint individual (MAL a veces sí entrega chapters/episodes) ──
   try{
     const r1 = await fetch(`https://api.jikan.moe/v4/${ep}/${malId}`);
     const d1 = await r1.json();
@@ -1422,46 +1425,40 @@ async function jikanGetLatestCount(malId, type){
       cnt = type==="manga" ? (det.chapters||0) : (det.episodes||0);
     }
   }catch(e1){}
-  
+
   if(cnt > 0) return cnt;
-  
-  // Paso 2: endpoint de lista de capítulos/episodios
-  // Jikan ordena de MÁS RECIENTE a más antiguo → data[0] = último publicado
+
+  // ── Paso 2: endpoint de lista de capítulos/episodios ──
+  // Para obras en emisión MAL NO entrega chapters/episodes=null en el detail,
+  // pero la lista de episodios sí tiene los publicados.
+  // Jikan ordena ASC (ep 1 primero) → el ÚLTIMO item es el más reciente.
   try{
-    await new Promise(r=>setTimeout(r,250));
+    await new Promise(r=>setTimeout(r,300));
     const listUrl = type==="manga"
       ? `https://api.jikan.moe/v4/manga/${malId}/chapters?page=1`
       : `https://api.jikan.moe/v4/anime/${malId}/episodes?page=1`;
     const r2 = await fetch(listUrl);
     const d2 = await r2.json();
     const items = d2.data || [];
-    const tot = d2.pagination?.items?.total || 0;
-    const lp = d2.pagination?.last_visible_page || 1;
-    
-    if(tot > 0){
-      // MAL reporta total exacto en la paginación
-      return tot;
-    }
-    
+    const tot   = d2.pagination?.items?.total || 0;
+    const lp    = d2.pagination?.last_visible_page || 1;
+
+    // MAL a veces reporta total exacto en la paginación
+    if(tot > 0) return tot;
+
     if(items.length > 0){
-      // Leer el número del primer item (el más reciente)
-      // Para manga: items[0].chapter es un string como "374" o "374.5"
-      // Para anime: items[0].episode_id es un número
-      let latestStr = type==="manga"
-        ? (items[0]?.chapter ?? items[0]?.title ?? "")
-        : String(items[0]?.episode_id ?? items[0]?.mal_id ?? 0);
-      
-      // Extraer número del string (puede ser "374" o "374.5" o "Chapter 374")
-      const numMatch = String(latestStr).match(/\d+(\.\d+)?/);
-      const latestNum = numMatch ? Math.floor(parseFloat(numMatch[0])) : 0;
-      
-      if(latestNum > 0){
-        cnt = latestNum;
-      } else if(lp > 1){
-        // Si hay múltiples páginas y no pudimos leer el número,
-        // ir a la última página para contar los items restantes
+      if(lp <= 1){
+        // Una sola página: intentar leer el número del ÚLTIMO item (orden ASC)
+        const lastItem = items[items.length-1];
+        const rawStr = type==="manga"
+          ? String(lastItem?.chapter ?? lastItem?.mal_id ?? items.length)
+          : String(lastItem?.mal_id ?? lastItem?.episode_id ?? items.length);
+        const nm = rawStr.match(/\d+(\.\d+)?/);
+        cnt = nm ? Math.floor(parseFloat(nm[0])) : items.length;
+      } else {
+        // Múltiples páginas → ir a la última para leer el número del último ep/cap publicado
         try{
-          await new Promise(r=>setTimeout(r,250));
+          await new Promise(r=>setTimeout(r,300));
           const lastUrl = type==="manga"
             ? `https://api.jikan.moe/v4/manga/${malId}/chapters?page=${lp}`
             : `https://api.jikan.moe/v4/anime/${malId}/episodes?page=${lp}`;
@@ -1469,22 +1466,22 @@ async function jikanGetLatestCount(malId, type){
           const dL = await rL.json();
           const lastItems = dL.data || [];
           if(lastItems.length > 0){
-            // Intentar leer el número del ÚLTIMO item de la última página (el más antiguo = cap 1 aprox)
-            // Si la ordenación es desc, el último item de la última página es el cap 1.
-            // Pero queremos el MAYOR, que está en la primera página.
-            // Usamos: (lp-1)*100 + primer item de primera página si tiene número
-            cnt = (lp-1)*100 + items.length;
+            const lastItem = lastItems[lastItems.length-1];
+            const rawStr = type==="manga"
+              ? String(lastItem?.chapter ?? lastItem?.mal_id ?? 0)
+              : String(lastItem?.mal_id ?? lastItem?.episode_id ?? 0);
+            const nm = rawStr.match(/\d+(\.\d+)?/);
+            const fromNum = nm ? Math.floor(parseFloat(nm[0])) : 0;
+            // Si el número del último ep/cap es coherente, usarlo; si no, estimar
+            cnt = fromNum > 0 ? fromNum : (lp-1)*100 + lastItems.length;
           } else {
             cnt = (lp-1)*100;
           }
         }catch(e3){cnt = (lp-1)*100;}
-      } else {
-        // Solo una página → la cantidad de items es el total
-        cnt = items.length;
       }
     }
   }catch(e2){}
-  
+
   return cnt;
 }
 
@@ -1647,36 +1644,47 @@ function selectJikanResult(item,tabType){
 }
 
 async function checkJikanUpdates(){
+  let anyUpdated = false;
   for(const tabKey of ["manga","anime"]){
     const ep=tabKey==="manga"?"manga":"anime";
     const publishing=data[tabKey].filter(s=>s.jikanId&&s.jikanPublishing);
     for(const series of publishing){
       try{
-        const res=await fetch(`https://api.jikan.moe/v4/${ep}/${series.jikanId}`);
-        const json=await res.json();
-        let count=tabKey==="manga"?json.data?.chapters:json.data?.episodes;
-        const stillPub=tabKey==="manga"?json.data?.publishing:json.data?.airing;
-        // Si la API no entrega chapters/episodes, usar jikanGetLatestCount
-        if(!count){
-          try{ count=await jikanGetLatestCount(series.jikanId,tabKey); }catch(eL){}
+        // Paso 1: intentar endpoint directo
+        let count = 0;
+        let stillPub = true;
+        try{
+          const res=await fetch(`https://api.jikan.moe/v4/${ep}/${series.jikanId}`);
+          const json=await res.json();
+          count=tabKey==="manga"?json.data?.chapters:json.data?.episodes;
+          stillPub=tabKey==="manga"?(json.data?.publishing!==false):(json.data?.airing!==false);
+        }catch(e1){}
+
+        // Paso 2: si el endpoint directo no entregó un número, usar jikanGetLatestCount
+        if(!count || count < 1){
+          try{
+            await new Promise(r=>setTimeout(r,300));
+            count = await jikanGetLatestCount(series.jikanId, tabKey);
+          }catch(eL){}
         }
-        // Actualizar si: hay cap nuevo, o si el total guardado es 0/1 y la API da más
-        const shouldUpdate=(count&&count>series.total)||(count&&count>0&&series.total<=1);
+
+        // Actualizar si: hay un conteo válido mayor al guardado, o si el total era <=1 y ahora hay más
+        const shouldUpdate = count > 0 && (count > series.total || series.total <= 1);
         if(shouldUpdate){
-          series.total=count;
-          series.jikanPublishing=stillPub||false;
-          series.lastUpdated=Date.now();
-          save();
-          showToast(`🆕 ${series.title}: ${count} ${tabKey==="manga"?"cap.":"ep."} disponibles`,4000);
-          render();
-        }else if(!stillPub&&series.jikanPublishing){
-          series.jikanPublishing=false;
-          save();
+          series.total = count;
+          series.jikanPublishing = stillPub;
+          series.lastUpdated = Date.now();
+          anyUpdated = true;
+          showToast(`🆕 ${series.title}: ${count} ${tabKey==="manga"?"cap.":"ep."} disponibles`, 4000);
+        } else if(!stillPub && series.jikanPublishing){
+          series.jikanPublishing = false;
+          anyUpdated = true;
         }
       }catch(e){}
-      await new Promise(r=>setTimeout(r,600));
+      await new Promise(r=>setTimeout(r,700));
     }
   }
+  if(anyUpdated){ save(); render(); }
 }
 // ── AVISO: NUEVO CAPÍTULO EN SERIES AL DÍA ──
 async function checkUpToDateNewChapters(){
@@ -2650,11 +2658,30 @@ render();
     topBtn.setAttribute("aria-label","Volver arriba");
     topBtn.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
     document.body.appendChild(topBtn);
-    window.addEventListener("scroll",()=>{
-      if(window.scrollY>250)topBtn.classList.add("vis");
-      else topBtn.classList.remove("vis");
-    },{passive:true});
   }
+
+  // ── BOTÓN IR AL INICIO (top absoluto de la app) ──
+  let homeBtn=document.getElementById("home-fab-btn");
+  if(!homeBtn){
+    homeBtn=document.createElement("button");
+    homeBtn.id="home-fab-btn";
+    homeBtn.className="btn-home-fab";
+    homeBtn.innerHTML="🏠";
+    homeBtn.setAttribute("aria-label","Ir al inicio");
+    homeBtn.title="Ir al inicio";
+    homeBtn.onclick=()=>{
+      // Resetear tab a inicio si la función existe
+      if(typeof setTab==="function") setTab("manga");
+      window.scrollTo({top:0,behavior:"smooth"});
+    };
+    document.body.appendChild(homeBtn);
+  }
+
+  window.addEventListener("scroll",()=>{
+    const scrolled=window.scrollY>250;
+    topBtn.classList.toggle("vis",scrolled);
+    homeBtn.classList.toggle("vis",scrolled);
+  },{passive:true});
 })();
 // ── ONBOARDING ──
 (function(){
