@@ -1607,11 +1607,34 @@ async function jikanGetLatestCount(malId, type, fast=false){
   return 0;
 }
 
-// ── AniList GraphQL: fuente confiable para caps/eps en publicación ──────────
-// Usa idMal (MAL ID) para cruzar con AniList. Sin restricción CORS en browser.
+// ── MangaDex: tiene lastChapter para manga en publicación ───────────────────
+// MangaDex trackea el último capítulo publicado incluso para obras en curso.
+// Cruza por links.mal (MAL ID) para identificar el manga exacto.
+async function mangadexGetChapters(malId){
+  try{
+    // Buscar en MangaDex por el MAL ID directamente en los links
+    const url=`https://api.mangadex.org/manga?limit=10&includes[]=none&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic`;
+    // MangaDex permite filtrar por link de MAL
+    const malUrl=`https://api.mangadex.org/manga?limit=5&includes[]=none&links[mal]=${malId}`;
+    const res=await fetch(malUrl,{headers:{"Accept":"application/json"}});
+    if(!res.ok) return 0;
+    const json=await res.json();
+    const items=json?.data||[];
+    for(const item of items){
+      const lc=item?.attributes?.lastChapter;
+      if(lc&&lc!==""){
+        const n=parseFloat(lc);
+        if(n>0) return Math.floor(n);
+      }
+    }
+    return 0;
+  }catch(e){return 0;}
+}
+
+// ── AniList GraphQL ──────────────────────────────────────────────────────────
 async function anilistGetCount(malId, type){
-  const mediaType = type==="manga"?"MANGA":"ANIME";
-  const field     = type==="manga"?"chapters":"episodes";
+  const mediaType=type==="manga"?"MANGA":"ANIME";
+  const field    =type==="manga"?"chapters":"episodes";
   const query=`{Media(idMal:${malId},type:${mediaType}){${field} status}}`;
   try{
     const res=await fetch("https://graphql.anilist.co",{
@@ -1619,24 +1642,47 @@ async function anilistGetCount(malId, type){
       headers:{"Content-Type":"application/json","Accept":"application/json"},
       body:JSON.stringify({query})
     });
-    if(!res.ok)return 0;
+    if(!res.ok) return 0;
     const json=await res.json();
     return json?.data?.Media?.[field]||0;
   }catch(e){return 0;}
 }
 
-// ── Obtener el mejor conteo disponible para un item ───────────────────────────
-// Combina: rawCount (Jikan search), AniList, y endpoint Jikan individual.
-// Devuelve {count, source} para debug. Siempre retorna en ≤ 5s.
+// ── Mejor conteo disponible: MangaDex + AniList + Jikan en paralelo ──────────
+// Para manga en publicación: MangaDex es la fuente más confiable.
+// Para anime: AniList + Jikan episodes.
+// Timeout global de 6s para no bloquear la UI.
 async function getBestCount(malId, type, rawCount){
-  const timeout = new Promise(r=>setTimeout(()=>r(0),5000));
-  // Si Jikan search ya trajo el número → verificar con AniList en paralelo
-  const anilist = Promise.race([anilistGetCount(malId,type), timeout]);
-  const jikan   = Promise.race([jikanFetchFast(`https://api.jikan.moe/v4/${type==="manga"?"manga":"anime"}/${malId}`)
-    .then(d=>type==="manga"?(d?.data?.chapters||0):(d?.data?.episodes||0))
-    .catch(()=>0), timeout]);
-  const [al,jk] = await Promise.all([anilist,jikan]);
-  return Math.max(rawCount||0, al||0, jk||0);
+  const timeout=new Promise(r=>setTimeout(()=>r(0),6000));
+  if(type==="manga"){
+    // MangaDex tiene lastChapter actualizado para manga en publicación
+    const mdx   =Promise.race([mangadexGetChapters(malId), timeout]);
+    const al    =Promise.race([anilistGetCount(malId,"manga"), timeout]);
+    const jk    =Promise.race([jikanFetchFast(`https://api.jikan.moe/v4/manga/${malId}`)
+      .then(d=>d?.data?.chapters||0).catch(()=>0), timeout]);
+    const [m,a,j]=await Promise.all([mdx,al,jk]);
+    return Math.max(rawCount||0, m||0, a||0, j||0);
+  }else{
+    // Anime: AniList + Jikan episodes
+    const al  =Promise.race([anilistGetCount(malId,"anime"), timeout]);
+    const jkEp=Promise.race([jikanFetchFast(`https://api.jikan.moe/v4/anime/${malId}/episodes?page=1`)
+      .then(d=>{
+        const tot=d?.pagination?.items?.total||0;
+        if(tot>0) return tot;
+        const items=d?.data||[];
+        if(!items.length) return 0;
+        const lp=d?.pagination?.last_visible_page||1;
+        if(lp<=1){
+          const last=items[items.length-1];
+          return jikanExtractPublishedNumber(last,"anime")||items.length;
+        }
+        return (lp-1)*100+items.length;
+      }).catch(()=>0), timeout]);
+    const jk=Promise.race([jikanFetchFast(`https://api.jikan.moe/v4/anime/${malId}`)
+      .then(d=>d?.data?.episodes||0).catch(()=>0), timeout]);
+    const [a,je,j]=await Promise.all([al,jkEp,jk]);
+    return Math.max(rawCount||0, a||0, je||0, j||0);
+  }
 }
 
 async function searchJikan(query,tabType){
@@ -1715,7 +1761,8 @@ function renderJikanDrop(tabType){
       countHTML = `<span style="font-size:9px;color:var(--t2);font-family:Space Mono,monospace;opacity:.7">buscando...</span>`;
     }else{
       // Sin dato en ninguna API — el usuario deberá ingresarlo al seleccionar
-      countHTML = `<span style="font-size:9px;color:var(--wrn);font-family:Space Mono,monospace;opacity:.85">✏️ ingresa tú el número</span>`;
+      // Sin dato en ninguna fuente — raro con MangaDex activo
+      countHTML = `<span style="font-size:9px;color:var(--t3);font-family:Space Mono,monospace">sin dato</span>`;
     }
     const badgeHTML=pub
       ?`<span class="jikan-badge pub"><span class="jikan-dot"></span>En publicación</span>`
@@ -1794,7 +1841,7 @@ function selectJikanResult(item,tabType){
             };
           }
           showToast(publishing
-            ?"✏️ La API no tiene el dato — ingresa cuántos caps van"
+            ?"⏳ MangaDex no tiene dato — intenta de nuevo en un momento"
             :"✏️ Ingresa el total de caps manualmente", 3500);
         }
       }catch(e){
