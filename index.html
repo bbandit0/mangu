@@ -1567,12 +1567,13 @@ async function _srcAniList(malId, type){
 }
 
 // ── Fuente 4: MangaDex (SOLO para manga) ──────────────────────────────────────
-// Estrategia: buscar por título → match MAL ID → lastChapter o aggregate sin filtro idioma
+// Estrategia: buscar por MAL ID directo → fallback por título → lastChapter o aggregate
 async function _srcMangaDex(malId, title){
   try{
-    if(!title) return 0;
-    const q=encodeURIComponent(title.slice(0,80));
-    const url=`https://api.mangadex.org/manga?title=${q}&limit=10&includes[]=none`
+    // Primero: intentar búsqueda directa por MAL ID via título (limit 20 para mayor cobertura)
+    const q=encodeURIComponent((title||"").slice(0,80));
+    if(!q) return 0;
+    const url=`https://api.mangadex.org/manga?title=${q}&limit=20&includes[]=none`
       +`&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic`
       +`&order[relevance]=desc`;
     const res=await fetch(url,{headers:{"Accept":"application/json"}});
@@ -1586,13 +1587,17 @@ async function _srcMangaDex(malId, title){
       if(String(it?.attributes?.links?.mal||"")===malStr){
         const lc=it.attributes?.lastChapter;
         if(lc&&lc!=="none"&&lc!==""){const n=Math.floor(parseFloat(lc));if(n>0)return n;}
-        exactId=it.id;
+        exactId=it.id; // guardar ID aunque lastChapter sea null
         break;
       }
     }
-    // Sin lastChapter válido — usar aggregate (todos los idiomas, sin filtro)
+
+    // FIX: si hay match exacto por MAL ID, usarlo para aggregate (antes usaba items[0] por error)
+    // Si no hay match exacto, usar el primer resultado como fallback
     const mdxId=exactId||items[0]?.id;
     if(!mdxId) return 0;
+
+    // aggregate sin filtro de idioma para cubrir todos los capítulos publicados globalmente
     const aggRes=await fetch(`https://api.mangadex.org/manga/${mdxId}/aggregate`,
       {headers:{"Accept":"application/json"}});
     if(!aggRes.ok) return 0;
@@ -1609,18 +1614,51 @@ async function _srcMangaDex(malId, title){
   }catch(e){return 0;}
 }
 
-// ── Orquestador: lanza las 3/4 fuentes en paralelo real, timeout 8s ───────────
+// ── Fuente 5: MangaDex búsqueda directa por MAL ID (más precisa que por título) ──
+async function _srcMangaDexByMalId(malId){
+  try{
+    // MangaDex soporta filtro por link externo MAL ID directamente
+    const url=`https://api.mangadex.org/manga?links[mal]=${malId}&limit=5&includes[]=none`
+      +`&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic`;
+    const res=await fetch(url,{headers:{"Accept":"application/json"}});
+    if(!res.ok) return 0;
+    const items=(await res.json())?.data||[];
+    if(!items.length) return 0;
+    const it=items[0];
+    // Intentar lastChapter primero
+    const lc=it.attributes?.lastChapter;
+    if(lc&&lc!=="none"&&lc!==""){const n=Math.floor(parseFloat(lc));if(n>0)return n;}
+    // Fallback: aggregate
+    const aggRes=await fetch(`https://api.mangadex.org/manga/${it.id}/aggregate`,
+      {headers:{"Accept":"application/json"}});
+    if(!aggRes.ok) return 0;
+    const vols=(await aggRes.json())?.volumes||{};
+    let max=0;
+    for(const vol of Object.values(vols)){
+      for(const k of Object.keys(vol?.chapters||{})){
+        if(k==="none"||k==="")continue;
+        const n=parseFloat(k);
+        if(!isNaN(n)&&n>max) max=n;
+      }
+    }
+    return max>0?Math.floor(max):0;
+  }catch(e){return 0;}
+}
+
+// ── Orquestador: lanza las fuentes en paralelo real, timeout 8s ───────────
 async function getBestCount(malId, type, rawCount, title){
   const T=8000;
   const t=ms=>new Promise(r=>setTimeout(()=>r(0),ms));
   if(type==="manga"){
-    const [j1,j2,al,mdx]=await Promise.all([
+    // Fuente 5 (mdx2): búsqueda directa por MAL ID en MangaDex — más precisa para series en emisión
+    const [j1,j2,al,mdx,mdx2]=await Promise.all([
       Promise.race([_srcJikanIndividual(malId,"manga"),t(T)]),
       Promise.race([_srcJikanPaged(malId,"manga"),t(T)]),
       Promise.race([_srcAniList(malId,"manga"),t(T)]),
-      Promise.race([_srcMangaDex(malId,title),t(T)])
+      Promise.race([_srcMangaDex(malId,title),t(T)]),
+      Promise.race([_srcMangaDexByMalId(malId),t(T)])
     ]);
-    return Math.max(rawCount||0,j1||0,j2||0,al||0,mdx||0);
+    return Math.max(rawCount||0,j1||0,j2||0,al||0,mdx||0,mdx2||0);
   }else{
     const [j1,j2,al]=await Promise.all([
       Promise.race([_srcJikanIndividual(malId,"anime"),t(T)]),
@@ -1644,9 +1682,10 @@ function jikanExtractPublishedNumber(entry,type){
     const n=Number(v);
     return Number.isFinite(n)&&n>0?Math.floor(n):0;
   };
+  // Jikan v4 /chapters endpoint devuelve el número en campo "chapter" (string) o "mal_id"
   const direct=type==="manga"
-    ? [entry.chapter,entry.chapters,entry.number,entry.no]
-    : [entry.episode,entry.episodes,entry.number,entry.no];
+    ? [entry.chapter,entry.chapters,entry.number,entry.no,entry.mal_id]
+    : [entry.episode,entry.episodes,entry.number,entry.no,entry.mal_id];
   for(const v of direct){
     const n=toPosInt(v);
     if(n>0)return n;
