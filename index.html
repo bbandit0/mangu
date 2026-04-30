@@ -1498,6 +1498,15 @@ async function jikanFetchJSON(url,retries=4){
   return null;
 }
 
+// Versión rápida para el dropdown: 1 intento, sin esperas
+async function jikanFetchFast(url){
+  try{
+    const res = await fetch(url);
+    if(!res.ok) return null;
+    return await res.json();
+  }catch(e){ return null; }
+}
+
 function jikanExtractPublishedNumber(entry,type){
   if(!entry)return 0;
   const toPosInt=v=>{
@@ -1525,67 +1534,77 @@ function jikanExtractPublishedNumber(entry,type){
   return 0;
 }
 
-async function jikanGetLatestCount(malId, type){
+async function jikanGetLatestCount(malId, type, fast=false){
   const ep = type==="manga"?"manga":"anime";
-  let cnt = 0;
+  const fetchFn = fast ? jikanFetchFast : jikanFetchJSON;
 
-  // ── Paso 1: endpoint individual (MAL a veces sí entrega chapters/episodes) ──
+  // ══ PASO 1: endpoint individual ──────────────────────────────────────────
+  // Para obras FINALIZADAS MAL siempre entrega chapters/episodes exacto.
+  // Para obras EN PUBLICACIÓN devuelve null → pasamos al siguiente paso.
   try{
-    const d1 = await jikanFetchJSON(`https://api.jikan.moe/v4/${ep}/${malId}`);
+    const d1 = await fetchFn(`https://api.jikan.moe/v4/${ep}/${malId}`);
     const det = d1?.data;
     if(det){
-      cnt = type==="manga" ? (det.chapters||0) : (det.episodes||0);
+      const cnt = type==="manga" ? (det.chapters||0) : (det.episodes||0);
+      if(cnt > 0) return cnt;
     }
-  }catch(e1){}
+  }catch(e){}
 
-  if(cnt > 0) return cnt;
-
-  // ── Paso 2: endpoint de lista de capítulos/episodios ──
-  // Para obras en emisión MAL NO entrega chapters/episodes=null en el detail,
-  // pero la lista de episodios sí tiene los publicados.
-  // Jikan ordena ASC (ep 1 primero) → el ÚLTIMO item es el más reciente.
-  try{
-    const listUrl = type==="manga"
-      ? `https://api.jikan.moe/v4/manga/${malId}/chapters?page=1`
-      : `https://api.jikan.moe/v4/anime/${malId}/episodes?page=1`;
-    const d2 = await jikanFetchJSON(listUrl);
-    if(!d2||!d2.data)return 0;
-    const items = d2.data || [];
-    const tot   = d2.pagination?.items?.total || 0;
-    const perPage = d2.pagination?.items?.per_page || 100;
-    const lp    = d2.pagination?.last_visible_page || 1;
-
-    // MAL a veces reporta total exacto en la paginación
-    if(tot > 0) return tot;
-
-    if(items.length > 0){
-      if(lp <= 1){
-        // Una sola página: intentar leer el número del ÚLTIMO item (orden ASC)
-        const lastItem = items[items.length-1];
-        const fromItem = jikanExtractPublishedNumber(lastItem,type);
-        cnt = fromItem>0 ? fromItem : items.length;
-      } else {
-        // Múltiples páginas → ir a la última para leer el número del último ep/cap publicado
-        try{
-          const lastUrl = type==="manga"
-            ? `https://api.jikan.moe/v4/manga/${malId}/chapters?page=${lp}`
-            : `https://api.jikan.moe/v4/anime/${malId}/episodes?page=${lp}`;
-          const dL = await jikanFetchJSON(lastUrl);
-          const lastItems = dL?.data || [];
-          if(lastItems.length > 0){
-            const lastItem = lastItems[lastItems.length-1];
-            const fromNum = jikanExtractPublishedNumber(lastItem,type);
-            // Si el número del último ep/cap es coherente, usarlo; si no, estimar
-            cnt = fromNum > 0 ? fromNum : (lp-1)*perPage + lastItems.length;
-          } else {
-            cnt = Math.max((lp-1)*perPage,0);
+  // ══ PASO 2 (MANGA): endpoint /manga/{id}/chapters ─────────────────────────
+  if(type === "manga"){
+    try{
+      const d2 = await fetchFn(`https://api.jikan.moe/v4/manga/${malId}/chapters?page=1`);
+      if(d2 && Array.isArray(d2.data) && d2.data.length > 0){
+        const pag = d2.pagination || {};
+        const lp  = pag.last_visible_page || 1;
+        const tot = pag.items?.total || 0;
+        if(tot > 0) return tot;
+        if(lp <= 1){
+          const last = d2.data[d2.data.length - 1];
+          const n = jikanExtractPublishedNumber(last, "manga");
+          if(n > 0) return n;
+          return d2.data.length;
+        } else {
+          const dL = await fetchFn(`https://api.jikan.moe/v4/manga/${malId}/chapters?page=${lp}`);
+          if(dL && Array.isArray(dL.data) && dL.data.length > 0){
+            const last = dL.data[dL.data.length - 1];
+            const n = jikanExtractPublishedNumber(last, "manga");
+            if(n > 0) return n;
+            return (lp - 1) * 100 + dL.data.length;
           }
-        }catch(e3){cnt = Math.max((lp-1)*perPage,0);}
+        }
       }
-    }
-  }catch(e2){}
+    }catch(e){}
+  }
 
-  return cnt;
+  // ══ PASO 2 (ANIME): endpoint /anime/{id}/episodes ────────────────────────
+  if(type === "anime"){
+    try{
+      const d2 = await fetchFn(`https://api.jikan.moe/v4/anime/${malId}/episodes?page=1`);
+      if(d2 && Array.isArray(d2.data) && d2.data.length > 0){
+        const pag = d2.pagination || {};
+        const lp  = pag.last_visible_page || 1;
+        const tot = pag.items?.total || 0;
+        if(tot > 0) return tot;
+        if(lp <= 1){
+          const last = d2.data[d2.data.length - 1];
+          const n = jikanExtractPublishedNumber(last, "anime");
+          if(n > 0) return n;
+          return d2.data.length;
+        } else {
+          const dL = await fetchFn(`https://api.jikan.moe/v4/anime/${malId}/episodes?page=${lp}`);
+          if(dL && Array.isArray(dL.data) && dL.data.length > 0){
+            const last = dL.data[dL.data.length - 1];
+            const n = jikanExtractPublishedNumber(last, "anime");
+            if(n > 0) return n;
+            return (lp - 1) * 100 + dL.data.length;
+          }
+        }
+      }
+    }catch(e){}
+  }
+
+  return 0;
 }
 
 async function searchJikan(query,tabType){
@@ -1598,19 +1617,27 @@ async function searchJikan(query,tabType){
   }catch(e){jikanResults=[];}
   // Mostrar dropdown inmediatamente con lo que tenemos
   renderJikanDrop(tabType);
-  // Enriquecer en background: para items sin chapters/episodes, obtener el último cap publicado
-  for(const item of jikanResults){
+
+  // Enriquecer EN PARALELO todos los items sin chapters/episodes
+  // Timeout de 6s por item para no dejar "buscando..." colgado
+  const enrichPromises = jikanResults.map(async (item) => {
     const rawCnt = tabType==="manga"?(item.chapters||0):(item.episodes||0);
     if(!rawCnt && item.mal_id){
       try{
-        // Verificar que el usuario no haya cambiado la búsqueda
-        if(!jikanResults.includes(item)) break;
-        item._latestChapter = await jikanGetLatestCount(item.mal_id, tabType);
-        // Re-renderizar tras cada item enriquecido
-        if(jikanResults.length>0) renderJikanDrop(tabType);
-      }catch(e2){}
+        const timeoutPromise = new Promise(res => setTimeout(()=>res(0), 6000));
+        const fetchPromise   = jikanGetLatestCount(item.mal_id, tabType, true);
+        const result = await Promise.race([fetchPromise, timeoutPromise]);
+        if(!jikanResults.includes(item)) return; // usuario cambió búsqueda
+        item._latestChapter = result || 0;
+        // Re-renderizar inmediatamente cuando este item termina (parcial)
+        if(jikanResults.length > 0) renderJikanDrop(tabType);
+      }catch(e){
+        item._latestChapter = 0;
+        if(jikanResults.length > 0) renderJikanDrop(tabType);
+      }
     }
-  }
+  });
+  await Promise.all(enrichPromises);
 }
 
 function removeJikanDrop(){
@@ -1706,7 +1733,7 @@ function selectJikanResult(item,tabType){
     if(item.mal_id){
       (async()=>{
         try{
-          const fresh = await jikanGetLatestCount(item.mal_id, tabType);
+          const fresh = await jikanGetLatestCount(item.mal_id, tabType, true);
           if(fresh > knownCount){
             newTotal = String(fresh);
             const fEl = document.getElementById("add-total");
@@ -1722,24 +1749,24 @@ function selectJikanResult(item,tabType){
   // Si NO tenemos conteo aún, hacer fetch ahora (caso raro: el background no terminó)
   if(item.mal_id){
     const fEl=()=>document.getElementById("add-total");
-    const fe=fEl(); if(fe)fe.placeholder="Buscando...";
+    const fe=fEl(); if(fe){fe.value="";fe.placeholder="Buscando caps publicados...";}
     (async()=>{
       try{
-        const cnt = await jikanGetLatestCount(item.mal_id, tabType);
+        const cnt = await jikanGetLatestCount(item.mal_id, tabType, true);
         const f=fEl();
         if(cnt>0){
           newTotal=String(cnt);
           if(f){f.value=newTotal;f.placeholder=tabType==="manga"?"Total de capitulos *":"Total de ep. *";f.style.borderColor="rgba(99,179,237,.5)";setTimeout(()=>{const f2=fEl();if(f2)f2.style.borderColor="";},1200);}
           showToast(`📖 ${cnt} ${tabType==="manga"?"caps":"eps"}${publishing?" · en emisión":""}`);
         }else{
-          // Último recurso: si no hay dato, dejar 0 y marcar para que el polling lo actualice
+          // Sin dato: dejar campo vacío, polling lo actualizará
           newTotal="0";
-          if(f){f.value="";f.placeholder=tabType==="manga"?"Obteniendo caps publicados...":"Obteniendo eps publicados...";}
+          if(f){f.value="";f.placeholder=tabType==="manga"?"Caps desconocidos (en emisión)":"Eps desconocidos (en emisión)";}
           showToast("⚠️ No se pudo obtener el total — se actualizará automáticamente");
         }
       }catch(e){
         const f=fEl();
-        if(f){f.value="0";f.placeholder="En emisión (sin dato)";}
+        if(f){f.value="";f.placeholder="En emisión (sin dato)";}
       }
     })();
   }
@@ -1770,8 +1797,8 @@ async function checkJikanUpdates(){
           }catch(eL){}
         }
 
-        // Actualizar si: hay un conteo válido diferente al guardado, o si el total era <=1 y ahora hay más
-        const shouldUpdate = count > 0 && (count !== series.total || series.total <= 1);
+        // Actualizar si: hay un conteo válido mayor al guardado, o si el total era <=1 y ahora hay más
+        const shouldUpdate = count > 0 && (count > series.total || series.total <= 1);
         if(shouldUpdate){
           series.total = count;
           series.jikanPublishing = stillPub;
@@ -2118,7 +2145,7 @@ titleWrap.append(sIcon,ti);titleRow.appendChild(titleWrap);addBody.appendChild(t
 const row2=h("div","add-row2");const ni=h("input","add-cap-input",null,{placeholder:tab==="manga"?"Total de capitulos *":"Total de ep. * (todas las temp.)",type:"number",min:"1",id:"add-total",value:newTotal});ni.oninput=e=>{newTotal=e.target.value;};ni.onkeydown=e=>{if(e.key==="Enter")doAdd();};const fi=h("input","hidden",null,{type:"file",accept:"image/*",id:"acf"});fi.onchange=e=>{const f=e.target.files?.[0];if(!f)return;resizeImg(f,b=>{newCover=b;render();});e.target.value="";};const coverBtn=h("button","add-cover-btn",svg.up+" Portada");coverBtn.onclick=()=>document.getElementById("acf").click();const ab=h("button","add-submit-btn",svg.plus);ab.style.background=ac;ab.title="Agregar";ab.onclick=doAdd;row2.append(fi,ni,coverBtn,ab);addBody.appendChild(row2);addBody.appendChild(h("div","add-divider"));const stSec=h("div","add-status-section");stSec.appendChild(h("div","add-status-label","Estado"));const spRow=h("div","add-status-pills");STATUSES.forEach(st=>{const lbl=(st.key==="reading"&&tab==="anime")?"Viendo":getStatusLabel(st.key);const pill=h("button","add-status-pill"+(newStatus===st.key?" sp-"+st.key:""),st.icon+" "+lbl);pill.onclick=()=>{newStatus=st.key;spRow.querySelectorAll(".add-status-pill").forEach(p=>{p.className="add-status-pill";});pill.className="add-status-pill sp-"+st.key;};spRow.appendChild(pill);});stSec.appendChild(spRow);addBody.appendChild(stSec);const genSec=h("div","add-genres-section");genSec.appendChild(h("div","add-genres-label","Generos"));const genGrid=h("div","add-genres-grid");const allTagsList=[...ALL_TAGS,...(theme.customTags||[])];allTagsList.forEach(t=>{const isCustom=!ALL_TAGS.includes(t);const wrapper=isCustom?h("div","tag-custom"):null;const chip=h("button","genre-chip"+(newTags.includes(t)?(animeCls?" anime-on":" on"):""),t);chip.onclick=()=>{if(newTags.includes(t)){newTags=newTags.filter(x=>x!==t);chip.className="genre-chip";}else{newTags.push(t);chip.className="genre-chip"+(animeCls?" anime-on":" on");}};if(isCustom&&wrapper){const dx=h("button","tag-del-x","✕");dx.onclick=e=>{e.stopPropagation();theme.customTags=(theme.customTags||[]).filter(c=>c!==t);newTags=newTags.filter(x=>x!==t);saveLocal();render();};wrapper.append(chip,dx);genGrid.appendChild(wrapper);}else{genGrid.appendChild(chip);}});const addGenChip=h("button","genre-add-chip","+ tag");addGenChip.onclick=()=>{const nm=prompt("Nombre del nuevo tag:");if(!nm||!nm.trim())return;const nt=nm.trim();if(allTagsList.includes(nt)){showToast("Ya existe ese tag");return;}if(!theme.customTags)theme.customTags=[];theme.customTags.push(nt);newTags.push(nt);saveLocal();render();};genGrid.appendChild(addGenChip);genSec.appendChild(genGrid);addBody.appendChild(genSec);if(newCover){const prevW=h("div","add-cover-preview");prevW.append(Object.assign(h("img","cvmn"),{src:newCover}),h("button","bcx","✕ quitar",{onclick:()=>{newCover="";render();}}));addBody.appendChild(prevW);}root.appendChild(addS);
 const filtered=sortList(filterList(list));if(filtered.length===0){const emptyWrap=h("div","");emptyWrap.appendChild(h("div","empty",`<div class="icn">${icon}</div><p>${list.length===0?`Agrega tu primer ${tab==="manga"?"manga":"anime"}`:"Sin resultados"}</p>`));if(list.length===0){p28RenderOnboardingExamples(emptyWrap,tab);}root.appendChild(emptyWrap);return;}
 // Catalog view
-if(viewMode==="catalog"){const cat=h("div","catalog");filtered.forEach(s=>{const pct=s.total>0?(s.completed.length/s.total)*100:0;const cc=h("div","catc");cc.onclick=()=>{pinnedId=s.id;viewMode="list";expanded[s.id]=true;render();};const st=SM[s.status];const statusIcon=st?(s.status==="reading"&&tab==="anime"?"👁️":st.icon):"";cc.innerHTML=`<div style="position:relative">${s.cover?`<img class="catcv" src="${s.cover}">`:`<div class="catph">${icon}</div>`}${s.favorite?`<div class="cat-fav">★</div>`:""}${s.score?`<div class="cat-score">${s.score}</div>`:""}${pct>0?`<div class="cat-pct">${Math.round(pct)}%</div>`:""}${statusIcon?`<div class="cat-status-ov">${statusIcon}</div>`:""}</div><div class="cati"><div class="catt">${s.title}</div><div class="catp">${s.completed.length}/${s.total>0?(s.jikanPublishing?s.total+"📡":s.total):("?")}</div><div class="catb"><div class="catf" style="width:${pct}%;background:${ac}"></div></div></div>`;cat.appendChild(cc);});root.appendChild(cat);return;}
+if(viewMode==="catalog"){const cat=h("div","catalog");filtered.forEach(s=>{const pct=s.total>0?(s.completed.length/s.total)*100:0;const cc=h("div","catc");cc.onclick=()=>{pinnedId=s.id;viewMode="list";expanded[s.id]=true;render();};const st=SM[s.status];const statusIcon=st?(s.status==="reading"&&tab==="anime"?"👁️":st.icon):"";cc.innerHTML=`<div style="position:relative">${s.cover?`<img class="catcv" src="${s.cover}">`:`<div class="catph">${icon}</div>`}${s.favorite?`<div class="cat-fav">★</div>`:""}${s.score?`<div class="cat-score">${s.score}</div>`:""}${pct>0?`<div class="cat-pct">${Math.round(pct)}%</div>`:""}${statusIcon?`<div class="cat-status-ov">${statusIcon}</div>`:""}</div><div class="cati"><div class="catt">${s.title}</div><div class="catp">${s.completed.length}/${s.total}</div><div class="catb"><div class="catf" style="width:${pct}%;background:${ac}"></div></div></div>`;cat.appendChild(cc);});root.appendChild(cat);return;}
 // List view
 const sl=h("div","slist");
 let displayList=[...filtered];
@@ -2192,11 +2219,11 @@ const maxRead=s.completed.length>0?Math.max(...s.completed):0;
 function buildCell(n,isR){const cl=h("div",isR?(n===maxRead?"cell rd-current":"cell rd"):"cell unrd",String(n));if(isR&&n!==maxRead){cl.style.background=ac;cl.style.color="#fff";}if(isR&&n===maxRead){cl.style.boxShadow=`0 0 0 2px ${ac},0 0 10px ${ac}44`;}cl.onclick=()=>{markChapter(s.id,n,cl,ac);};return cl;}
 const seasons=(tab==="anime"&&s.seasons?.length>0)?s.seasons:null;
 const gwrap=h("div","cgrid-wrap");
-// Banner "en emisión" si la obra está en publicación
+// ── Banner "en emisión" si la obra está en publicación con caps conocidos ──
 if(s.jikanPublishing&&s.total>0){
   const pubBanner=h("div","");
   pubBanner.style.cssText="display:flex;align-items:center;gap:8px;padding:7px 12px;margin-bottom:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;font-size:11px;color:#22c55e;font-weight:600";
-  pubBanner.innerHTML=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;animation:jDotBlink 1.2s ease-in-out infinite;flex-shrink:0"></span>En publicación · último cap. publicado: <b style="font-family:monospace">${s.total}</b>`;
+  pubBanner.innerHTML=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;animation:jDotBlink 1.2s ease-in-out infinite;flex-shrink:0"></span>En publicación · último cap. publicado: <b style="font-family:monospace;margin-left:3px">${s.total}</b>`;
   gwrap.appendChild(pubBanner);
 }
 if(seasons){
@@ -2214,21 +2241,21 @@ if(seasons){
   if(readNums.length>0){const lbl2=h("div","cgrid-lbl",`<span>Leídos (${readNums.length})</span><div class="gl"></div>`);gwrap.appendChild(lbl2);const cg=h("div","cgrid");readNums.forEach(n=>cg.appendChild(buildCell(n,true)));gwrap.appendChild(cg);}
   if(unreadNums.length>0){const lbl2=h("div","cgrid-lbl cgrid-lbl-unread",`<span>Por leer (${unreadNums.length})</span><div class="gl"></div>`);gwrap.appendChild(lbl2);const cg=h("div","cgrid");unreadNums.forEach(n=>cg.appendChild(buildCell(n,false)));gwrap.appendChild(cg);}
 }
-// ── Botón "Agregar caps" para obras en publicación ──
+// ── Botón "+ Agregar caps" para obras en publicación ──
 if(s.jikanPublishing){
   const addMoreRow=h("div","");
-  addMoreRow.style.cssText="display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px 4px";
+  addMoreRow.style.cssText="display:flex;align-items:center;gap:8px;margin-top:10px;padding:4px 2px";
   const addMoreLabel=h("span","");
   addMoreLabel.style.cssText="font-size:11px;color:var(--t2)";
-  addMoreLabel.textContent="¿Salió un cap nuevo?";
+  addMoreLabel.textContent="¿Salió cap nuevo?";
   const addMoreBtn=h("button","bs","+ Agregar caps");
   addMoreBtn.style.cssText="font-size:11px;padding:5px 12px";
   addMoreBtn.onclick=()=>{
     const x=data[tab].find(z=>z.id===s.id);if(!x)return;
-    const input=prompt(`Último capítulo publicado de "${x.title}" (actual: ${x.total}):`);
+    const input=prompt(`Último capítulo publicado de "${x.title}" (actual: ${x.total||"desconocido"}):`);
     const newN=parseInt(input);
     if(!newN||isNaN(newN)||newN<=0){showToast("⚠️ Número inválido");return;}
-    if(newN<=x.total){showToast(`ℹ️ Ya tienes ${x.total} caps registrados`);return;}
+    if(x.total>0&&newN<=x.total){showToast(`ℹ️ Ya tienes ${x.total} caps registrados`);return;}
     x.total=newN;x.lastUpdated=Date.now();
     save();render();
     showToast(`✅ Actualizado a ${newN} ${tab==="manga"?"caps":"eps"}`);
