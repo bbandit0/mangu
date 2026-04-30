@@ -1534,15 +1534,35 @@ function jikanExtractPublishedNumber(entry,type){
   return 0;
 }
 
+// ── Consultar AniList GraphQL (soporta CORS desde browser) ──────────────────
+// AniList tiene el campo chapters/episodes actualizado para obras en publicación.
+// Recibe el mal_id de MAL y lo convierte a AniList ID via campo idMal.
+async function anilistGetCount(malId, type){
+  const mediaType = type === "manga" ? "MANGA" : "ANIME";
+  const field     = type === "manga" ? "chapters" : "episodes";
+  const query = `{Media(idMal:${malId},type:${mediaType}){${field} status}}`;
+  try{
+    const res = await fetch("https://graphql.anilist.co", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Accept":"application/json"},
+      body: JSON.stringify({query})
+    });
+    if(!res.ok) return 0;
+    const json = await res.json();
+    const cnt = json?.data?.Media?.[field] || 0;
+    return cnt > 0 ? cnt : 0;
+  }catch(e){ return 0; }
+}
+
 async function jikanGetLatestCount(malId, type, fast=false){
-  const ep = type==="manga"?"manga":"anime";
+  const ep      = type==="manga"?"manga":"anime";
   const fetchFn = fast ? jikanFetchFast : jikanFetchJSON;
 
-  // ══ PASO 1: endpoint individual ──────────────────────────────────────────
-  // Para obras FINALIZADAS MAL siempre entrega chapters/episodes exacto.
-  // Para obras EN PUBLICACIÓN devuelve null → pasamos al siguiente paso.
+  // ══ PASO 1: Jikan endpoint individual ────────────────────────────────────
+  // Para obras FINALIZADAS siempre entrega el número exacto.
+  // Para obras EN PUBLICACIÓN devuelve null → continuar.
   try{
-    const d1 = await fetchFn(`https://api.jikan.moe/v4/${ep}/${malId}`);
+    const d1  = await fetchFn(`https://api.jikan.moe/v4/${ep}/${malId}`);
     const det = d1?.data;
     if(det){
       const cnt = type==="manga" ? (det.chapters||0) : (det.episodes||0);
@@ -1550,34 +1570,17 @@ async function jikanGetLatestCount(malId, type, fast=false){
     }
   }catch(e){}
 
-  // ══ PASO 2 (MANGA): endpoint /manga/{id}/chapters ─────────────────────────
-  if(type === "manga"){
-    try{
-      const d2 = await fetchFn(`https://api.jikan.moe/v4/manga/${malId}/chapters?page=1`);
-      if(d2 && Array.isArray(d2.data) && d2.data.length > 0){
-        const pag = d2.pagination || {};
-        const lp  = pag.last_visible_page || 1;
-        const tot = pag.items?.total || 0;
-        if(tot > 0) return tot;
-        if(lp <= 1){
-          const last = d2.data[d2.data.length - 1];
-          const n = jikanExtractPublishedNumber(last, "manga");
-          if(n > 0) return n;
-          return d2.data.length;
-        } else {
-          const dL = await fetchFn(`https://api.jikan.moe/v4/manga/${malId}/chapters?page=${lp}`);
-          if(dL && Array.isArray(dL.data) && dL.data.length > 0){
-            const last = dL.data[dL.data.length - 1];
-            const n = jikanExtractPublishedNumber(last, "manga");
-            if(n > 0) return n;
-            return (lp - 1) * 100 + dL.data.length;
-          }
-        }
-      }
-    }catch(e){}
-  }
+  // ══ PASO 2: AniList GraphQL ───────────────────────────────────────────────
+  // AniList mantiene el conteo real de capítulos publicados incluso para
+  // obras en emisión. No tiene restricción CORS para peticiones de browser.
+  try{
+    const cnt = await anilistGetCount(malId, type);
+    if(cnt > 0) return cnt;
+  }catch(e){}
 
-  // ══ PASO 2 (ANIME): endpoint /anime/{id}/episodes ────────────────────────
+  // ══ PASO 3 (ANIME ONLY): Jikan /episodes ─────────────────────────────────
+  // Para anime Jikan SÍ tiene endpoint de episodios que funciona.
+  // Para manga NO existe /chapters en Jikan v4 — omitir.
   if(type === "anime"){
     try{
       const d2 = await fetchFn(`https://api.jikan.moe/v4/anime/${malId}/episodes?page=1`);
@@ -1589,15 +1592,13 @@ async function jikanGetLatestCount(malId, type, fast=false){
         if(lp <= 1){
           const last = d2.data[d2.data.length - 1];
           const n = jikanExtractPublishedNumber(last, "anime");
-          if(n > 0) return n;
-          return d2.data.length;
+          return n > 0 ? n : d2.data.length;
         } else {
           const dL = await fetchFn(`https://api.jikan.moe/v4/anime/${malId}/episodes?page=${lp}`);
           if(dL && Array.isArray(dL.data) && dL.data.length > 0){
             const last = dL.data[dL.data.length - 1];
             const n = jikanExtractPublishedNumber(last, "anime");
-            if(n > 0) return n;
-            return (lp - 1) * 100 + dL.data.length;
+            return n > 0 ? n : (lp - 1) * 100 + dL.data.length;
           }
         }
       }
@@ -1615,21 +1616,23 @@ async function searchJikan(query,tabType){
     const json=await res.json();
     jikanResults=(json.data||[]).slice(0,6);
   }catch(e){jikanResults=[];}
-  // Mostrar dropdown inmediatamente con lo que tenemos
+
+  // Mostrar dropdown inmediatamente con lo que tenemos (caps ya disponibles para finalizados)
   renderJikanDrop(tabType);
 
-  // Enriquecer EN PARALELO todos los items sin chapters/episodes
-  // Timeout de 6s por item para no dejar "buscando..." colgado
+  // Enriquecer EN PARALELO los items que no tienen chapters/episodes
   const enrichPromises = jikanResults.map(async (item) => {
     const rawCnt = tabType==="manga"?(item.chapters||0):(item.episodes||0);
     if(!rawCnt && item.mal_id){
       try{
-        const timeoutPromise = new Promise(res => setTimeout(()=>res(0), 6000));
-        const fetchPromise   = jikanGetLatestCount(item.mal_id, tabType, true);
-        const result = await Promise.race([fetchPromise, timeoutPromise]);
-        if(!jikanResults.includes(item)) return; // usuario cambió búsqueda
-        item._latestChapter = result || 0;
-        // Re-renderizar inmediatamente cuando este item termina (parcial)
+        const timeout = new Promise(r => setTimeout(()=>r(0), 7000));
+        // AniList y Jikan en paralelo — tomar el mayor de los dos
+        const [al, jk] = await Promise.all([
+          Promise.race([anilistGetCount(item.mal_id, tabType), timeout]),
+          Promise.race([jikanGetLatestCount(item.mal_id, tabType, true), timeout])
+        ]);
+        if(!jikanResults.includes(item)) return;
+        item._latestChapter = Math.max(al||0, jk||0);
         if(jikanResults.length > 0) renderJikanDrop(tabType);
       }catch(e){
         item._latestChapter = 0;
@@ -1733,7 +1736,7 @@ function selectJikanResult(item,tabType){
     if(item.mal_id){
       (async()=>{
         try{
-          const fresh = await jikanGetLatestCount(item.mal_id, tabType, true);
+          const [_al1,_jk1]=await Promise.all([anilistGetCount(item.mal_id,tabType),jikanGetLatestCount(item.mal_id,tabType,true)]);const fresh=Math.max(_al1||0,_jk1||0);
           if(fresh > knownCount){
             newTotal = String(fresh);
             const fEl = document.getElementById("add-total");
@@ -1752,7 +1755,7 @@ function selectJikanResult(item,tabType){
     const fe=fEl(); if(fe){fe.value="";fe.placeholder="Buscando caps publicados...";}
     (async()=>{
       try{
-        const cnt = await jikanGetLatestCount(item.mal_id, tabType, true);
+        const [_al2,_jk2]=await Promise.all([anilistGetCount(item.mal_id,tabType),jikanGetLatestCount(item.mal_id,tabType,true)]);const cnt=Math.max(_al2||0,_jk2||0);
         const f=fEl();
         if(cnt>0){
           newTotal=String(cnt);
@@ -1793,7 +1796,7 @@ async function checkJikanUpdates(){
         if(!count || count < 1){
           try{
             await new Promise(r=>setTimeout(r,300));
-            count = await jikanGetLatestCount(series.jikanId, tabKey);
+            const [_alU,_jkU]=await Promise.all([anilistGetCount(series.jikanId,tabKey),jikanGetLatestCount(series.jikanId,tabKey)]);count=Math.max(_alU||0,_jkU||0);
           }catch(eL){}
         }
 
