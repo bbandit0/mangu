@@ -1732,15 +1732,14 @@ function selectJikanResult(item,tabType){
           if(f){f.value=newTotal;f.placeholder=tabType==="manga"?"Total de capitulos *":"Total de ep. *";f.style.borderColor="rgba(99,179,237,.5)";setTimeout(()=>{const f2=fEl();if(f2)f2.style.borderColor="";},1200);}
           showToast(`📖 ${cnt} ${tabType==="manga"?"caps":"eps"}${publishing?" · en emisión":""}`);
         }else{
-          // Último recurso: si absolutamente no hay dato, poner 1 para que no bloquee al usuario
-          // y marcar como publishing para que el polling lo actualice
-          newTotal="1";
-          if(f){f.value="1";f.placeholder=tabType==="manga"?"Total (en emisión)":"Eps (en emisión)";}
+          // Último recurso: si no hay dato, dejar 0 y marcar para que el polling lo actualice
+          newTotal="0";
+          if(f){f.value="";f.placeholder=tabType==="manga"?"Obteniendo caps publicados...":"Obteniendo eps publicados...";}
           showToast("⚠️ No se pudo obtener el total — se actualizará automáticamente");
         }
       }catch(e){
         const f=fEl();
-        if(f){f.value="1";f.placeholder="En emisión";}
+        if(f){f.value="0";f.placeholder="En emisión (sin dato)";}
       }
     })();
   }
@@ -1771,8 +1770,8 @@ async function checkJikanUpdates(){
           }catch(eL){}
         }
 
-        // Actualizar si: hay un conteo válido mayor al guardado, o si el total era <=1 y ahora hay más
-        const shouldUpdate = count > 0 && (count > series.total || series.total <= 1);
+        // Actualizar si: hay un conteo válido diferente al guardado, o si el total era <=1 y ahora hay más
+        const shouldUpdate = count > 0 && (count !== series.total || series.total <= 1);
         if(shouldUpdate){
           series.total = count;
           series.jikanPublishing = stillPub;
@@ -2119,12 +2118,12 @@ titleWrap.append(sIcon,ti);titleRow.appendChild(titleWrap);addBody.appendChild(t
 const row2=h("div","add-row2");const ni=h("input","add-cap-input",null,{placeholder:tab==="manga"?"Total de capitulos *":"Total de ep. * (todas las temp.)",type:"number",min:"1",id:"add-total",value:newTotal});ni.oninput=e=>{newTotal=e.target.value;};ni.onkeydown=e=>{if(e.key==="Enter")doAdd();};const fi=h("input","hidden",null,{type:"file",accept:"image/*",id:"acf"});fi.onchange=e=>{const f=e.target.files?.[0];if(!f)return;resizeImg(f,b=>{newCover=b;render();});e.target.value="";};const coverBtn=h("button","add-cover-btn",svg.up+" Portada");coverBtn.onclick=()=>document.getElementById("acf").click();const ab=h("button","add-submit-btn",svg.plus);ab.style.background=ac;ab.title="Agregar";ab.onclick=doAdd;row2.append(fi,ni,coverBtn,ab);addBody.appendChild(row2);addBody.appendChild(h("div","add-divider"));const stSec=h("div","add-status-section");stSec.appendChild(h("div","add-status-label","Estado"));const spRow=h("div","add-status-pills");STATUSES.forEach(st=>{const lbl=(st.key==="reading"&&tab==="anime")?"Viendo":getStatusLabel(st.key);const pill=h("button","add-status-pill"+(newStatus===st.key?" sp-"+st.key:""),st.icon+" "+lbl);pill.onclick=()=>{newStatus=st.key;spRow.querySelectorAll(".add-status-pill").forEach(p=>{p.className="add-status-pill";});pill.className="add-status-pill sp-"+st.key;};spRow.appendChild(pill);});stSec.appendChild(spRow);addBody.appendChild(stSec);const genSec=h("div","add-genres-section");genSec.appendChild(h("div","add-genres-label","Generos"));const genGrid=h("div","add-genres-grid");const allTagsList=[...ALL_TAGS,...(theme.customTags||[])];allTagsList.forEach(t=>{const isCustom=!ALL_TAGS.includes(t);const wrapper=isCustom?h("div","tag-custom"):null;const chip=h("button","genre-chip"+(newTags.includes(t)?(animeCls?" anime-on":" on"):""),t);chip.onclick=()=>{if(newTags.includes(t)){newTags=newTags.filter(x=>x!==t);chip.className="genre-chip";}else{newTags.push(t);chip.className="genre-chip"+(animeCls?" anime-on":" on");}};if(isCustom&&wrapper){const dx=h("button","tag-del-x","✕");dx.onclick=e=>{e.stopPropagation();theme.customTags=(theme.customTags||[]).filter(c=>c!==t);newTags=newTags.filter(x=>x!==t);saveLocal();render();};wrapper.append(chip,dx);genGrid.appendChild(wrapper);}else{genGrid.appendChild(chip);}});const addGenChip=h("button","genre-add-chip","+ tag");addGenChip.onclick=()=>{const nm=prompt("Nombre del nuevo tag:");if(!nm||!nm.trim())return;const nt=nm.trim();if(allTagsList.includes(nt)){showToast("Ya existe ese tag");return;}if(!theme.customTags)theme.customTags=[];theme.customTags.push(nt);newTags.push(nt);saveLocal();render();};genGrid.appendChild(addGenChip);genSec.appendChild(genGrid);addBody.appendChild(genSec);if(newCover){const prevW=h("div","add-cover-preview");prevW.append(Object.assign(h("img","cvmn"),{src:newCover}),h("button","bcx","✕ quitar",{onclick:()=>{newCover="";render();}}));addBody.appendChild(prevW);}root.appendChild(addS);
 const filtered=sortList(filterList(list));if(filtered.length===0){const emptyWrap=h("div","");emptyWrap.appendChild(h("div","empty",`<div class="icn">${icon}</div><p>${list.length===0?`Agrega tu primer ${tab==="manga"?"manga":"anime"}`:"Sin resultados"}</p>`));if(list.length===0){p28RenderOnboardingExamples(emptyWrap,tab);}root.appendChild(emptyWrap);return;}
 // Catalog view
-if(viewMode==="catalog"){const cat=h("div","catalog");filtered.forEach(s=>{const pct=s.total>0?(s.completed.length/s.total)*100:0;const cc=h("div","catc");cc.onclick=()=>{pinnedId=s.id;viewMode="list";expanded[s.id]=true;render();};const st=SM[s.status];const statusIcon=st?(s.status==="reading"&&tab==="anime"?"👁️":st.icon):"";cc.innerHTML=`<div style="position:relative">${s.cover?`<img class="catcv" src="${s.cover}">`:`<div class="catph">${icon}</div>`}${s.favorite?`<div class="cat-fav">★</div>`:""}${s.score?`<div class="cat-score">${s.score}</div>`:""}${pct>0?`<div class="cat-pct">${Math.round(pct)}%</div>`:""}${statusIcon?`<div class="cat-status-ov">${statusIcon}</div>`:""}</div><div class="cati"><div class="catt">${s.title}</div><div class="catp">${s.completed.length}/${s.total}</div><div class="catb"><div class="catf" style="width:${pct}%;background:${ac}"></div></div></div>`;cat.appendChild(cc);});root.appendChild(cat);return;}
+if(viewMode==="catalog"){const cat=h("div","catalog");filtered.forEach(s=>{const pct=s.total>0?(s.completed.length/s.total)*100:0;const cc=h("div","catc");cc.onclick=()=>{pinnedId=s.id;viewMode="list";expanded[s.id]=true;render();};const st=SM[s.status];const statusIcon=st?(s.status==="reading"&&tab==="anime"?"👁️":st.icon):"";cc.innerHTML=`<div style="position:relative">${s.cover?`<img class="catcv" src="${s.cover}">`:`<div class="catph">${icon}</div>`}${s.favorite?`<div class="cat-fav">★</div>`:""}${s.score?`<div class="cat-score">${s.score}</div>`:""}${pct>0?`<div class="cat-pct">${Math.round(pct)}%</div>`:""}${statusIcon?`<div class="cat-status-ov">${statusIcon}</div>`:""}</div><div class="cati"><div class="catt">${s.title}</div><div class="catp">${s.completed.length}/${s.total>0?(s.jikanPublishing?s.total+"📡":s.total):("?")}</div><div class="catb"><div class="catf" style="width:${pct}%;background:${ac}"></div></div></div>`;cat.appendChild(cc);});root.appendChild(cat);return;}
 // List view
 const sl=h("div","slist");
 let displayList=[...filtered];
 if(pinnedId){const pi=displayList.findIndex(x=>x.id===pinnedId);if(pi>0){const item=displayList.splice(pi,1)[0];displayList.unshift(item);}}
-displayList.forEach(s=>{const pct=s.total>0?(s.completed.length/s.total)*100:0;const isExp=expanded[s.id];const st=SM[s.status];const sc=h("div","scard");sc.setAttribute("data-id",s.id);const sh=h("div","shdr");sh.onclick=()=>{expanded[s.id]=!expanded[s.id];render();};sh.innerHTML=`${s.cover?`<img class="cthm" src="${s.cover}">`:`<div class="cph">${icon}</div>`}<div class="sinf"><div class="stit">${s.favorite?`<span class="fav-star">★</span>`:""}${s.title}</div><div class="smeta"><span class="sprg">${s.completed.length}/${s.total>0?s.total:(s.jikanPublishing?"?":"?")}</span>${st?`<span class="sbadge ${s.status}">${st.key==="reading"&&tab==="anime"?"👁️":st.icon}</span>`:""}${s.rewatch?`<span class="sbadge rewatch">🔄</span>`:""}${s.score?`<span class="sscore" style="color:${scoreColor(s.score)}">${s.score}</span>`:""}<span class="slast">${s.lastUpdated?timeAgo(s.lastUpdated):""}</span>${s.characters?.length?`<span class="slast">👤${s.characters.length}</span>`:""}</div>${s.total>0?`<div class="pbar"><div class="pfill" style="width:${pct}%;background:${ac}"></div></div>`:`<div style="font-size:9px;color:var(--am);margin-top:4px;font-family:monospace">${s.jikanPublishing?"⏳ caps actualizándose...":""}</div>`}</div>`;
+displayList.forEach(s=>{const pct=s.total>0?(s.completed.length/s.total)*100:0;const isExp=expanded[s.id];const st=SM[s.status];const sc=h("div","scard");sc.setAttribute("data-id",s.id);const sh=h("div","shdr");sh.onclick=()=>{expanded[s.id]=!expanded[s.id];render();};sh.innerHTML=`${s.cover?`<img class="cthm" src="${s.cover}">`:`<div class="cph">${icon}</div>`}<div class="sinf"><div class="stit">${s.favorite?`<span class="fav-star">★</span>`:""}${s.title}</div><div class="smeta"><span class="sprg">${s.completed.length}/${s.total>0?(s.jikanPublishing?s.total+" caps (en emisión)":s.total):(s.jikanPublishing?"? (en emisión)":"?")}</span>${st?`<span class="sbadge ${s.status}">${st.key==="reading"&&tab==="anime"?"👁️":st.icon}</span>`:""}${s.rewatch?`<span class="sbadge rewatch">🔄</span>`:""}${s.score?`<span class="sscore" style="color:${scoreColor(s.score)}">${s.score}</span>`:""}<span class="slast">${s.lastUpdated?timeAgo(s.lastUpdated):""}</span>${s.characters?.length?`<span class="slast">👤${s.characters.length}</span>`:""}</div>${s.total>0?`<div class="pbar"><div class="pfill" style="width:${pct}%;background:${ac}"></div></div>`:`<div style="font-size:9px;color:var(--am);margin-top:4px;font-family:monospace">${s.jikanPublishing?"⏳ caps actualizándose...":""}</div>`}</div>`;
 const sa=h("div","sact");const nxt=nextChapter(s);if(nxt){const qbCls=["qnext",theme.qnextStyle==="colored"?"qn-colored":"",theme.qnextStyle==="large"?"qn-large":"",theme.qnextStyle==="colored-large"?"qn-colored qn-large":""].join(" ").trim();const qb=h("button",qbCls,"+1");if(theme.qnextStyle==="colored"||theme.qnextStyle==="colored-large")qb.style.background=ac;qb.onclick=e=>{e.stopPropagation();const x=data[tab].find(z=>z.id===s.id);if(!x)return;x.completed.push(nxt);x.completed.sort((a,b)=>a-b);x.lastUpdated=Date.now();const wasCompleted=x.completed.length===x.total;if(wasCompleted)x.status="completed";else if(x.status==="plan")x.status="reading";p28TouchStreak();const streak=p28GetStreak();p29PlayTick();p29BumpGoal();save();if(wasCompleted){p28ShowPlusAnim(tab,x.title,streak);setTimeout(()=>p29ShowConfetti(ac),300);}else{p28ShowPlusAnim(tab,x.title,streak);}setTimeout(()=>{render();showToast(`${tab==="manga"?"Cap.":"Ep."} ${nxt} ✓${wasCompleted?" · 🎉 ¡Serie completada!":""}`);},200);};sa.appendChild(qb);}sa.appendChild(h("button","ib dng",svg.trash,{onclick:e=>{e.stopPropagation();showModal("Eliminar",`¿Eliminar <b>${s.title}</b>?`,"🗑",()=>{data[tab]=data[tab].filter(x=>x.id!==s.id);save();render();showToast(`"${s.title}" eliminado`);});}}));sa.appendChild(h("div","ib",isExp?svg.chu:svg.chd));sh.appendChild(sa);sc.appendChild(sh);
 // ── Expanded panel ──
 if(isExp){const cp=h("div","cpnl");
@@ -2193,6 +2192,13 @@ const maxRead=s.completed.length>0?Math.max(...s.completed):0;
 function buildCell(n,isR){const cl=h("div",isR?(n===maxRead?"cell rd-current":"cell rd"):"cell unrd",String(n));if(isR&&n!==maxRead){cl.style.background=ac;cl.style.color="#fff";}if(isR&&n===maxRead){cl.style.boxShadow=`0 0 0 2px ${ac},0 0 10px ${ac}44`;}cl.onclick=()=>{markChapter(s.id,n,cl,ac);};return cl;}
 const seasons=(tab==="anime"&&s.seasons?.length>0)?s.seasons:null;
 const gwrap=h("div","cgrid-wrap");
+// Banner "en emisión" si la obra está en publicación
+if(s.jikanPublishing&&s.total>0){
+  const pubBanner=h("div","");
+  pubBanner.style.cssText="display:flex;align-items:center;gap:8px;padding:7px 12px;margin-bottom:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;font-size:11px;color:#22c55e;font-weight:600";
+  pubBanner.innerHTML=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;animation:jDotBlink 1.2s ease-in-out infinite;flex-shrink:0"></span>En publicación · último cap. publicado: <b style="font-family:monospace">${s.total}</b>`;
+  gwrap.appendChild(pubBanner);
+}
 if(seasons){
   seasons.forEach(sn=>{
     const lbl2=h("div","cgrid-lbl",`<span>${sn.name} (${sn.from}–${sn.to})</span><div class="gl"></div>`);gwrap.appendChild(lbl2);
@@ -2207,6 +2213,28 @@ if(seasons){
   const unreadNums=Array.from({length:s.total},(_,i)=>i+1).filter(n=>!s.completed.includes(n));
   if(readNums.length>0){const lbl2=h("div","cgrid-lbl",`<span>Leídos (${readNums.length})</span><div class="gl"></div>`);gwrap.appendChild(lbl2);const cg=h("div","cgrid");readNums.forEach(n=>cg.appendChild(buildCell(n,true)));gwrap.appendChild(cg);}
   if(unreadNums.length>0){const lbl2=h("div","cgrid-lbl cgrid-lbl-unread",`<span>Por leer (${unreadNums.length})</span><div class="gl"></div>`);gwrap.appendChild(lbl2);const cg=h("div","cgrid");unreadNums.forEach(n=>cg.appendChild(buildCell(n,false)));gwrap.appendChild(cg);}
+}
+// ── Botón "Agregar caps" para obras en publicación ──
+if(s.jikanPublishing){
+  const addMoreRow=h("div","");
+  addMoreRow.style.cssText="display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px 4px";
+  const addMoreLabel=h("span","");
+  addMoreLabel.style.cssText="font-size:11px;color:var(--t2)";
+  addMoreLabel.textContent="¿Salió un cap nuevo?";
+  const addMoreBtn=h("button","bs","+ Agregar caps");
+  addMoreBtn.style.cssText="font-size:11px;padding:5px 12px";
+  addMoreBtn.onclick=()=>{
+    const x=data[tab].find(z=>z.id===s.id);if(!x)return;
+    const input=prompt(`Último capítulo publicado de "${x.title}" (actual: ${x.total}):`);
+    const newN=parseInt(input);
+    if(!newN||isNaN(newN)||newN<=0){showToast("⚠️ Número inválido");return;}
+    if(newN<=x.total){showToast(`ℹ️ Ya tienes ${x.total} caps registrados`);return;}
+    x.total=newN;x.lastUpdated=Date.now();
+    save();render();
+    showToast(`✅ Actualizado a ${newN} ${tab==="manga"?"caps":"eps"}`);
+  };
+  addMoreRow.append(addMoreLabel,addMoreBtn);
+  gwrap.appendChild(addMoreRow);
 }
 cp.appendChild(gwrap);
 const statsRow=h("div","cpnl-stats");
