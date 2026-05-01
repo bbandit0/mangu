@@ -41,7 +41,8 @@
 </style>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap');
-:root{--bg1:#07090f;--bg2:#0e1220;--bg3:#121c2e;--bg4:#1a2a40;--bgi:#0a1018;--am:#63b3ed;--amd:rgba(99,179,237,.12);--aa:#68d391;--aad:rgba(104,211,145,.1);--t1:#c8d4e8;--t2:#5a6a82;--t3:#2e3d52;--bd:rgba(255,255,255,.06);--bdl:rgba(255,255,255,.1);--dng:#e74c4c;--suc:#34d399;--wrn:#fbbf24;--inf:#06b6d4;--fav:#f59e0b;--r:8px;--rm:14px;--purple:#9b7dff}.stit{font-size:1em!important}.sprg,.slast{font-size:.8em!important}.tab{font-size:.93em!important}.tag,.fchip{font-size:.73em!important}.catt,.fn-series-title{font-size:.87em!important}.catp,.stl{font-size:.73em!important}.fn-fc-name{font-size:.87em!important}.fn-profile-name{font-size:1.13em!important}.dash-cl{font-size:.67em!important}.tab-c{font-size:.67em!important}.add-m input,.add-m-title input,.add-m-actions input{font-size:.93em!important}.srt,.status-sel{font-size:.8em!important}
+:root{--bg1:#07090f;--bg2:#0e1220;--bg3:#121c2e;--bg4:#1a2a40;--bgi:#0a1018;--am:#63b3ed;--amd:rgba(99,179,237,.12);--aa:#68d391;--aad:rgba(104,211,145,.1);--t1:#c8d4e8;--t2:#5a6a82;--t3:#2e3d52;--bd:rgba(255,255,255,.06);--bdl:rgba(255,255,255,.1);--dng:#e74c4c;--suc:#34d399;--wrn:#fbbf24;--inf:#06b6d4;--fav:#f59e0b;--r:8px;--rm:14px;--purple:#9b7dff}.stit{font-size:1em!important}
+#app{transition:opacity .1s ease;}.sprg,.slast{font-size:.8em!important}.tab{font-size:.93em!important}.tag,.fchip{font-size:.73em!important}.catt,.fn-series-title{font-size:.87em!important}.catp,.stl{font-size:.73em!important}.fn-fc-name{font-size:.87em!important}.fn-profile-name{font-size:1.13em!important}.dash-cl{font-size:.67em!important}.tab-c{font-size:.67em!important}.add-m input,.add-m-title input,.add-m-actions input{font-size:.93em!important}.srt,.status-sel{font-size:.8em!important}
 *{margin:0;padding:0;box-sizing:border-box}#app:empty{visibility:hidden;}body{
   background-color:#04060d;
   background:
@@ -678,7 +679,7 @@ html::after{
 .fn-friend-card-v5{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:20px;overflow:hidden;margin-bottom:12px;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 4px 24px rgba(0,0,0,.3)}
 .fn-friend-card-v5:hover{border-color:rgba(99,179,237,.35);transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.45)}
 /* Banner que usa cover de serie activa */
-.fn-fc-v5-banner{height:60px;position:relative;overflow:hidden;background:#0a0e1a}
+.fn-fc-v5-banner{position:relative;width:100%;height:80px;border-radius:10px 10px 0 0;overflow:hidden;background:linear-gradient(135deg,var(--bg3) 0%,var(--bg4) 100%);}
 .fn-fc-v5-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(8px) brightness(.55) saturate(1.4);transform:scale(1.1)}
 .fn-fc-v5-banner-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,rgba(0,0,0,.7) 100%)}
 /* Chip de racha en banner */
@@ -1601,9 +1602,9 @@ async function _renderFriendsPanelInner(container){
         </div>`;
       }else{
         // Sin imagen: degradado de color + patrón + nombre de serie activa
-        bannerHtml=`<div class="fn-fc-v5-banner" style="background:${_bg2}">
+        bannerHtml=`<div class="fn-fc-v5-banner" style="background:linear-gradient(135deg,${_bg2} 0%,var(--bg4) 100%)">
           <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 14px)"></div>
-          <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(255,255,255,.06) 0%,transparent 70%)"></div>
+          <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(255,255,255,.08) 0%,transparent 70%)"></div>
           ${topSeries?`<div class="fn-fc-v5-active"><span class="fn-fc-v5-active-title">${topSeries.title}</span><span class="fn-fc-v5-pct">${topPct}%</span></div>`:""}
         </div>`;
       }
@@ -1898,9 +1899,6 @@ async function _srcJikanIndividual(malId, type){
 }
 
 // ── Fuente 2: Jikan /chapters o /episodes con paginación ─────────────────────
-// FIX: Para obras en publicación, Jikan devuelve chapters:null en el endpoint individual.
-// El endpoint /chapters sí lista los capítulos publicados. El campo "mal_id" de cada
-// entrada contiene el número real del capítulo (ej: One Piece cap 1122 → mal_id:1122).
 async function _srcJikanPaged(malId, type){
   try{
     const ep=type==="manga"?"manga":"anime";
@@ -1910,57 +1908,20 @@ async function _srcJikanPaged(malId, type){
     const tot=d.pagination?.items?.total||0;
     if(tot>0) return tot;
     const lp=d.pagination?.last_visible_page||1;
-    // Extrae el número más alto de capítulo de un array de items
-    const extractMax=(items)=>{
-      let max=0;
-      for(const entry of items){
-        const candidates=[entry.mal_id,entry.chapter,entry.chapters,entry.number,entry.no];
-        for(const v of candidates){const n=Number(v);if(Number.isFinite(n)&&n>max)max=Math.floor(n);}
-        const txt=String(entry.title||entry.name||"");
-        const m=txt.match(/(\d+(?:\.\d+)?)/);
-        if(m){const n=Math.floor(parseFloat(m[1]));if(n>max)max=n;}
-      }
-      return max;
-    };
-    if(lp<=1){const n=extractMax(d.data);return n>0?n:d.data.length;}
+    if(lp<=1){
+      const last=d.data[d.data.length-1];
+      return jikanExtractPublishedNumber(last,type)||d.data.length;
+    }
+    // Ir a la última página
     const dL=await jikanFetchFast(`https://api.jikan.moe/v4/${ep}/${malId}/${field}?page=${lp}`);
     if(dL?.data?.length){
       const totL=dL.pagination?.items?.total||0;
       if(totL>0) return totL;
-      const best=Math.max(extractMax(d.data),extractMax(dL.data));
-      if(best>0) return best;
-      return (lp-1)*100+dL.data.length;
+      const last=dL.data[dL.data.length-1];
+      const n=jikanExtractPublishedNumber(last,type);
+      return n>0?n:(lp-1)*100+dL.data.length;
     }
-    const n=extractMax(d.data);
-    return n>0?n:d.data.length;
-  }catch(e){return 0;}
-}
-
-// ── Fuente 2b: Jikan /chapters escaneo de última página por mal_id ──────────────
-// Estrategia específica para series en publicación con muchos capítulos (One Piece, etc.)
-// Hace 2 requests: página 1 para saber last_visible_page, y luego las últimas 1-2 páginas.
-async function _srcJikanPagedBinary(malId, type){
-  try{
-    const ep=type==="manga"?"manga":"anime";
-    const field=type==="manga"?"chapters":"episodes";
-    const d1=await jikanFetchFast(`https://api.jikan.moe/v4/${ep}/${malId}/${field}?page=1`);
-    if(!d1?.data?.length) return 0;
-    const tot=d1.pagination?.items?.total||0;
-    if(tot>0) return tot;
-    const lp=d1.pagination?.last_visible_page||1;
-    let globalMax=0;
-    for(const e of d1.data){const n=Number(e.mal_id||0);if(n>globalMax)globalMax=n;}
-    if(lp<=1) return globalMax>0?globalMax:d1.data.length;
-    // Escanear las últimas 2 páginas
-    const pages=lp>2?[lp-1,lp]:[lp];
-    for(const pg of pages){
-      const dp=await jikanFetchFast(`https://api.jikan.moe/v4/${ep}/${malId}/${field}?page=${pg}`);
-      if(!dp?.data?.length) continue;
-      const totP=dp.pagination?.items?.total||0;
-      if(totP>0) return totP;
-      for(const e of dp.data){const n=Number(e.mal_id||0);if(n>globalMax)globalMax=n;}
-    }
-    return globalMax>0?globalMax:(lp-1)*100+d1.data.length;
+    return (lp-1)*100+d.data.length;
   }catch(e){return 0;}
 }
 
@@ -2072,31 +2033,32 @@ async function _srcMangaDexByMalId(malId){
 }
 
 // ── Orquestador: fuentes en paralelo, timeout 12s ────────────────────────
-// FIX: Incluye _srcJikanPagedBinary que lee mal_id de la última página de /chapters.
-// Es la fuente más confiable para obras en publicación (chapters:null en endpoint individual).
+// DISEÑO: Jikan rate limit = 3 req/seg. searchJikan ya usó 1 req.
+// Por eso getBestCount usa SOLO 1 fuente Jikan (paged) + AniList + 2x MangaDex.
+// _srcJikanIndividual se reserva como fallback secuencial si todo falla.
 async function getBestCount(malId, type, rawCount, title){
   const T=12000;
   const t=ms=>new Promise(r=>setTimeout(()=>r(0),ms));
   if(type==="manga"){
-    const [j2,j2b,al,mdx,mdx2]=await Promise.all([
+    // Solo 1 request Jikan (paged), 1 AniList, 2 MangaDex — evita rate limit
+    const [j2,al,mdx,mdx2]=await Promise.all([
       Promise.race([_srcJikanPaged(malId,"manga"),t(T)]),
-      Promise.race([_srcJikanPagedBinary(malId,"manga"),t(T)]),
       Promise.race([_srcAniList(malId,"manga"),t(T)]),
       Promise.race([_srcMangaDex(malId,title),t(T)]),
       Promise.race([_srcMangaDexByMalId(malId),t(T)])
     ]);
-    const best=Math.max(rawCount||0,j2||0,j2b||0,al||0,mdx||0,mdx2||0);
+    const best=Math.max(rawCount||0,j2||0,al||0,mdx||0,mdx2||0);
+    // Si todavía 0, intentar Jikan individual como último recurso
     if(best>0) return best;
     const j1=await Promise.race([_srcJikanIndividual(malId,"manga"),t(4000)]);
     return Math.max(best,j1||0);
   }else{
-    const [j1,j2,j2b,al]=await Promise.all([
+    const [j1,j2,al]=await Promise.all([
       Promise.race([_srcJikanIndividual(malId,"anime"),t(T)]),
       Promise.race([_srcJikanPaged(malId,"anime"),t(T)]),
-      Promise.race([_srcJikanPagedBinary(malId,"anime"),t(T)]),
       Promise.race([_srcAniList(malId,"anime"),t(T)])
     ]);
-    return Math.max(rawCount||0,j1||0,j2||0,j2b||0,al||0);
+    return Math.max(rawCount||0,j1||0,j2||0,al||0);
   }
 }
 
@@ -2148,47 +2110,37 @@ async function searchJikan(query,tabType){
   // Mostrar dropdown inmediatamente con lo que tiene Jikan (caps para finalizados conocidos)
   renderJikanDrop(tabType);
 
-  // ── FASE 1: Enriquecimiento rápido (timeout 5s) ──
-  // Jikan /chapters (binary) + AniList en paralelo — respuesta en ~2s para obras en publicación.
-  // Prioridad: primero obras en publicación (chapters:null en Jikan individual).
-  const snap=[...jikanResults];
+  // Enriquecer items con MangaDex+AniList+Jikan
+  // Prioridad: primero los en publicación (son los que fallan más), luego finalizados
+  // Concurrencia limitada a 2 para no saturar las APIs (Jikan tiene rate limit de 3 req/seg)
+  const snap=[...jikanResults]; // snapshot para evitar race con nueva búsqueda
   const sorted=[
     ...snap.filter(x=>tabType==="manga"?x.publishing:x.airing),
     ...snap.filter(x=>!(tabType==="manga"?x.publishing:x.airing))
   ];
-  const T1=5000;
-  const t1=ms=>new Promise(r=>setTimeout(()=>r(0),ms));
-
-  const fase1=sorted.map(async(item)=>{
-    if(!item.mal_id)return{item,rawCnt:0,fase1Result:0};
-    const rawCnt=tabType==="manga"?(item.chapters||0):(item.episodes||0);
-    try{
-      const [jPaged,jBinary,al]=await Promise.all([
-        Promise.race([_srcJikanPaged(item.mal_id,tabType),t1(T1)]),
-        Promise.race([_srcJikanPagedBinary(item.mal_id,tabType),t1(T1)]),
-        Promise.race([_srcAniList(item.mal_id,tabType),t1(T1)])
-      ]);
-      const best=Math.max(rawCnt||0,jPaged||0,jBinary||0,al||0);
-      const live=jikanResults.find(x=>x.mal_id===item.mal_id);
-      if(live&&best>0){live._latestChapter=best;renderJikanDrop(tabType);}
-      return{item,rawCnt,fase1Result:best};
-    }catch(e){return{item,rawCnt,fase1Result:0};}
-  });
-
-  const fase1Results=await Promise.all(fase1);
-
-  // ── FASE 2: Fallback con getBestCount completo (MangaDex + todas las fuentes) ──
-  // Solo para los items que fase1 no pudo resolver.
-  const needsFase2=(fase1Results||[]).filter(r=>r&&r.fase1Result<=0);
-  for(const{item,rawCnt}of needsFase2){
-    const live=jikanResults.find(x=>x.mal_id===item.mal_id);
-    if(!live)continue;
-    try{
-      const title=item.title_english||item.title||'';
-      const best=await getBestCount(item.mal_id,tabType,rawCnt,title);
-      live._latestChapter=best;
-      renderJikanDrop(tabType);
-    }catch(e){live._latestChapter=0;renderJikanDrop(tabType);}
+  const concurrency=2;
+  for(let i=0;i<sorted.length;i+=concurrency){
+    const batch=sorted.slice(i,i+concurrency);
+    await Promise.all(batch.map(async(item)=>{
+      if(!item.mal_id)return;
+      const rawCnt=tabType==="manga"?(item.chapters||0):(item.episodes||0);
+      try{
+        const title=item.title_english||item.title||'';
+        let best=await getBestCount(item.mal_id,tabType,rawCnt,title);
+        // Si todas las fuentes devuelven 0, intentar Jikan /chapters como último recurso (con retry)
+        if(!best){
+          try{best=await jikanGetLatestCount(item.mal_id,tabType,false);}catch(e){}
+        }
+        // Solo actualizar si el item sigue en la lista actual
+        const live=jikanResults.find(x=>x.mal_id===item.mal_id);
+        if(!live)return;
+        live._latestChapter=best; // 0=sin dato confirmado, >0=encontrado
+        renderJikanDrop(tabType);
+      }catch(e){
+        const live=jikanResults.find(x=>x.mal_id===item.mal_id);
+        if(live){live._latestChapter=0;renderJikanDrop(tabType);}
+      }
+    }));
   }
 }
 
@@ -2230,14 +2182,13 @@ function renderJikanDrop(tabType){
   if(existingDrop){
     jikanResults.forEach(item=>{
       if(!item.mal_id)return;
-      // Solo actualizar si el enriquecimiento terminó (undefined = en curso, no tocar)
+      // Solo actualizar si el enriquecimiento ya terminó (evitar parpadeos intermedios)
       if(item._latestChapter===undefined)return;
       const row=existingDrop.querySelector(`[data-malid="${item.mal_id}"]`);
       if(!row)return;
       const meta=row.querySelector(".jikan-meta");
       if(!meta)return;
-      // Reemplazar el nodo de conteo (tanto si hay dato como si confirmó sin dato)
-      // FIX: buscar también el span genérico "sin dato" además de pending/count
+      // Reemplazar solo el nodo de conteo preservando badge y año
       const pending=meta.querySelector(".jikan-count-pending");
       const countEl=meta.querySelector(".jikan-chapters-count");
       const targetEl=pending||countEl;
@@ -2245,7 +2196,7 @@ function renderJikanDrop(tabType){
         const newHTML=_jikanCountHTML(item,tab_);
         const tmp=document.createElement("span");
         tmp.innerHTML=newHTML;
-        if(tmp.firstChild)targetEl.replaceWith(tmp.firstChild);
+        targetEl.replaceWith(tmp.firstChild);
       }
     });
     return;
@@ -2370,9 +2321,9 @@ async function checkJikanUpdates(){
     const publishing=data[tabKey].filter(s=>s.jikanId&&s.jikanPublishing);
     for(const series of publishing){
       try{
-        let stillPub=true;
-        let count=0;
-        // Obtener estado publishing desde Jikan individual
+        // Obtener mejor conteo con AniList + Jikan en paralelo
+        let stillPub = true;
+        let count = 0;
         try{
           const res=await fetch(`https://api.jikan.moe/v4/${ep}/${series.jikanId}`);
           const json=await res.json();
@@ -2380,11 +2331,11 @@ async function checkJikanUpdates(){
           stillPub=tabKey==="manga"?(json.data?.publishing!==false):(json.data?.airing!==false);
           count=jkCnt||0;
         }catch(e1){}
-        // getBestCount incluye _srcJikanPagedBinary — resuelve chapters:null para series activas
-        try{
-          const best=await getBestCount(series.jikanId,tabKey,count,series.title||"");
-          if(best>count) count=best;
-        }catch(e2){}
+        // Si Jikan no trajo número, usar AniList (_srcAniList es la función correcta)
+        if(!count || count<1){
+          const alCnt=await _srcAniList(series.jikanId,tabKey);
+          if(alCnt>0)count=alCnt;
+        }
         const shouldUpdate=count>0&&(count>series.total||series.total<=1);
         if(shouldUpdate){
           series.total=count;
@@ -2468,37 +2419,43 @@ setInterval(checkJikanUpdates,6*60*60*1000);
 // ── P2.9: SONIDO +1 (Web Audio API) ──
 let _p29AudioCtx=null;
 function p29PlayTick(){
-  if(theme.soundEnabled===false)return;
   try{
-    if(!_p29AudioCtx)_p29AudioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    if(_p29AudioCtx.state==="suspended")_p29AudioCtx.resume();
-    const ctx=_p29AudioCtx;const now=ctx.currentTime;
-    // Marimba tap suave — sine con ataque rápido, decay largo y cálido
-    // Nota principal: Sol5 (784Hz) + armónico suave
-    const oM=ctx.createOscillator(),gM=ctx.createGain(),fM=ctx.createBiquadFilter();
-    fM.type="lowpass";fM.frequency.value=3500;fM.Q.value=0.7;
-    oM.connect(fM);fM.connect(gM);gM.connect(ctx.destination);
-    oM.type="sine";oM.frequency.setValueAtTime(784,now);
-    gM.gain.setValueAtTime(0,now);
-    gM.gain.linearRampToValueAtTime(0.22,now+0.006);
-    gM.gain.exponentialRampToValueAtTime(0.001,now+0.28);
-    oM.start(now);oM.stop(now+0.30);
-    // Octava inferior más suave (Do4 392Hz) para calidez
-    const oL=ctx.createOscillator(),gL=ctx.createGain();
-    oL.connect(gL);gL.connect(ctx.destination);
-    oL.type="sine";oL.frequency.setValueAtTime(392,now);
-    gL.gain.setValueAtTime(0,now);gL.gain.linearRampToValueAtTime(0.09,now+0.006);
-    gL.gain.exponentialRampToValueAtTime(0.001,now+0.22);
-    oL.start(now);oL.stop(now+0.23);
-    // Brillo suave (Mi6 1318Hz) para presencia
-    const oH=ctx.createOscillator(),gH=ctx.createGain();
-    oH.connect(gH);gH.connect(ctx.destination);
-    oH.type="sine";oH.frequency.setValueAtTime(1318,now+0.003);
-    gH.gain.setValueAtTime(0,now+0.003);gH.gain.linearRampToValueAtTime(0.05,now+0.009);
-    gH.gain.exponentialRampToValueAtTime(0.001,now+0.14);
-    oH.start(now+0.003);oH.stop(now+0.15);
+    if(!_p29AudioCtx){_p29AudioCtx=new(window.AudioContext||window.webkitAudioContext)();}
+    const ctx=_p29AudioCtx;
+    const now=ctx.currentTime;
+    // Sonido tipo xilofón/campana: frecuencias armónicas suaves (dopaminérgico)
+    const notes=[880,1108,1320]; // La5 + Do#6 + Mi6 (acorde mayor brillante)
+    notes.forEach((freq,i)=>{
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      const filter=ctx.createBiquadFilter();
+      filter.type="lowpass";
+      filter.frequency.value=3000;
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type="sine";
+      osc.frequency.setValueAtTime(freq,now+i*0.045);
+      // Envolvente ADSR muy suave: attack rápido, decay largo, sin sustain
+      const vol=i===0?0.18:i===1?0.12:0.08;
+      gain.gain.setValueAtTime(0,now+i*0.045);
+      gain.gain.linearRampToValueAtTime(vol,now+i*0.045+0.012);
+      gain.gain.exponentialRampToValueAtTime(0.001,now+i*0.045+0.38);
+      osc.start(now+i*0.045);
+      osc.stop(now+i*0.045+0.4);
+    });
+    // Sub-capa armónica grave suave para calidez
+    const sub=ctx.createOscillator();
+    const subGain=ctx.createGain();
+    sub.connect(subGain);
+    subGain.connect(ctx.destination);
+    sub.type="sine";
+    sub.frequency.setValueAtTime(220,now);
+    subGain.gain.setValueAtTime(0.04,now);
+    subGain.gain.exponentialRampToValueAtTime(0.001,now+0.25);
+    sub.start(now);
+    sub.stop(now+0.28);
   }catch(e){}
-  try{if(navigator.vibrate)navigator.vibrate([4,0,0]);}catch(e){}
 }
 
 // ── P2.9: CONFETTI AL COMPLETAR SERIE ──
@@ -2575,7 +2532,11 @@ hr.appendChild(h("button",`ib${showSettings?" on":""}`,svg.pal,{onclick:()=>{sho
 hr.appendChild(h("button",`ib${tab==="dashboard"?" on":""}`,svg.chart,{onclick:()=>{tab=tab==="dashboard"?"manga":"dashboard";showSettings=false;showPatch=false;render();}}));{const fb2=h("button",`ib${tab==="friends"?" on":""}`,`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,{onclick:()=>{tab=tab==="friends"?"manga":"friends";if(tab==="friends"){showSettings=false;showPatch=false;render();setTimeout(()=>renderFriendsPanel(),100);}else render();}});fb2.style.position="relative";const bdg=document.createElement("div");bdg.id="friends-badge";bdg.style.cssText="position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:#e74c4c;color:#fff;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 3px;pointer-events:none;font-family:'Space Mono',monospace;border:2px solid var(--bg1);line-height:1";bdg.textContent=pendingRequestsCount>9?"9+":pendingRequestsCount;if(pendingRequestsCount>0)bdg.style.display="flex";fb2.appendChild(bdg);hr.appendChild(fb2);}hr.style.zIndex='2';hr.style.position='relative';hdr.appendChild(hr);root.appendChild(hdr);
 // Sync bar
 const syncBar=h("div","sync-bar");
-if(FIREBASE_ENABLED){if(fbUser){syncBar.innerHTML=`<div class="dot on"></div><div class="sync-user">${fbUser.photoURL?`<img class="sync-avatar" src="${fbUser.photoURL}">`:""}<span>${(friendsState.cachedUsername&&friendsState.usernameCacheUid===fbUser.uid)?"@"+friendsState.cachedUsername:"Sin @username"}</span></div><div class="fill"></div>`;const ob=h("button","sync-btn out","Salir");ob.onclick=signOut;syncBar.appendChild(ob);const sb=h("button","sync-btn","↻ Sync");sb.onclick=loadFromCloud;syncBar.appendChild(sb);}else{syncBar.innerHTML=`<div class="dot off"></div><span>Sin sincronizar</span><div class="fill"></div>`;const lb=h("button","sync-btn ggl","Iniciar con Google");lb.onclick=signIn;syncBar.appendChild(lb);}}else{syncBar.innerHTML=`<div class="dot no"></div><span>Firebase no configurado — ver comentarios en el código</span>`;}
+if(FIREBASE_ENABLED){if(fbUser){
+  // FIX: usar foto custom si está disponible, fallback a Google photo
+  const _syncPhoto=friendsState.customPhotoUrl||(typeof localStorage!=="undefined"?localStorage.getItem("fn-custom-photo-"+fbUser.uid):"")||fbUser.photoURL||"";
+  const _syncUsername=(friendsState.cachedUsername&&friendsState.usernameCacheUid===fbUser.uid)?"@"+friendsState.cachedUsername:"Sin @username";
+  syncBar.innerHTML=`<div class="dot on"></div><div class="sync-user">${_syncPhoto?`<img class="sync-avatar" src="${_syncPhoto}">`:""}<span>${_syncUsername}</span></div><div class="fill"></div>`;const ob=h("button","sync-btn out","Salir");ob.onclick=signOut;syncBar.appendChild(ob);const sb=h("button","sync-btn","↻ Sync");sb.onclick=loadFromCloud;syncBar.appendChild(sb);}else{syncBar.innerHTML=`<div class="dot off"></div><span>Sin sincronizar</span><div class="fill"></div>`;const lb=h("button","sync-btn ggl","Iniciar con Google");lb.onclick=signIn;syncBar.appendChild(lb);}}else{syncBar.innerHTML=`<div class="dot no"></div><span>Firebase no configurado — ver comentarios en el código</span>`;}
 root.appendChild(syncBar);
 // ── P2.8: Streak Banner ──
 const _streakWrap=document.createElement("div");
