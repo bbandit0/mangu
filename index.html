@@ -1613,7 +1613,29 @@ async function _renderFriendsPanelInner(container){
         const _cached=_coverUrlCache.get(_cacheKey);
         if(_cached&&_cached!=="pending") topCoverUrl=_cached;
         // Fetch async en background para el próximo render (rate-limit: solo si no está en cache)
-        else if(!_cached) fnFetchCoverUrl(topSeries.title,topSeries.type==="A"?"anime":"manga").then(url=>{if(url)renderFriendsPanel();});
+        else if(!_cached) fnFetchCoverUrl(topSeries.title,topSeries.type==="A"?"anime":"manga").then(url=>{
+            if(url){
+              // Actualización quirúrgica: solo actualiza el banner de esta card sin re-renderizar todo
+              const bannerEl=document.querySelector(`[data-view-uid="${f.uid}"] .fn-fc-v5-banner`);
+              if(bannerEl){
+                // Inyectar imagen blur en el banner
+                let imgEl=bannerEl.querySelector('.fc-banner-img');
+                if(!imgEl){
+                  imgEl=document.createElement('div');
+                  imgEl.className='fc-banner-img';
+                  imgEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;background-size:cover;background-position:center 25%;filter:blur(14px) brightness(.3) saturate(1.8);transform:scale(1.15);z-index:0;transition:opacity .5s ease;opacity:0';
+                  bannerEl.insertBefore(imgEl,bannerEl.firstChild);
+                }
+                imgEl.style.backgroundImage=`url('${url}')`;
+                imgEl.style.opacity='1';
+                // Mostrar label si existe
+                const lbl=bannerEl.querySelector('.fc-banner-lbl');
+                if(lbl) lbl.style.display='flex';
+              } else {
+                renderFriendsPanel(); // fallback si la card ya no está en DOM
+              }
+            }
+          });
       }
       const topPct=topSeries&&topSeries.total>0?Math.round((topSeries.completed||0)/topSeries.total*100):0;
       // Color hash para gradiente del banner
@@ -1625,7 +1647,7 @@ async function _renderFriendsPanelInner(container){
         bannerHtml=`<div class="fn-fc-v5-banner" style="background:${_bg2};position:relative;overflow:hidden">
           <img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(14px) brightness(.3) saturate(1.8);transform:scale(1.15);z-index:0" src="${topCoverUrl}" loading="lazy" onerror="this.style.display='none'">
           <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.1) 0%,rgba(0,0,0,.7) 100%)"></div>
-          ${topSeries?`<div style="position:absolute;bottom:9px;left:12px;right:12px;z-index:2;display:flex;align-items:center;gap:5px"><span style="font-size:9px;color:rgba(255,255,255,.7);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;text-shadow:0 1px 4px rgba(0,0,0,.9)">▶ ${topSeries.title}</span><span style="font-size:9px;font-family:'Space Mono',monospace;color:rgba(255,255,255,.5);background:rgba(0,0,0,.45);padding:1px 5px;border-radius:4px;flex-shrink:0">${topPct}%</span></div>`:""}
+          ${topSeries?`<div class="fc-banner-lbl" style="position:absolute;bottom:9px;left:12px;right:12px;z-index:2;display:flex;align-items:center;gap:5px"><span style="font-size:9px;color:rgba(255,255,255,.7);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;text-shadow:0 1px 4px rgba(0,0,0,.9)">▶ ${topSeries.title}</span><span style="font-size:9px;font-family:'Space Mono',monospace;color:rgba(255,255,255,.5);background:rgba(0,0,0,.45);padding:1px 5px;border-radius:4px;flex-shrink:0">${topPct}%</span></div>`:""}
         </div>`;
       }else{
         // Sin imagen: degradado de color + patrón animado
@@ -1633,7 +1655,7 @@ async function _renderFriendsPanelInner(container){
           <div style="position:absolute;inset:0;z-index:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 18px)"></div>
           <div style="position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 90% 90% at 15% 60%,rgba(104,211,145,.2) 0%,transparent 55%),radial-gradient(ellipse 70% 90% at 88% 20%,rgba(99,179,237,.18) 0%,transparent 55%)"></div>
           <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.6) 100%)"></div>
-          ${topSeries?`<div style="position:absolute;bottom:9px;left:12px;right:12px;z-index:2;display:flex;align-items:center;gap:5px"><span style="font-size:9px;color:rgba(255,255,255,.7);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;text-shadow:0 1px 4px rgba(0,0,0,.9)">▶ ${topSeries.title}</span><span style="font-size:9px;font-family:'Space Mono',monospace;color:rgba(255,255,255,.5);background:rgba(0,0,0,.45);padding:1px 5px;border-radius:4px;flex-shrink:0">${topPct}%</span></div>`:""}
+          ${topSeries?`<div class="fc-banner-lbl" style="position:absolute;bottom:9px;left:12px;right:12px;z-index:2;display:flex;align-items:center;gap:5px"><span style="font-size:9px;color:rgba(255,255,255,.7);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;text-shadow:0 1px 4px rgba(0,0,0,.9)">▶ ${topSeries.title}</span><span style="font-size:9px;font-family:'Space Mono',monospace;color:rgba(255,255,255,.5);background:rgba(0,0,0,.45);padding:1px 5px;border-radius:4px;flex-shrink:0">${topPct}%</span></div>`:""}
         </div>`;
       }
       // Series en común
@@ -3203,15 +3225,16 @@ async function p28RenderRecoSection(root){
 }
 
 // ── P2.8: PERFIL PÚBLICO MEJORADO ──
-function p28RenderPublicProfile(root){
+async function p28RenderPublicProfile(root){
   if(!fbUser)return;
   const streak=p28GetStreak();
   const mCount=data.manga.length;
   const aCount=data.anime.length;
-  const reading=[
-    ...data.manga.filter(s=>s.status==="reading").map(s=>({...s,_type:"manga"})),
-    ...data.anime.filter(s=>s.status==="reading").map(s=>({...s,_type:"anime"}))
-  ].sort((a,b)=>(b.lastUpdated||0)-(a.lastUpdated||0)).slice(0,6);
+  const allSeries=[
+    ...data.manga.map(s=>({...s,_type:"manga"})),
+    ...data.anime.map(s=>({...s,_type:"anime"}))
+  ].sort((a,b)=>(b.lastUpdated||0)-(a.lastUpdated||0));
+  const reading=allSeries.filter(s=>s.status==="reading").slice(0,6);
   const totalRead=data.manga.reduce((s,x)=>s+x.completed.length,0)+data.anime.reduce((s,x)=>s+x.completed.length,0);
   const totalMangaCh=data.manga.reduce((s,x)=>s+x.completed.length,0);
   const totalAnimeEp=data.anime.reduce((s,x)=>s+x.completed.length,0);
@@ -3221,8 +3244,32 @@ function p28RenderPublicProfile(root){
   const ti=timeInvested();
   const avgM=avgScore(data.manga);
   const compM=completionRate(data.manga);
-  // Top géneros para mostrar chips
   const genres=topGenres([...data.manga,...data.anime],5);
+
+  // ── BANNER: serie más recientemente actualizada ──
+  const _bannerSeries=allSeries[0]||null;
+  let _bannerUrl="";
+  if(_bannerSeries){
+    if(_bannerSeries.cover&&typeof _bannerSeries.cover==="string"&&_bannerSeries.cover.startsWith("http")){
+      _bannerUrl=_bannerSeries.cover;
+    } else {
+      const _bk=((_bannerSeries._type||"manga")+":"+_bannerSeries.title).toLowerCase().trim();
+      const _bcached=_coverUrlCache.get(_bk);
+      if(_bcached&&_bcached!=="pending") _bannerUrl=_bcached;
+      else if(!_bcached){
+        // Fetch en background — actualiza solo el elemento del banner sin re-render completo
+        fnFetchCoverUrl(_bannerSeries.title,_bannerSeries._type||"manga").then(url=>{
+          if(url){
+            const el=document.getElementById("pubprof-banner-img");
+            if(el){el.style.backgroundImage=`url('${url}')`;el.style.opacity="1";}
+            const lbl=document.getElementById("pubprof-banner-lbl");
+            if(lbl) lbl.style.display="flex";
+          }
+        });
+      }
+    }
+  }
+  const _bannerPct=_bannerSeries&&_bannerSeries.total>0?Math.round((_bannerSeries.completed?.length||0)/_bannerSeries.total*100):0;
 
   const wrap=document.createElement("div");
   wrap.className="pubprof-wrap";
@@ -3230,12 +3277,9 @@ function p28RenderPublicProfile(root){
   const _profPhotoSrc=_profCustomPhoto||friendsState.customPhotoUrl||photoURL||"";
   const avContent=_profPhotoSrc?`<img src="${_profPhotoSrc}" alt="avatar" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:`<span>${(username||displayName||"?").charAt(0).toUpperCase()}</span>`;
 
-  // Chips de géneros
   const genreChips=genres.length>0
     ?`<div class="pubprof-genres">${genres.map(([g])=>`<span class="pubprof-genre-chip">${g}</span>`).join("")}</div>`
     :"";
-
-  // Chip de racha
   const streakChip=streak>0
     ?`<div class="pubprof-streak-chip">🔥 ${streak} día${streak!==1?"s":""}</div>`
     :`<div class="pubprof-streak-chip" style="opacity:.4">🔥 Sin racha</div>`;
@@ -3244,8 +3288,11 @@ function p28RenderPublicProfile(root){
   wrap.innerHTML=`
     <div class="pubprof-cover">
       <div class="pubprof-cover-inner">
-        <div class="pubprof-cover-orb1"></div>
-        <div class="pubprof-cover-orb2"></div>
+        <div id="pubprof-banner-img" style="position:absolute;inset:0;${_bannerUrl?`background:url('${_bannerUrl}') center 25%/cover;filter:blur(14px) brightness(.32) saturate(1.8);transform:scale(1.12);opacity:1`:"opacity:0"};z-index:0;transition:opacity .6s ease"></div>
+        <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(0,0,0,.7) 100%)"></div>
+        <div class="pubprof-cover-orb1" style="z-index:2"></div>
+        <div class="pubprof-cover-orb2" style="z-index:2"></div>
+        ${_bannerSeries?`<div id="pubprof-banner-lbl" style="position:absolute;bottom:10px;left:20px;right:20px;z-index:3;display:${_bannerUrl?"flex":"none"};align-items:center;gap:8px"><span style="font-size:10px;font-weight:700;color:rgba(255,255,255,.82);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 6px rgba(0,0,0,.9)">▶ ${_bannerSeries.title}</span>${_bannerSeries.total>0?`<span style="font-size:9px;font-family:'Space Mono',monospace;color:rgba(255,255,255,.5);background:rgba(0,0,0,.5);padding:1px 6px;border-radius:4px;flex-shrink:0">${_bannerPct}%</span>`:""}</div>`:""}
       </div>
       <div class="pubprof-av-wrap"><div class="pubprof-av">${avContent}</div></div>
     </div>
