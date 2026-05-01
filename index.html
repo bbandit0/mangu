@@ -1898,29 +1898,106 @@ async function _srcJikanIndividual(malId, type){
 }
 
 // ── Fuente 2: Jikan /chapters o /episodes con paginación ─────────────────────
+// Para obras en publicación, Jikan no reporta total en pagination.items.total
+// (devuelve 0 o null). La estrategia correcta: ir a la última página y extraer
+// el número más alto de los capítulos listados (campo "mal_id" en el endpoint
+// /chapters, que contiene el número de capítulo real).
 async function _srcJikanPaged(malId, type){
   try{
     const ep=type==="manga"?"manga":"anime";
     const field=type==="manga"?"chapters":"episodes";
     const d=await jikanFetchFast(`https://api.jikan.moe/v4/${ep}/${malId}/${field}?page=1`);
     if(!d||!Array.isArray(d.data)||!d.data.length) return 0;
+
+    // Si Jikan reporta total directamente, usarlo
     const tot=d.pagination?.items?.total||0;
     if(tot>0) return tot;
+
     const lp=d.pagination?.last_visible_page||1;
+
+    // Función para extraer el máximo número de capítulo de un array de items
+    const extractMax=(items)=>{
+      let max=0;
+      for(const entry of items){
+        // En el endpoint /chapters de Jikan v4, el número real del capítulo
+        // viene en entry.mal_id (ej: cap 1100 de One Piece → mal_id: 1100)
+        // También puede venir en entry.chapter (string) en algunos casos
+        const candidates=[
+          entry.mal_id,
+          entry.chapter,
+          entry.chapters,
+          entry.number,
+          entry.no
+        ];
+        for(const v of candidates){
+          const n=Number(v);
+          if(Number.isFinite(n)&&n>max) max=Math.floor(n);
+        }
+        // Fallback: extraer número del título
+        const txt=String(entry.title||entry.name||"");
+        const m=txt.match(/(\d+(?:\.\d+)?)/);
+        if(m){const n=Math.floor(parseFloat(m[1]));if(n>max)max=n;}
+      }
+      return max;
+    };
+
     if(lp<=1){
-      const last=d.data[d.data.length-1];
-      return jikanExtractPublishedNumber(last,type)||d.data.length;
+      const n=extractMax(d.data);
+      return n>0?n:d.data.length;
     }
-    // Ir a la última página
+
+    // Ir a la última página para obtener el capítulo más reciente
     const dL=await jikanFetchFast(`https://api.jikan.moe/v4/${ep}/${malId}/${field}?page=${lp}`);
     if(dL?.data?.length){
       const totL=dL.pagination?.items?.total||0;
       if(totL>0) return totL;
-      const last=dL.data[dL.data.length-1];
-      const n=jikanExtractPublishedNumber(last,type);
-      return n>0?n:(lp-1)*100+dL.data.length;
+      // Revisar ambas páginas (primera y última) y tomar el máximo
+      const nFirst=extractMax(d.data);
+      const nLast=extractMax(dL.data);
+      const best=Math.max(nFirst,nLast);
+      if(best>0) return best;
+      // Fallback aritmético
+      return (lp-1)*100+dL.data.length;
     }
-    return (lp-1)*100+d.data.length;
+    const n=extractMax(d.data);
+    return n>0?n:d.data.length;
+  }catch(e){return 0;}
+}
+
+// ── Fuente 2b: Jikan /chapters con escaneo binario (para series largas en publicación) ──
+// Jikan devuelve 100 items por página. Para One Piece (1100+ caps) necesitamos
+// la última página real. Esta función hace búsqueda binaria para encontrarla.
+async function _srcJikanPagedBinary(malId, type){
+  try{
+    const ep=type==="manga"?"manga":"anime";
+    const field=type==="manga"?"chapters":"episodes";
+    // Página 1 para saber last_visible_page
+    const d1=await jikanFetchFast(`https://api.jikan.moe/v4/${ep}/${malId}/${field}?page=1`);
+    if(!d1?.data?.length) return 0;
+    const tot=d1.pagination?.items?.total||0;
+    if(tot>0) return tot;
+    const lp=d1.pagination?.last_visible_page||1;
+    if(lp<=1){
+      // Solo hay una página: extraer max mal_id
+      let max=0;
+      for(const e of d1.data){const n=Number(e.mal_id||0);if(n>max)max=n;}
+      return max>0?max:d1.data.length;
+    }
+    // Escanear las últimas 2 páginas para mayor cobertura
+    const pages=lp>2?[lp-1,lp]:[lp];
+    let globalMax=0;
+    for(const pg of pages){
+      const dp=await jikanFetchFast(`https://api.jikan.moe/v4/${ep}/${malId}/${field}?page=${pg}`);
+      if(!dp?.data?.length) continue;
+      const totP=dp.pagination?.items?.total||0;
+      if(totP>0) return totP;
+      for(const e of dp.data){
+        const n=Number(e.mal_id||0);
+        if(n>globalMax) globalMax=n;
+      }
+    }
+    if(globalMax>0) return globalMax;
+    return (lp-1)*100+d1.data.length;
   }catch(e){return 0;}
 }
 
@@ -2033,31 +2110,33 @@ async function _srcMangaDexByMalId(malId){
 
 // ── Orquestador: fuentes en paralelo, timeout 12s ────────────────────────
 // DISEÑO: Jikan rate limit = 3 req/seg. searchJikan ya usó 1 req.
-// Por eso getBestCount usa SOLO 1 fuente Jikan (paged) + AniList + 2x MangaDex.
-// _srcJikanIndividual se reserva como fallback secuencial si todo falla.
+// Para obras en publicación se añade _srcJikanPagedBinary que lee mal_id
+// de la última página (campo numérico exacto del capítulo publicado).
 async function getBestCount(malId, type, rawCount, title){
   const T=12000;
   const t=ms=>new Promise(r=>setTimeout(()=>r(0),ms));
   if(type==="manga"){
-    // Solo 1 request Jikan (paged), 1 AniList, 2 MangaDex — evita rate limit
-    const [j2,al,mdx,mdx2]=await Promise.all([
+    // Correr todas las fuentes en paralelo
+    const [j2,j2b,al,mdx,mdx2]=await Promise.all([
       Promise.race([_srcJikanPaged(malId,"manga"),t(T)]),
+      Promise.race([_srcJikanPagedBinary(malId,"manga"),t(T)]),
       Promise.race([_srcAniList(malId,"manga"),t(T)]),
       Promise.race([_srcMangaDex(malId,title),t(T)]),
       Promise.race([_srcMangaDexByMalId(malId),t(T)])
     ]);
-    const best=Math.max(rawCount||0,j2||0,al||0,mdx||0,mdx2||0);
+    const best=Math.max(rawCount||0,j2||0,j2b||0,al||0,mdx||0,mdx2||0);
     // Si todavía 0, intentar Jikan individual como último recurso
     if(best>0) return best;
     const j1=await Promise.race([_srcJikanIndividual(malId,"manga"),t(4000)]);
     return Math.max(best,j1||0);
   }else{
-    const [j1,j2,al]=await Promise.all([
+    const [j1,j2,j2b,al]=await Promise.all([
       Promise.race([_srcJikanIndividual(malId,"anime"),t(T)]),
       Promise.race([_srcJikanPaged(malId,"anime"),t(T)]),
+      Promise.race([_srcJikanPagedBinary(malId,"anime"),t(T)]),
       Promise.race([_srcAniList(malId,"anime"),t(T)])
     ]);
-    return Math.max(rawCount||0,j1||0,j2||0,al||0);
+    return Math.max(rawCount||0,j1||0,j2||0,j2b||0,al||0);
   }
 }
 
@@ -2320,9 +2399,9 @@ async function checkJikanUpdates(){
     const publishing=data[tabKey].filter(s=>s.jikanId&&s.jikanPublishing);
     for(const series of publishing){
       try{
-        // Obtener mejor conteo con AniList + Jikan en paralelo
         let stillPub = true;
         let count = 0;
+        // Intentar Jikan individual primero (para obtener estado publishing)
         try{
           const res=await fetch(`https://api.jikan.moe/v4/${ep}/${series.jikanId}`);
           const json=await res.json();
@@ -2330,11 +2409,13 @@ async function checkJikanUpdates(){
           stillPub=tabKey==="manga"?(json.data?.publishing!==false):(json.data?.airing!==false);
           count=jkCnt||0;
         }catch(e1){}
-        // Si Jikan no trajo número, usar AniList (_srcAniList es la función correcta)
-        if(!count || count<1){
-          const alCnt=await _srcAniList(series.jikanId,tabKey);
-          if(alCnt>0)count=alCnt;
-        }
+        // Usar getBestCount (incluye _srcJikanPagedBinary) para obtener el número real
+        // de capítulos publicados cuando Jikan individual devuelve null/0
+        try{
+          const title=series.title||"";
+          const best=await getBestCount(series.jikanId,tabKey,count,title);
+          if(best>count) count=best;
+        }catch(e2){}
         const shouldUpdate=count>0&&(count>series.total||series.total<=1);
         if(shouldUpdate){
           series.total=count;
