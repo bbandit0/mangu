@@ -349,79 +349,93 @@ html::after{
   100%{opacity:0;transform:translate(var(--px),var(--py)) rotate(var(--rot)) scale(.4)}
 }
 
-/* ── RECOMENDACIONES ── */
-.reco-section{margin:20px 0 0}
-.reco-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.reco-title-wrap{display:flex;align-items:center;gap:8px}
-.reco-icon-box{width:28px;height:28px;border-radius:8px;background:rgba(155,125,255,.14);border:1px solid rgba(155,125,255,.24);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.reco-label{font-size:13px;font-weight:700;color:var(--t1)}
-.reco-sublabel{font-size:10px;color:var(--t3);margin-top:1px}
-.reco-new-tag{font-size:8px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(155,125,255,.14);color:var(--purple);border:1px solid rgba(155,125,255,.24)}
-.reco-context{font-size:10px;color:var(--t3);margin-bottom:10px;padding:8px 10px;background:rgba(155,125,255,.06);border:1px solid rgba(155,125,255,.12);border-radius:8px;line-height:1.5}
-.reco-context b{color:var(--purple)}
-.reco-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+/* ══ PARCHE v3.3 — DESCUBRIR ══ */
+.reco-section{margin:8px 0 0;animation:tabFadeIn .2s ease-out}
+.reco-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:14px 16px;background:linear-gradient(135deg,rgba(155,125,255,.1),rgba(99,179,237,.06));border:1px solid rgba(155,125,255,.2);border-radius:18px}
+.reco-title-wrap{display:flex;align-items:center;gap:10px}
+.reco-icon-box{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,rgba(155,125,255,.25),rgba(99,179,237,.18));border:1px solid rgba(155,125,255,.35);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 4px 16px rgba(155,125,255,.18)}
+.reco-label{font-size:15px;font-weight:700;color:var(--t1)}
+.reco-sublabel{font-size:10px;color:var(--t3);margin-top:2px}
+.reco-new-tag{font-size:9px;font-weight:700;padding:3px 9px;border-radius:10px;background:rgba(104,211,145,.12);color:var(--aa);border:1px solid rgba(104,211,145,.25)}
+#reco-refresh-btn{background:rgba(155,125,255,.12)!important;border:1px solid rgba(155,125,255,.3)!important;color:#9b7dff!important;font-family:'Outfit',sans-serif!important;font-size:11px!important;font-weight:600!important;padding:7px 14px!important;border-radius:10px!important;cursor:pointer!important;transition:.18s!important;white-space:nowrap!important}
+#reco-refresh-btn:hover{background:rgba(155,125,255,.22)!important;box-shadow:0 4px 16px rgba(155,125,255,.2)!important}
+.reco-context{font-size:11px;color:var(--t2);margin-bottom:14px;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid rgba(155,125,255,.12);border-radius:12px;display:flex;align-items:center;gap:6px}
+.reco-context b{color:var(--purple);font-weight:700}
+.reco-section-lbl{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.9px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.reco-section-lbl::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.reco-row{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-bottom:22px}
 .reco-row::-webkit-scrollbar{display:none}
-.reco-card{flex-shrink:0;width:128px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;cursor:pointer;transition:.2s;position:relative}
-.reco-card:hover{border-color:rgba(155,125,255,.3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(155,125,255,.1)}
-.reco-card:active{transform:scale(.97)}
-.reco-card-cover{width:100%;height:168px;display:flex;align-items:center;justify-content:center;font-size:48px}
-.reco-card-score{position:absolute;top:7px;right:7px;font-size:8px;font-weight:700;padding:2px 6px;border-radius:8px;background:rgba(10,14,26,.82);color:#fbbf24;backdrop-filter:blur(4px)}
-.reco-card-body{padding:8px 10px 10px}
-.reco-card-title{font-size:10px;font-weight:600;color:var(--t1);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.reco-card-reason{font-size:9px;color:var(--t3);line-height:1.4;margin-bottom:6px}
-.reco-card-tag{font-size:8px;font-weight:700;padding:2px 6px;border-radius:6px;background:rgba(155,125,255,.11);color:var(--purple);border:1px solid rgba(155,125,255,.2)}
-.reco-empty{font-size:11px;color:var(--t3);padding:14px;text-align:center}
+.reco-card{flex-shrink:0;width:148px;background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);position:relative;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.reco-card:hover{border-color:rgba(155,125,255,.45);transform:translateY(-6px) scale(1.02);box-shadow:0 20px 60px rgba(155,125,255,.18),0 0 0 1px rgba(155,125,255,.2)}
+.reco-card:active{transform:scale(.96)}
+.reco-card-cover{width:100%;height:196px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;overflow:hidden}
+.reco-card-cover-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+.reco-card:hover .reco-card-cover-img{transform:scale(1.06)}
+.reco-card-cover::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(transparent,var(--bg2));pointer-events:none}
+.reco-card-score{position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;padding:4px 8px;border-radius:10px;background:rgba(0,0,0,.78);color:#fbbf24;backdrop-filter:blur(6px);border:1px solid rgba(251,191,36,.3);font-family:'Space Mono',monospace;box-shadow:0 2px 12px rgba(0,0,0,.5)}
+.reco-card-body{padding:10px 12px 12px;position:relative;z-index:1}
+.reco-card-title{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:5px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.reco-card-reason{font-size:9px;color:var(--t3);line-height:1.4;margin-bottom:7px}
+.reco-card-tag{font-size:8px;font-weight:700;padding:3px 7px;border-radius:6px;background:rgba(155,125,255,.12);color:var(--purple);border:1px solid rgba(155,125,255,.25);display:inline-block}
+.reco-empty{font-size:12px;color:var(--t3);padding:20px;text-align:center;background:rgba(255,255,255,.02);border-radius:12px;margin-bottom:14px}
+@keyframes recoShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.reco-skeleton{width:148px;flex-shrink:0;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.reco-skeleton-img{height:196px;background:linear-gradient(90deg,var(--bg2) 25%,rgba(255,255,255,.06) 50%,var(--bg2) 75%);background-size:800px 100%;animation:recoShimmer 1.5s infinite}
+.reco-skeleton-body{padding:10px 12px 12px}
+.reco-skeleton-line{height:9px;border-radius:4px;background:linear-gradient(90deg,var(--bg2) 25%,rgba(255,255,255,.06) 50%,var(--bg2) 75%);background-size:800px 100%;animation:recoShimmer 1.5s infinite;margin-bottom:6px}
+.reco-skeleton-line.wide{width:90%}.reco-skeleton-line.mid{width:65%}.reco-skeleton-line.short{width:40%}
 
-/* ── PERFIL PÚBLICO MEJORADO ── */
-/* ── PERFIL PERSONAL v4.0 ── */
-.pubprof-wrap{background:var(--bg2);border:1px solid rgba(99,179,237,.18);border-radius:24px;overflow:hidden;margin-top:16px;box-shadow:0 12px 48px rgba(0,0,0,.4)}
-.pubprof-cover{height:130px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(99,179,237,.7) 0%,rgba(155,125,255,.6) 35%,rgba(104,211,145,.5) 65%,rgba(251,191,36,.4) 100%)}
-.pubprof-cover::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 14px),radial-gradient(ellipse 80% 80% at 80% 50%,rgba(255,255,255,.08),transparent)}
-.pubprof-cover::after{content:"";position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,var(--bg2))}
-/* orbes decorativos en el cover */
-.pubprof-cover-orb1{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(rgba(99,179,237,.4),transparent 70%);top:-30px;right:40px;pointer-events:none}
-.pubprof-cover-orb2{position:absolute;width:80px;height:80px;border-radius:50%;background:radial-gradient(rgba(155,125,255,.45),transparent 70%);bottom:-10px;right:10px;pointer-events:none}
-.pubprof-av-wrap{position:absolute;bottom:-32px;left:20px;z-index:2}
-.pubprof-av{width:72px;height:72px;border-radius:50%;border:4px solid var(--bg2);background:linear-gradient(135deg,var(--am),var(--aa));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;overflow:hidden;box-shadow:0 6px 24px rgba(99,179,237,.5),0 0 0 2px rgba(99,179,237,.3)}
+/* ══ PARCHE v3.3 — PERFIL PERSONAL ══ */
+.pubprof-wrap{background:var(--bg2);border:1px solid rgba(99,179,237,.16);border-radius:28px;overflow:hidden;margin-top:16px;box-shadow:0 24px 80px rgba(0,0,0,.55),0 0 0 1px rgba(99,179,237,.08);animation:tabFadeIn .22s ease-out}
+.pubprof-cover{height:160px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(99,179,237,.55) 0%,rgba(155,125,255,.45) 35%,rgba(104,211,145,.38) 65%,rgba(251,191,36,.3) 100%)}
+.pubprof-cover::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 18px),radial-gradient(ellipse 80% 80% at 80% 50%,rgba(255,255,255,.07),transparent)}
+.pubprof-cover::after{content:"";position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,var(--bg2))}
+.pubprof-cover-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(14px) brightness(.45) saturate(1.6);transform:scale(1.12)}
+.pubprof-cover-orb1{position:absolute;width:180px;height:180px;border-radius:50%;background:radial-gradient(rgba(99,179,237,.35),transparent 65%);top:-50px;right:20px;pointer-events:none;animation:orbDrift1 8s ease-in-out infinite alternate}
+.pubprof-cover-orb2{position:absolute;width:110px;height:110px;border-radius:50%;background:radial-gradient(rgba(155,125,255,.4),transparent 65%);bottom:-20px;right:80px;pointer-events:none;animation:orbDrift2 6s ease-in-out infinite alternate}
+@keyframes orbDrift1{from{transform:translate(0,0) scale(1)}to{transform:translate(-10px,8px) scale(1.08)}}
+@keyframes orbDrift2{from{transform:translate(0,0)}to{transform:translate(8px,-10px) scale(.92)}}
+.pubprof-av-wrap{position:absolute;bottom:-36px;left:22px;z-index:3}
+.pubprof-av{width:80px;height:80px;border-radius:50%;border:4px solid var(--bg2);background:linear-gradient(135deg,var(--am),var(--aa));display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#fff;overflow:hidden;box-shadow:0 0 0 3px rgba(99,179,237,.4),0 8px 32px rgba(99,179,237,.35),0 0 60px rgba(99,179,237,.15);transition:box-shadow .3s}
+.pubprof-av:hover{box-shadow:0 0 0 4px rgba(99,179,237,.6),0 12px 40px rgba(99,179,237,.45),0 0 80px rgba(99,179,237,.2)}
 .pubprof-av img{width:100%;height:100%;object-fit:cover}
-.pubprof-body{padding:44px 18px 0}
-/* Nombre + handle */
-.pubprof-name{font-size:22px;font-weight:700;color:var(--am);font-family:"Space Mono",monospace;letter-spacing:-.5px;text-shadow:0 0 28px rgba(99,179,237,.35)}
-.pubprof-handle{font-size:11px;color:var(--t3);margin-bottom:0;font-family:"Space Mono",monospace;margin-top:3px}
-/* Fila de acción rápida: share + racha */
-.pubprof-action-row{display:flex;align-items:center;gap:10px;margin:12px 0 16px}
-.pubprof-streak-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:linear-gradient(135deg,rgba(251,191,36,.18),rgba(251,191,36,.08));border:1px solid rgba(251,191,36,.35);border-radius:20px;font-size:12px;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;flex-shrink:0}
-.pubprof-time-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;font-size:11px;font-weight:600;color:var(--t2);flex-shrink:0}
-/* Stats grid horizontal con colores fuertes */
-.pubprof-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:0;background:rgba(0,0,0,.2);border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
-.pp-sc{padding:14px 8px;text-align:center;border-right:1px solid rgba(255,255,255,.06);transition:all .2s cubic-bezier(.34,1.56,.64,1);cursor:default;position:relative;overflow:hidden}
+.pubprof-body{padding:48px 20px 22px}
+.pubprof-name{font-size:24px;font-weight:800;color:transparent;background:linear-gradient(120deg,#c8d4e8 0%,var(--am) 50%,#7ecbff 100%);-webkit-background-clip:text;background-clip:text;font-family:"Space Mono",monospace;letter-spacing:-.8px;margin-bottom:3px}
+.pubprof-handle{font-size:11px;color:var(--t3);font-family:"Space Mono",monospace;margin-bottom:0}
+.pubprof-action-row{display:flex;align-items:center;gap:8px;margin:14px 0 18px;flex-wrap:wrap}
+.pubprof-streak-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:linear-gradient(135deg,rgba(251,191,36,.2),rgba(251,191,36,.07));border:1px solid rgba(251,191,36,.4);border-radius:20px;font-size:12px;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;flex-shrink:0;box-shadow:0 0 20px rgba(251,191,36,.12)}
+.pubprof-time-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:20px;font-size:11px;font-weight:600;color:var(--t2);flex-shrink:0}
+.pubprof-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:18px;background:rgba(0,0,0,.25);border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.pp-sc{padding:16px 8px;text-align:center;border-right:1px solid rgba(255,255,255,.05);transition:background .2s;cursor:default;position:relative;overflow:hidden}
 .pp-sc:last-child{border-right:none}
-.pp-sc::before{content:"";position:absolute;inset:0;opacity:0;transition:.2s;background:rgba(99,179,237,.06)}
-.pp-sc:hover::before{opacity:1}
-.pp-sc:hover{transform:translateY(-2px)}
-.pp-sc-v{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;line-height:1;display:block}
-.pp-sc-l{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-top:5px;display:block}
-/* Géneros favoritos */
-.pubprof-genres{display:flex;flex-wrap:wrap;gap:5px;margin:14px 0}
-.pubprof-genre-chip{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;background:rgba(99,179,237,.1);border:1px solid rgba(99,179,237,.2);color:var(--am)}
-/* Sección en progreso — más visual */
-.pubprof-sec-lbl{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:6px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);margin-top:14px}
-.pubprof-mini-list{display:flex;flex-direction:column;gap:0;margin-bottom:0;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
-.pp-mini{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.05);transition:all .18s ease;cursor:default;position:relative}
+.pp-sc:nth-child(1){background:linear-gradient(160deg,rgba(99,179,237,.1),transparent 80%)}
+.pp-sc:nth-child(2){background:linear-gradient(160deg,rgba(104,211,145,.09),transparent 80%)}
+.pp-sc:nth-child(3){background:linear-gradient(160deg,rgba(99,179,237,.08),transparent 80%)}
+.pp-sc:nth-child(4){background:linear-gradient(160deg,rgba(155,125,255,.09),transparent 80%)}
+.pp-sc:hover{background:rgba(99,179,237,.07)}
+.pp-sc-v{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;line-height:1;display:block;margin-bottom:4px}
+.pp-sc-l{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;display:block}
+.pubprof-genres{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.pubprof-genre-chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(155,125,255,.1);border:1px solid rgba(155,125,255,.22);color:var(--purple);letter-spacing:.3px;transition:.2s;cursor:default}
+.pubprof-genre-chip:hover{background:rgba(155,125,255,.2);border-color:rgba(155,125,255,.4)}
+.pubprof-sec-lbl{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.pubprof-sec-lbl::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.pubprof-mini-list{display:flex;flex-direction:column;gap:0;margin-bottom:20px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.pp-mini{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.04);position:relative;transition:.15s}
 .pp-mini:last-child{border-bottom:none}
-.pp-mini:hover{background:rgba(99,179,237,.07);padding-left:18px}
-.pp-mini-pbar-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.04)}
-.pp-mini-pbar-fill{height:100%;border-radius:0}
-.pp-mini-ico{width:36px;height:52px;border-radius:6px;background:rgba(99,179,237,.12);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--am);flex-shrink:0;border:1px solid rgba(255,255,255,.08)}
+.pp-mini:hover{background:rgba(99,179,237,.06);padding-left:18px}
+.pp-mini-ico{width:36px;height:52px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;border:1px solid;background:rgba(255,255,255,.04)}
 .pp-mini-info{flex:1;min-width:0}
 .pp-mini-title{font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pp-mini-prog{font-size:10px;color:var(--t3);font-family:'Space Mono',monospace;margin-top:2px}
-.pp-mini-pct{font-size:9px;font-weight:700;font-family:'Space Mono',monospace;flex-shrink:0;padding:2px 7px;border-radius:8px;background:rgba(255,255,255,.06)}
-/* Botón compartir — prominente y atractivo */
-.pubprof-share-btn{width:100%;padding:13px;border:none;background:linear-gradient(135deg,var(--am),var(--aa));color:#fff;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;border-radius:0;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.3px;margin-top:16px}
-.pubprof-share-btn:hover{filter:brightness(1.12);letter-spacing:.6px}
-.pubprof-share-btn:active{transform:scale(.98)}
-.pubprof-share-btn-disabled{width:100%;padding:13px;border:none;background:rgba(255,255,255,.04);color:var(--t3);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;border-radius:0;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;cursor:default}
+.pp-mini-prog{font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);margin-top:2px}
+.pp-mini-pct{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;flex-shrink:0}
+.pp-mini-pbar-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.04)}
+.pp-mini-pbar-fill{height:100%;border-radius:2px;transition:width .4s ease}
+.pubprof-share-btn{width:100%;padding:13px;background:linear-gradient(135deg,rgba(99,179,237,.15),rgba(155,125,255,.1));border:1px solid rgba(99,179,237,.3);border-radius:14px;color:var(--am);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.3px;position:relative;overflow:hidden}
+.pubprof-share-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.08) 50%,transparent 100%);transform:translateX(-100%);transition:transform .5s}
+.pubprof-share-btn:hover::before{transform:translateX(100%)}
+.pubprof-share-btn:hover{border-color:rgba(99,179,237,.55);background:linear-gradient(135deg,rgba(99,179,237,.25),rgba(155,125,255,.15));box-shadow:0 8px 32px rgba(99,179,237,.2)}
+.pubprof-share-btn-disabled{width:100%;padding:12px;text-align:center;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;color:var(--t3);font-size:12px}
 
 /* ── MODO LECTURA RÁPIDA ── */
 .quick-read-fab{position:fixed;bottom:178px;right:16px;z-index:500;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
@@ -533,191 +547,143 @@ html::after{
 .fn-remove-btn:hover{color:var(--dng);border-color:var(--dng)}
 
 
-/* ── COMUNIDAD MEJORADA v4.0 ── */
-.friends-panel{padding-bottom:8px}
-.fn-friend-card{
-  background:var(--bg2);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:20px;
-  overflow:hidden;
-  margin-bottom:16px;
-  cursor:pointer;
-  transition:all .25s cubic-bezier(.34,1.56,.64,1);
-  position:relative;
-  box-shadow:0 4px 24px rgba(0,0,0,.3);
-}
-.fn-friend-card:hover{
-  border-color:rgba(99,179,237,.35);
-  transform:translateY(-4px);
-  box-shadow:0 16px 48px rgba(0,0,0,.45),0 0 0 1px rgba(99,179,237,.18);
-}
-/* Mini banner de color en tope de la card */
-.fn-fc-banner{height:44px;width:100%;position:relative;overflow:hidden;flex-shrink:0}
-.fn-fc-banner::after{content:"";position:absolute;bottom:0;left:0;right:0;height:24px;background:linear-gradient(transparent,var(--bg2))}
-.fn-fc-header{display:flex;align-items:center;gap:14px;padding:0 16px 12px 16px;margin-top:-20px;position:relative;z-index:1}
-.fn-fc-avatar{width:54px;height:54px;border-radius:50%;object-fit:cover;border:3px solid var(--bg2);flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,.4)}
-.fn-fc-avatar-ph{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--am),var(--aa));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:3px solid var(--bg2);box-shadow:0 4px 16px rgba(0,0,0,.4)}
-.fn-fc-info{flex:1;min-width:0}
-.fn-fc-name{font-size:17px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Space Mono',monospace;letter-spacing:-.5px}
-.fn-fc-user{font-size:10px;color:var(--t3);margin-top:2px;font-family:'Space Mono',monospace}
-.fn-fc-stats{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.15)}
-.fn-fc-stat{flex:1;padding:12px 14px;text-align:center;border-right:1px solid rgba(255,255,255,.05)}
-.fn-fc-stat:last-child{border-right:none}
-.fn-fc-stat-v{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;line-height:1}
-.fn-fc-stat-l{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-/* Request cards */
-.fn-req-card{
-  display:flex;align-items:center;gap:12px;
-  background:rgba(255,255,255,.03);
-  border:1px solid var(--bd);
-  border-radius:12px;
-  padding:12px 14px;
-  margin-bottom:8px;
-  transition:.15s;
-}
-.fn-req-card:hover{background:rgba(255,255,255,.055);border-color:var(--bdl)}
-/* Mi usuario card mejorado */
-.fn-my-user{
-  background:linear-gradient(135deg,rgba(99,179,237,.1),rgba(104,211,145,.05));
-  border:1px solid rgba(99,179,237,.25);
-  border-radius:14px;
-  padding:14px 16px;
-  display:flex;align-items:center;gap:12px;
-}
-.fn-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--am);flex-shrink:0}
-.fn-avatar-ph{width:46px;height:46px;border-radius:50%;background:var(--amd);border:2px solid var(--am);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.fn-display-name{font-size:15px;font-weight:700;color:var(--am);font-family:'Space Mono',monospace}
-.fn-username{font-size:11px;color:var(--t2);margin-top:2px;font-family:'Space Mono',monospace}
-.fn-tag{font-size:10px;color:var(--t3);margin-top:3px}
-/* Friends section labels */
-.friends-section{margin-bottom:14px}
-.friends-section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--t3);margin-bottom:8px;padding-left:2px}
-/* Search row */
-.fn-search-row{display:flex;gap:8px;align-items:center}
-.fn-input{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;color:var(--t1);font-family:'Outfit',sans-serif;font-size:13px;outline:none;transition:.15s}
+/* ══ PARCHE v3.3 — COMUNIDAD ══ */
+.friends-panel{padding-bottom:8px;animation:tabFadeIn .2s ease-out}
+.friends-section{margin-bottom:20px}
+.friends-section:last-child{margin-bottom:0}
+.friends-section-lbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:10px;padding-left:2px;display:flex;align-items:center;gap:8px}
+.friends-section-lbl::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05)}
+.fn-search-row{display:flex;gap:8px;align-items:stretch}
+.fn-search-row .fn-input{flex:1}
+.fn-input{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:12px;color:var(--t1);font-family:'Outfit',sans-serif;font-size:13px;outline:none;transition:.18s}
 .fn-input:focus{border-color:rgba(99,179,237,.4);box-shadow:0 0 0 3px rgba(99,179,237,.08)}
-.fn-btn{padding:9px 16px;border:none;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;transition:.15s;background:var(--am);color:#fff;white-space:nowrap}
-.fn-btn:hover{filter:brightness(1.1)}
-.fn-btn.sec{background:rgba(255,255,255,.06);border:1px solid var(--bd);color:var(--t2)}
-.fn-btn.sec:hover{background:rgba(255,255,255,.1);color:var(--t1)}
-/* Perfil de amigo mejorado */
-.fn-profile{background:var(--bg3);border:1px solid rgba(99,179,237,.2);border-radius:22px;overflow:hidden;margin-bottom:20px;animation:slideDown .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 20px 60px rgba(0,0,0,.4)}
-.fn-profile-banner-v5{height:110px;position:relative;overflow:hidden;background:var(--bg2)}
-.fn-profile-banner{height:90px;position:relative;overflow:hidden}
-.fn-profile-banner::before{content:"";position:absolute;inset:0;background:inherit;filter:blur(0px)}
-.fn-profile-banner::after{content:"";position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(transparent,var(--bg3))}
-.fn-profile-header{display:flex;align-items:flex-end;gap:16px;padding:0 20px 18px;margin-top:-36px;border-bottom:1px solid rgba(255,255,255,.07);position:relative;z-index:1}
-.fn-profile-avatar{width:72px;height:72px;border-radius:50%;border:4px solid var(--bg3);object-fit:cover;box-shadow:0 8px 28px rgba(0,0,0,.5),0 0 0 2px var(--am)}
-.fn-profile-avatar-ph{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--am),var(--aa));border:4px solid var(--bg3);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 8px 28px rgba(0,0,0,.5),0 0 0 2px var(--am)}
-.fn-profile-name{font-size:20px;font-weight:700;color:var(--am);font-family:'Space Mono',monospace;letter-spacing:-.6px;text-shadow:0 0 24px rgba(99,179,237,.3)}
-.fn-profile-uname{font-size:11px;color:var(--t3);font-family:'Space Mono',monospace;margin-top:3px}
-.fn-profile-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.06)}
-.fn-ps{padding:16px 8px;text-align:center;border-right:1px solid rgba(255,255,255,.06)}
-.fn-ps:last-child{border-right:none}
-.fn-ps-v{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;line-height:1}
-.fn-ps-l{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:5px}
-.fn-profile-list-title{font-size:11px;font-weight:700;color:var(--t2);margin-bottom:0;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.8px;padding:16px 20px 10px}
-.fn-series-item{display:flex;align-items:center;gap:12px;padding:10px 20px;background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.04);transition:.15s}
-.fn-series-item:last-child{border-bottom:none}
-.fn-series-item:hover{background:rgba(99,179,237,.07);padding-left:24px}
-.friends-section .fn-series-item:last-child{border-bottom:none}
-/* Streak compact chip */
-.streak-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,191,36,.06));border:1px solid rgba(251,191,36,.3);border-radius:20px;font-size:12px;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;vertical-align:middle}
-
-/* ── TAB FADE TRANSITION ── */
-@keyframes tabFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.tab-content-fade{animation:tabFadeIn .18s ease-out}
-
-/* ── MY PROFILE BANNER CARD ── */
-.fn-my-banner-card{border-radius:16px;overflow:hidden;border:1px solid rgba(99,179,237,.22);margin-bottom:0;position:relative}
-.fn-my-banner{height:70px;position:relative;overflow:hidden;background:var(--bg2)}
-.fn-my-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(10px) brightness(.45) saturate(1.4);transform:scale(1.1)}
-.fn-my-banner-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05),rgba(0,0,0,.7))}
-.fn-my-banner-inner{padding:0 14px 10px;margin-top:-22px;position:relative;z-index:1;display:flex;align-items:flex-end;gap:12px;background:rgba(14,18,32,.6)}
-.fn-my-banner-avatar{width:46px;height:46px;border-radius:50%;border:3px solid rgba(14,18,32,.8);flex-shrink:0;object-fit:cover;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff}
-.fn-my-banner-info{flex:1;min-width:0}
-.fn-my-banner-controls{display:flex;gap:5px;align-self:center;margin-left:auto}
-
-/* ── PROFILE INLINE TABS (manga/anime split) ── */
-.fn-prof-tabs{display:flex;gap:3px;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:10px;padding:3px;margin:14px 16px 0}
-.fn-prof-tab{flex:1;padding:7px 6px;border:1px solid transparent;background:transparent;color:var(--t2);font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border-radius:8px;text-align:center;transition:.15s}
-.fn-prof-tab.active{background:rgba(99,179,237,.12);border-color:rgba(99,179,237,.28);color:#7ec8f4}
-.fn-prof-tab.anime-active{background:rgba(104,211,145,.1);border-color:rgba(104,211,145,.22);color:#68d391}
-
-/* ── COMUNIDAD v5.0 — MEJORAS SOCIALES ── */
-/* Banner de invitación */
-.fn-invite-banner{background:linear-gradient(135deg,rgba(99,179,237,.1),rgba(155,125,255,.07));border:1px solid rgba(99,179,237,.22);border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
-.fn-invite-text{flex:1;min-width:0}
-.fn-invite-title{font-size:12px;font-weight:700;color:var(--t1)}
-.fn-invite-sub{font-size:11px;color:var(--t2);margin-top:2px}
-.fn-invite-btn{padding:7px 14px;border:none;background:linear-gradient(135deg,var(--am),var(--aa));color:#fff;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;border-radius:20px;cursor:pointer;white-space:nowrap;transition:.15s;flex-shrink:0}
-.fn-invite-btn:hover{filter:brightness(1.12)}
-/* Tabs comunidad */
-.fn-com-tabs{display:flex;gap:3px;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:12px;padding:3px;margin-bottom:14px}
-.fn-com-tab{flex:1;padding:8px 6px;border:1px solid transparent;background:transparent;color:var(--t2);font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border-radius:10px;text-align:center;transition:.18s;white-space:nowrap}
+.fn-input::placeholder{color:var(--t3)}
+.fn-btn{padding:10px 18px;border:none;border-radius:12px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;transition:.18s;background:linear-gradient(135deg,var(--am),#4a9edd);color:#fff;white-space:nowrap;box-shadow:0 4px 14px rgba(99,179,237,.25)}
+.fn-btn:hover{filter:brightness(1.1);box-shadow:0 6px 20px rgba(99,179,237,.35);transform:translateY(-1px)}
+.fn-btn:active{transform:scale(.96)}
+.fn-btn.sec{background:rgba(255,255,255,.05);border:1px solid var(--bd);color:var(--t2);box-shadow:none}
+.fn-btn.sec:hover{background:rgba(255,255,255,.1);color:var(--t1);transform:none}
+.fn-my-user{background:linear-gradient(135deg,rgba(99,179,237,.1),rgba(104,211,145,.05));border:1px solid rgba(99,179,237,.25);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden}
+.fn-my-user::before{content:'';position:absolute;top:0;right:0;width:120px;height:100%;background:radial-gradient(rgba(99,179,237,.12),transparent 65%);pointer-events:none}
+.fn-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--am);flex-shrink:0;box-shadow:0 0 0 3px rgba(99,179,237,.2)}
+.fn-avatar-ph{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--am),var(--aa));border:2px solid var(--am);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 0 0 3px rgba(99,179,237,.2)}
+.fn-user-info{flex:1;min-width:0}
+.fn-display-name{font-size:15px;font-weight:700;color:var(--am);font-family:'Space Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fn-username{font-size:11px;color:var(--t2);margin-top:3px;font-family:'Space Mono',monospace}
+.fn-tag{font-size:10px;color:var(--t3);margin-top:3px}
+.fn-com-tabs{display:flex;gap:3px;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:14px;padding:4px;margin-bottom:16px}
+.fn-com-tab{flex:1;padding:9px 6px;border:1px solid transparent;background:transparent;color:var(--t2);font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border-radius:11px;text-align:center;transition:.18s;white-space:nowrap}
 .fn-com-tab:hover{color:var(--t1);background:rgba(255,255,255,.06)}
-.fn-com-tab.active{background:rgba(99,179,237,.12);border-color:rgba(99,179,237,.28);color:#7ec8f4}
+.fn-com-tab.active{background:linear-gradient(135deg,rgba(99,179,237,.16),rgba(99,179,237,.06));border-color:rgba(99,179,237,.3);color:#7ec8f4;box-shadow:0 0 18px rgba(99,179,237,.08) inset}
 .fn-com-tab .fn-tab-badge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--dng);color:#fff;font-size:9px;font-weight:700;margin-left:4px;vertical-align:middle}
-/* Feed de actividad */
-.fn-feed{display:flex;flex-direction:column}
-.fn-feed-day-lbl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;display:flex;align-items:center;gap:8px}
-.fn-feed-day-lbl::after{content:'';flex:1;height:1px;background:var(--bd)}
-.fn-feed-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.fn-feed-item:last-child{border-bottom:none}
-.fn-feed-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0;margin-top:1px}
-.fn-feed-body{flex:1;min-width:0}
-.fn-feed-user{font-size:11px;font-weight:700;color:var(--am);font-family:'Space Mono',monospace}
-.fn-feed-action{font-size:11px;color:var(--t2);margin-top:2px;line-height:1.4}
-.fn-feed-action strong{color:var(--t1);font-weight:600}
-.fn-feed-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:7px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-.fn-feed-badge.manga{background:rgba(99,179,237,.13);color:#7ec8f4;border:1px solid rgba(99,179,237,.2)}
-.fn-feed-badge.anime{background:rgba(104,211,145,.1);color:#68d391;border:1px solid rgba(104,211,145,.18)}
-.fn-feed-badge.completed{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.22)}
-.fn-feed-badge.milestone{background:rgba(155,125,255,.12);color:var(--purple);border:1px solid rgba(155,125,255,.22)}
-.fn-feed-time{font-size:9px;color:var(--t3);font-family:'Space Mono',monospace;white-space:nowrap;margin-top:2px;flex-shrink:0}
-/* Tarjeta de amigo v5 — más rica */
-.fn-friend-card-v5{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:20px;overflow:hidden;margin-bottom:12px;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 4px 24px rgba(0,0,0,.3)}
-.fn-friend-card-v5:hover{border-color:rgba(99,179,237,.35);transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.45)}
-/* Banner que usa cover de serie activa */
-.fn-fc-v5-banner{position:relative;width:100%;height:80px;border-radius:10px 10px 0 0;overflow:hidden;background:linear-gradient(135deg,var(--bg3) 0%,var(--bg4) 100%);}
-.fn-fc-v5-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(8px) brightness(.55) saturate(1.4);transform:scale(1.1)}
-.fn-fc-v5-banner-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,rgba(0,0,0,.7) 100%)}
-/* Chip de racha en banner */
-.fn-fc-v5-streak{position:absolute;top:8px;right:10px;display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:linear-gradient(135deg,rgba(251,191,36,.25),rgba(251,191,36,.12));border:1px solid rgba(251,191,36,.4);border-radius:12px;font-size:10px;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;z-index:2}
-/* Serie activa badge en banner */
+.fn-friend-card-v5{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:22px;overflow:hidden;margin-bottom:12px;cursor:pointer;transition:all .28s cubic-bezier(.34,1.56,.64,1);box-shadow:0 4px 24px rgba(0,0,0,.35)}
+.fn-friend-card-v5:hover{border-color:rgba(99,179,237,.4);transform:translateY(-5px);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(99,179,237,.2)}
+.fn-fc-v5-banner{position:relative;width:100%;height:90px;overflow:hidden;background:var(--bg3)}
+.fn-fc-v5-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(10px) brightness(.5) saturate(1.5);transform:scale(1.12);transition:filter .3s}
+.fn-friend-card-v5:hover .fn-fc-v5-banner-img{filter:blur(8px) brightness(.6) saturate(1.7)}
+.fn-fc-v5-banner-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.08) 0%,rgba(0,0,0,.65) 100%)}
+.fn-fc-v5-online{position:absolute;top:10px;left:10px;width:8px;height:8px;border-radius:50%;background:#34d399;border:2px solid var(--bg2);box-shadow:0 0 8px rgba(52,211,153,.6);animation:onlinePulse 2s ease-in-out infinite}
+@keyframes onlinePulse{0%,100%{box-shadow:0 0 8px rgba(52,211,153,.5)}50%{box-shadow:0 0 16px rgba(52,211,153,.9)}}
+.fn-fc-v5-streak{position:absolute;top:8px;right:10px;display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:linear-gradient(135deg,rgba(251,191,36,.22),rgba(251,191,36,.1));border:1px solid rgba(251,191,36,.4);border-radius:12px;font-size:10px;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;z-index:2}
 .fn-fc-v5-active{position:absolute;bottom:7px;left:10px;right:10px;z-index:2;display:flex;align-items:center;gap:6px}
 .fn-fc-v5-active-title{font-size:10px;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
-.fn-fc-v5-pct{font-size:9px;font-family:'Space Mono',monospace;color:rgba(255,255,255,.6);flex-shrink:0}
-/* Header del card */
-.fn-fc-v5-header{display:flex;align-items:center;gap:12px;padding:0 14px 10px;margin-top:-22px;position:relative;z-index:1}
-.fn-fc-v5-avatar{width:50px;height:50px;border-radius:50%;border:3px solid var(--bg2);flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,.5);object-fit:cover;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#fff}
+.fn-fc-v5-pct{font-size:9px;font-family:'Space Mono',monospace;color:rgba(255,255,255,.55);flex-shrink:0}
+.fn-fc-v5-header{display:flex;align-items:center;gap:12px;padding:0 14px 10px;margin-top:-26px;position:relative;z-index:1}
+.fn-fc-v5-avatar{width:54px;height:54px;border-radius:50%;border:3px solid var(--bg2);flex-shrink:0;box-shadow:0 4px 20px rgba(0,0,0,.5);object-fit:cover;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;color:#fff}
 .fn-fc-v5-info{flex:1;min-width:0}
 .fn-fc-v5-name{font-size:15px;font-weight:700;color:var(--t1);font-family:'Space Mono',monospace;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Stats row */
-.fn-fc-v5-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.15)}
-.fn-fc-v5-stat{padding:10px 6px;text-align:center;border-right:1px solid rgba(255,255,255,.05)}
+.fn-fc-v5-remove{width:28px;height:28px;border:1px solid rgba(231,76,76,.2);background:rgba(231,76,76,.06);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);font-size:12px;flex-shrink:0;transition:.15s}
+.fn-fc-v5-remove:hover{background:rgba(231,76,76,.18);color:var(--dng);border-color:var(--dng)}
+.fn-fc-v5-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.18)}
+.fn-fc-v5-stat{padding:11px 6px;text-align:center;border-right:1px solid rgba(255,255,255,.05)}
 .fn-fc-v5-stat:last-child{border-right:none}
-.fn-fc-v5-stat-v{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;line-height:1;display:block}
-.fn-fc-v5-stat-l{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;display:block}
-/* Barra de progreso */
-.fn-fc-v5-pbar-wrap{margin:0 14px 10px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;height:3px}
+.fn-fc-v5-stat-v{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;line-height:1;display:block}
+.fn-fc-v5-stat-l{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:4px;display:block}
+.fn-fc-v5-pbar-wrap{margin:0 14px 10px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;height:3px}
 .fn-fc-v5-pbar-fill{height:100%;border-radius:4px;transition:width .6s ease}
-/* Series en común */
 .fn-fc-v5-common{padding:8px 14px 10px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .fn-fc-v5-common-lbl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;flex-shrink:0}
 .fn-fc-v5-common-chip{padding:2px 8px;border-radius:6px;font-size:9px;font-weight:600;background:rgba(99,179,237,.1);border:1px solid rgba(99,179,237,.2);color:var(--am);white-space:nowrap}
-/* Compare strip */
 .fn-fc-v5-compare{padding:8px 14px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px}
 .fn-fc-v5-compare-text{font-size:10px;color:var(--t2);flex:1}
 .fn-fc-v5-compare-text strong{color:var(--am)}
-.fn-fc-v5-compare-btn{padding:4px 11px;border:1px solid rgba(99,179,237,.3);background:rgba(99,179,237,.08);color:var(--am);font-family:'Outfit',sans-serif;font-size:10px;font-weight:700;border-radius:8px;cursor:pointer;white-space:nowrap;transition:.15s;flex-shrink:0}
-.fn-fc-v5-compare-btn:hover{background:rgba(99,179,237,.18)}
-/* Remove btn v5 */
-.fn-fc-v5-remove{width:26px;height:26px;border:1px solid rgba(231,76,76,.25);background:rgba(231,76,76,.07);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);font-size:11px;flex-shrink:0;transition:.15s}
-.fn-fc-v5-remove:hover{background:rgba(231,76,76,.18);color:var(--dng);border-color:var(--dng)}
-/* Photo URL form */
+.fn-fc-v5-compare-btn{padding:5px 12px;border:1px solid rgba(99,179,237,.3);background:rgba(99,179,237,.08);color:var(--am);font-family:'Outfit',sans-serif;font-size:10px;font-weight:700;border-radius:9px;cursor:pointer;white-space:nowrap;transition:.15s;flex-shrink:0}
+.fn-fc-v5-compare-btn:hover{background:rgba(99,179,237,.2);border-color:rgba(99,179,237,.5)}
+.fn-feed{display:flex;flex-direction:column}
+.fn-feed-day-lbl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px;margin:14px 0 8px;display:flex;align-items:center;gap:8px}
+.fn-feed-day-lbl::after{content:'';flex:1;height:1px;background:var(--bd)}
+.fn-feed-item{display:flex;gap:10px;padding:10px 12px;margin-bottom:3px;background:rgba(255,255,255,.02);border:1px solid transparent;border-radius:12px;transition:.15s}
+.fn-feed-item:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.06)}
+.fn-feed-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0;margin-top:1px;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.fn-feed-body{flex:1;min-width:0}
+.fn-feed-user{font-size:11px;font-weight:700;color:var(--am);font-family:'Space Mono',monospace}
+.fn-feed-action{font-size:11px;color:var(--t2);margin-top:3px;line-height:1.45}
+.fn-feed-action strong{color:var(--t1);font-weight:600}
+.fn-feed-meta{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap}
+.fn-feed-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.fn-feed-badge.manga{background:rgba(99,179,237,.12);color:#7ec8f4;border:1px solid rgba(99,179,237,.2)}
+.fn-feed-badge.anime{background:rgba(104,211,145,.1);color:#68d391;border:1px solid rgba(104,211,145,.18)}
+.fn-feed-badge.completed{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.22)}
+.fn-feed-badge.milestone{background:rgba(155,125,255,.12);color:var(--purple);border:1px solid rgba(155,125,255,.22)}
+.fn-feed-time{font-size:9px;color:var(--t3);font-family:'Space Mono',monospace;white-space:nowrap;flex-shrink:0}
+.fn-req-card{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;margin-bottom:8px;transition:.18s;animation:tabFadeIn .2s ease-out}
+.fn-req-card:hover{background:rgba(255,255,255,.06);border-color:rgba(99,179,237,.25)}
+.fn-req-name{flex:1;font-size:13px;font-weight:600;color:var(--t1)}
+.fn-req-user{font-size:10px;color:var(--t3);font-family:'Space Mono',monospace;margin-top:2px}
+.fn-req-btns{display:flex;gap:6px}
+.fn-req-btn{padding:7px 14px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;border:none;transition:.15s}
+.fn-req-btn.accept{background:linear-gradient(135deg,#16a34a,var(--suc));color:#fff;box-shadow:0 4px 14px rgba(52,211,153,.25)}
+.fn-req-btn.accept:hover{filter:brightness(1.1);box-shadow:0 6px 20px rgba(52,211,153,.35)}
+.fn-req-btn.reject{background:var(--bg4);color:var(--t2);border:1px solid var(--bd)}
+.fn-req-btn.reject:hover{color:var(--dng);border-color:var(--dng)}
+.fn-status{font-size:12px;color:var(--t2);text-align:center;padding:18px;background:rgba(255,255,255,.02);border-radius:12px;border:1px solid var(--bd)}
+.fn-status.error{color:var(--dng);border-color:rgba(231,76,76,.2)}
+.fn-status.success{color:var(--suc);border-color:rgba(52,211,153,.2)}
+.fn-remove-btn{padding:5px 10px;border:1px solid rgba(231,76,76,.25);background:transparent;color:var(--t3);font-size:10px;border-radius:8px;cursor:pointer;transition:.15s}
+.fn-remove-btn:hover{color:var(--dng);border-color:var(--dng)}
+.fn-profile{background:var(--bg3);border:1px solid rgba(99,179,237,.18);border-radius:24px;overflow:hidden;margin-bottom:20px;animation:slideDown .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.fn-profile-banner-v5{height:120px;position:relative;overflow:hidden;background:var(--bg2)}
+.fn-profile-banner{height:90px;position:relative;overflow:hidden}
+.fn-profile-banner::before{content:"";position:absolute;inset:0;background:inherit;filter:blur(0px)}
+.fn-profile-banner::after{content:"";position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,var(--bg3))}
+.fn-profile-header{display:flex;align-items:flex-end;gap:16px;padding:0 20px 18px;margin-top:-38px;border-bottom:1px solid rgba(255,255,255,.07);position:relative;z-index:1}
+.fn-profile-avatar{width:74px;height:74px;border-radius:50%;border:4px solid var(--bg3);object-fit:cover;box-shadow:0 8px 30px rgba(0,0,0,.55),0 0 0 2px rgba(99,179,237,.35)}
+.fn-profile-avatar-ph{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,var(--am),var(--aa));border:4px solid var(--bg3);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 8px 30px rgba(0,0,0,.55),0 0 0 2px rgba(99,179,237,.35)}
+.fn-profile-name{font-size:21px;font-weight:800;color:transparent;background:linear-gradient(120deg,#c8d4e8,var(--am));-webkit-background-clip:text;background-clip:text;font-family:'Space Mono',monospace;letter-spacing:-.7px}
+.fn-profile-uname{font-size:11px;color:var(--t3);font-family:'Space Mono',monospace;margin-top:3px}
+.fn-profile-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:rgba(0,0,0,.22);border-bottom:1px solid rgba(255,255,255,.06)}
+.fn-ps{padding:16px 8px;text-align:center;border-right:1px solid rgba(255,255,255,.06)}
+.fn-ps:last-child{border-right:none}
+.fn-ps-v{font-family:'Space Mono',monospace;font-size:20px;font-weight:700}
+.fn-ps-l{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:5px}
+.fn-my-banner-card{border-radius:18px;overflow:hidden;border:1px solid rgba(99,179,237,.2);margin-bottom:0;position:relative;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.fn-my-banner{height:76px;position:relative;overflow:hidden;background:var(--bg2)}
+.fn-my-banner-info{flex:1;min-width:0}
+.fn-my-banner-controls{display:flex;gap:5px;align-self:center;margin-left:auto}
+.fn-prof-tabs{display:flex;gap:3px;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:12px;padding:3px;margin:14px 16px 0}
+.fn-prof-tab{flex:1;padding:8px 6px;border:1px solid transparent;background:transparent;color:var(--t2);font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border-radius:10px;text-align:center;transition:.15s}
+.fn-prof-tab.active{background:rgba(99,179,237,.12);border-color:rgba(99,179,237,.28);color:#7ec8f4}
+.fn-prof-tab.anime-active{background:rgba(104,211,145,.1);border-color:rgba(104,211,145,.22);color:#68d391}
+.fn-profile-list-title{font-size:11px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.8px;padding:16px 20px 10px}
+.fn-series-item{display:flex;align-items:center;gap:12px;padding:10px 20px;background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.04);transition:.15s}
+.fn-series-item:last-child{border-bottom:none}
+.fn-series-item:hover{background:rgba(99,179,237,.06);padding-left:24px}
+.fn-series-cover{width:36px;height:52px;object-fit:cover;border-radius:7px;border:1px solid rgba(255,255,255,.08);flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.fn-series-cover-ph{width:36px;height:52px;background:linear-gradient(145deg,var(--bg4),var(--bg3));border-radius:7px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.fn-series-info{flex:1;min-width:0}
+.fn-series-title{font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fn-series-prog{font-family:'Space Mono',monospace;font-size:9px;color:var(--t2);margin-top:3px}
+.fn-series-pbar{height:2px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:5px;overflow:hidden}
+.fn-series-pfill{height:100%;border-radius:2px}
+.streak-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,191,36,.06));border:1px solid rgba(251,191,36,.3);border-radius:20px;font-size:12px;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;vertical-align:middle}
+.fn-invite-banner{background:linear-gradient(135deg,rgba(99,179,237,.09),rgba(155,125,255,.06));border:1px solid rgba(99,179,237,.2);border-radius:16px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.fn-invite-text{flex:1;min-width:0}
+.fn-invite-title{font-size:12px;font-weight:700;color:var(--t1)}
+.fn-invite-sub{font-size:11px;color:var(--t2);margin-top:2px}
+.fn-invite-btn{padding:8px 16px;border:none;background:linear-gradient(135deg,var(--am),var(--aa));color:#fff;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;border-radius:20px;cursor:pointer;white-space:nowrap;transition:.15s;flex-shrink:0;box-shadow:0 4px 14px rgba(99,179,237,.25)}
+.fn-invite-btn:hover{filter:brightness(1.12);box-shadow:0 6px 20px rgba(99,179,237,.35)}
 .fn-photo-form{margin-top:8px;display:none}
-.fn-photo-form input{width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;color:var(--t1);font-family:'Outfit',sans-serif;font-size:12px;outline:none;transition:.15s}
+.fn-photo-form input{width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;color:var(--t1);font-family:'Outfit',sans-serif;font-size:12px;outline:none;transition:.15s}
 .fn-photo-form input:focus{border-color:rgba(99,179,237,.4)}
 .fn-photo-form input::placeholder{color:var(--t3)}
 
@@ -3151,8 +3117,9 @@ async function p28RenderRecoSection(root){
   } else {
     const mangaWrap=document.getElementById("reco-manga-wrap");
     const animeWrap=document.getElementById("reco-anime-wrap");
-    if(mangaWrap)mangaWrap.innerHTML=`<div class="reco-empty">⏳ Cargando manga...</div>`;
-    if(animeWrap)animeWrap.innerHTML=`<div class="reco-empty">⏳ Cargando anime...</div>`;
+    const _skels=()=>`<div class="reco-row">${[1,2,3,4,5].map(()=>`<div class="reco-skeleton"><div class="reco-skeleton-img"></div><div class="reco-skeleton-body"><div class="reco-skeleton-line wide"></div><div class="reco-skeleton-line mid"></div><div class="reco-skeleton-line short"></div></div></div>`).join("")}</div>`;
+    if(mangaWrap)mangaWrap.innerHTML=_skels();
+    if(animeWrap)animeWrap.innerHTML=_skels();
     const [mangaReco,animeReco]=await Promise.all([
       p28FetchReco(allTags,"manga"),
       p28FetchReco(allTags,"anime")
@@ -3200,8 +3167,10 @@ function p28RenderPublicProfile(root){
     :`<div class="pubprof-streak-chip" style="opacity:.4">🔥 Sin racha</div>`;
   const timeChip=`<div class="pubprof-time-chip">⏱ ${ti.val} invertidas</div>`;
 
+  const _topCover=(()=>{const s=reading[0];return s&&s.cover&&s.cover.startsWith("http")?`<img class="pubprof-cover-bg-img" src="${s.cover}" alt="">`:""})();
   wrap.innerHTML=`
     <div class="pubprof-cover">
+      ${_topCover}
       <div class="pubprof-cover-orb1"></div>
       <div class="pubprof-cover-orb2"></div>
       <div class="pubprof-av-wrap"><div class="pubprof-av">${avContent}</div></div>
@@ -3324,7 +3293,7 @@ function p28RenderQuickReadFAB(){
 let p28ShowDiscoverTab=false;
 
 // ── P2.8: PATCH NOTES ENTRY ──
-const P28_PATCH_NOTES=`<div class="patch-version"><div class="patch-ver-tag">Parche v3.2 — 2026-04</div><ul class="patch-ver-items"><li>🔧 Fix "sin dato" en obras en publicación — raíz del problema: el dropdown recreaba todo el DOM al recibir el resultado async de AniList/MangaDex, lo que borraba visualmente el conteo aunque el dato ya existía en memoria</li><li>⚡ Actualización quirúrgica del dropdown — nueva lógica en <code>renderJikanDrop()</code>: si el dropdown ya existe, solo se parchea el nodo de conteo de cada ítem (via <code>data-malid</code>) en lugar de destruir y reconstruir el DOM; el input de búsqueda ya no pierde el foco durante el enriquecimiento</li><li>🏗 Helper <code>_jikanCountHTML()</code> — función extraída para centralizar la lógica de renderizado del conteo (buscando… / Cap. N últ. / sin dato); compartida entre la construcción inicial y la actualización quirúrgica</li><li>🎯 AniList priorizada para obras activas — <code>getBestCount()</code> ya ejecuta AniList y MangaDex en paralelo junto a Jikan; el fix asegura que ese resultado llegue al DOM correctamente incluso si el dropdown lleva más de 500ms abierto</li><li>💾 Sin pérdida de progreso de usuarios — el progreso (caps marcados, estado, tags) vive en Firebase Firestore y se indexa por ID interno de Mangu, completamente independiente del identificador de API; cualquier cambio de fuente de datos es transparente</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v3.1 — 2026-04</div><ul class="patch-ver-items"><li>📸 Foto de perfil persistente — la foto URL personalizada ahora se lee desde localStorage en CADA render (no solo al abrir el panel); soluciona el bug donde la foto desaparecía al cambiar de tab o recargar</li><li>🖼 Banner con cobertura Jikan automática — cuando la serie activa no tiene URL HTTP (fue agregada manualmente), la app consulta Jikan API en background para obtener la portada; al recibir la respuesta el banner se actualiza sin recargar la página</li><li>👤 Card de perfil propio con banner — el panel "Amigos" ahora muestra tu perfil con el mismo banner visual que los perfiles de amigos: cover difuminado de tu serie más activa (o degradado hash), avatar solapado, caps totales y series en curso visibles</li><li>📚 🎬 En progreso separado por tipo — el perfil expandido de amigos ahora tiene dos tabs dentro de "En progreso": Manga (N) y Anime (N), con selección persistente entre visitas al perfil</li><li>✨ Transición entre tabs — cambiar entre Manga / Anime / Dashboard / Amigos ahora aplica una animación fadeIn+slideUp de 180ms para una experiencia más fluida</li><li>📋 Notas del parche restauradas — recuperadas todas las versiones eliminadas accidentalmente (v1.0 a v2.6 completas)</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v3.0 — 2026-04</div><ul class="patch-ver-items"><li>🔒 Privacidad total — eliminado displayName de Google de todos los renders: tarjetas de amigos, perfil expandido, solicitudes recibidas y panel propio. Solo se muestra el @username elegido por el usuario</li><li>🎨 Tarjeta de amigo v5 — rediseño completo: banner con cover HTTP de la serie activa difuminado, título y % en el banner, barra de progreso, chips de series en común, franja de comparación de caps totales</li><li>👤 Perfil expandido v2 — banner más alto con cover HTTP difuminado o degradado hash, stats reorganizadas (caps / eps / completados / total), franja de comparación personal, series en común integradas, listas con contenedor unificado y fondo alternado por fila</li><li>📡 Feed de actividad — panel cronológico agrupado por día (Hoy/Ayer/fecha) con eventos de los últimos 7 días de todos los amigos: caps marcados, series completadas, progreso con %; avatares con color hash</li><li>🖼 Foto de perfil vía URL — botón "🖼 Foto" en panel propio para pegar URL externa; sin Firebase Storage; se sincroniza al public_profile automáticamente</li><li>🔧 Fix banner — excluidas imágenes Base64 comprimidas (40x57px) del banner por baja resolución; solo se usan URLs HTTP (Jikan/MAL)</li><li>🚫 Banner de invitación removido del panel de amigos (parche futuro)</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v2.9 — 2026-04</div><ul class="patch-ver-items"><li>🔊 Sonido +1 universal — el sonido de feedback ahora se activa desde cualquier punto de marcaje: botón +1 de la lista, píldora de progreso, panel de Continuar Leyendo y panel de Lectura Rápida ⚡</li><li>📖 Cap. en publicación corregido — el dropdown de búsqueda Jikan ya no muestra "cargando..." para obras en emisión; muestra el conteo real si está disponible, y solo el estado "En publicación" si no hay número exacto</li><li>🔄 Refrescar en Descubrir — nuevo botón "🔄 Refrescar" en el tab Descubrir para obtener nuevas recomendaciones sin necesidad de recargar la app</li><li>🎨 Banner de color en perfil de amigo — el perfil de amigo ahora muestra un banner de color generado a partir del username (hash → matiz HSL), similar a MAL/Letterboxd</li><li>📊 Stats mejoradas en perfil de amigo — se muestran capítulos totales leídos y episodios totales vistos, con íconos de color en cada stat</li><li>🤝 Series en común — al ver el perfil de un amigo, aparece un bloque azul con las series que ambos siguen ("Ambos leen: Berserk, Vinland Saga")</li><li>🎯 Meta diaria configurable — barra de progreso diario visible en el header ("Hoy: 3/5 capítulos"). Al completarla se activa confetti 🎉. Toca el título para cambiar la meta</li><li>📈 Estadísticas personales mejoradas — el dashboard ahora muestra racha de días, score promedio (manga y anime), y tasa de completación además de los contadores existentes</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v2.8 — 2026-04</div><ul class="patch-ver-items"><li>✏️ Cambiar @username — botón en Amigos para actualizar el @username desde cero o cambiarlo si ya tienes uno; formulario desplegable con campo editable</li><li>📱 Layout mobile corregido — tabs con scroll horizontal (no se apilan); stat cards 2x2; filtros con scroll horizontal; toolbar apila búsqueda y orden; catálogo 2 columnas compactas</li><li>📖 Capítulos obras en publicación — ya no muestra "?"; se fetchea endpoint individual de MAL y se muestra el cap real publicado; campo muestra "cargando..." mientras espera</li><li>🖼️ Portadas en perfil propio — sección En progreso del tab Perfil ahora muestra portada real de la serie (si existe), con fallback a inicial del título</li><li>📍 Sin salto automático — al interactuar con cualquier serie de la lista, la posición de scroll se preserva exactamente; ya no sube al primer manga</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v2.7 — 2026-04</div><ul class="patch-ver-items"><li>🔥 Racha de lectura — detecta si marcaste capítulos hoy y ayer; muestra banner "X días seguidos" con animación de fuego; el contador persiste en localStorage por cuenta</li><li>▶ Continuar leyendo — sección fija al tope con scroll horizontal tipo Netflix; muestra las 6 series en progreso con portada, progreso, barra y botón +1 sin expandir la tarjeta</li><li>✨ Animación dopamina +1 — al presionar +1 aparece una animación centrada en pantalla (1 segundo) con partículas de colores que explotan; activa el circuito de recompensa</li><li>🔍 Recomendaciones por similitud de tags — nuevo tab "Descubrir" que consulta la Jikan API con los géneros/tags del usuario y sugiere manga y anime similares con score, razón y botón para agregar</li><li>💡 Onboarding con ejemplos — cuando la lista está vacía, aparece una grilla de 4 títulos de ejemplo (Jujutsu Kaisen, One Piece, Naruto, Mob Psycho 100) que se agregan con un clic</li><li>⚡ Modo lectura rápida — FAB flotante (⚡) accesible en cualquier tab; abre un panel rápido con las series en progreso y botón +1 por serie sin necesidad de expandir ni buscar</li><li>👤 Perfil público mejorado — nueva vista de perfil con cover, avatar de Google, stats (manga/anime/leídos/racha), lista de series en progreso y botón de compartir con link público</li></ul></div>`;
+const P28_PATCH_NOTES=`<div class="patch-version"><div class="patch-ver-tag">Parche v3.3 — 2026-05</div><ul class="patch-ver-items"><li>🎨 Perfil rediseñado — banner más alto (160px) con cover difuminado de serie activa, avatar con glow ring animado, nombre con gradiente degradado</li><li>🔬 Stats del perfil con gradientes individuales por celda y sombra exterior en el contenedor</li><li>✨ Botón compartir con efecto shimmer en hover; orbes del banner con animación de drift continua</li><li>🔭 Descubrir rediseñado — header con glassmorphism, cards más anchas (148px/196px), parallax en hover, score badge con borde dorado</li><li>⚡ Skeletons animados con shimmer en Descubrir mientras carga Jikan API</li><li>👥 Comunidad rediseñada — barra de búsqueda con ícono SVG integrado, section labels con regla separadora, tabs con gradiente activo</li><li>🟢 Indicador de actividad (punto verde pulsante) en cards de amigos</li><li>📨 Solicitudes de amistad con animación de entrada y botón Aceptar con gradiente verde</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v3.2 — 2026-04</div><ul class="patch-ver-items"><li>🔧 Fix "sin dato" en obras en publicación — raíz del problema: el dropdown recreaba todo el DOM al recibir el resultado async de AniList/MangaDex, lo que borraba visualmente el conteo aunque el dato ya existía en memoria</li><li>⚡ Actualización quirúrgica del dropdown — nueva lógica en <code>renderJikanDrop()</code>: si el dropdown ya existe, solo se parchea el nodo de conteo de cada ítem (via <code>data-malid</code>) en lugar de destruir y reconstruir el DOM; el input de búsqueda ya no pierde el foco durante el enriquecimiento</li><li>🏗 Helper <code>_jikanCountHTML()</code> — función extraída para centralizar la lógica de renderizado del conteo (buscando… / Cap. N últ. / sin dato); compartida entre la construcción inicial y la actualización quirúrgica</li><li>🎯 AniList priorizada para obras activas — <code>getBestCount()</code> ya ejecuta AniList y MangaDex en paralelo junto a Jikan; el fix asegura que ese resultado llegue al DOM correctamente incluso si el dropdown lleva más de 500ms abierto</li><li>💾 Sin pérdida de progreso de usuarios — el progreso (caps marcados, estado, tags) vive en Firebase Firestore y se indexa por ID interno de Mangu, completamente independiente del identificador de API; cualquier cambio de fuente de datos es transparente</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v3.1 — 2026-04</div><ul class="patch-ver-items"><li>📸 Foto de perfil persistente — la foto URL personalizada ahora se lee desde localStorage en CADA render (no solo al abrir el panel); soluciona el bug donde la foto desaparecía al cambiar de tab o recargar</li><li>🖼 Banner con cobertura Jikan automática — cuando la serie activa no tiene URL HTTP (fue agregada manualmente), la app consulta Jikan API en background para obtener la portada; al recibir la respuesta el banner se actualiza sin recargar la página</li><li>👤 Card de perfil propio con banner — el panel "Amigos" ahora muestra tu perfil con el mismo banner visual que los perfiles de amigos: cover difuminado de tu serie más activa (o degradado hash), avatar solapado, caps totales y series en curso visibles</li><li>📚 🎬 En progreso separado por tipo — el perfil expandido de amigos ahora tiene dos tabs dentro de "En progreso": Manga (N) y Anime (N), con selección persistente entre visitas al perfil</li><li>✨ Transición entre tabs — cambiar entre Manga / Anime / Dashboard / Amigos ahora aplica una animación fadeIn+slideUp de 180ms para una experiencia más fluida</li><li>📋 Notas del parche restauradas — recuperadas todas las versiones eliminadas accidentalmente (v1.0 a v2.6 completas)</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v3.0 — 2026-04</div><ul class="patch-ver-items"><li>🔒 Privacidad total — eliminado displayName de Google de todos los renders: tarjetas de amigos, perfil expandido, solicitudes recibidas y panel propio. Solo se muestra el @username elegido por el usuario</li><li>🎨 Tarjeta de amigo v5 — rediseño completo: banner con cover HTTP de la serie activa difuminado, título y % en el banner, barra de progreso, chips de series en común, franja de comparación de caps totales</li><li>👤 Perfil expandido v2 — banner más alto con cover HTTP difuminado o degradado hash, stats reorganizadas (caps / eps / completados / total), franja de comparación personal, series en común integradas, listas con contenedor unificado y fondo alternado por fila</li><li>📡 Feed de actividad — panel cronológico agrupado por día (Hoy/Ayer/fecha) con eventos de los últimos 7 días de todos los amigos: caps marcados, series completadas, progreso con %; avatares con color hash</li><li>🖼 Foto de perfil vía URL — botón "🖼 Foto" en panel propio para pegar URL externa; sin Firebase Storage; se sincroniza al public_profile automáticamente</li><li>🔧 Fix banner — excluidas imágenes Base64 comprimidas (40x57px) del banner por baja resolución; solo se usan URLs HTTP (Jikan/MAL)</li><li>🚫 Banner de invitación removido del panel de amigos (parche futuro)</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v2.9 — 2026-04</div><ul class="patch-ver-items"><li>🔊 Sonido +1 universal — el sonido de feedback ahora se activa desde cualquier punto de marcaje: botón +1 de la lista, píldora de progreso, panel de Continuar Leyendo y panel de Lectura Rápida ⚡</li><li>📖 Cap. en publicación corregido — el dropdown de búsqueda Jikan ya no muestra "cargando..." para obras en emisión; muestra el conteo real si está disponible, y solo el estado "En publicación" si no hay número exacto</li><li>🔄 Refrescar en Descubrir — nuevo botón "🔄 Refrescar" en el tab Descubrir para obtener nuevas recomendaciones sin necesidad de recargar la app</li><li>🎨 Banner de color en perfil de amigo — el perfil de amigo ahora muestra un banner de color generado a partir del username (hash → matiz HSL), similar a MAL/Letterboxd</li><li>📊 Stats mejoradas en perfil de amigo — se muestran capítulos totales leídos y episodios totales vistos, con íconos de color en cada stat</li><li>🤝 Series en común — al ver el perfil de un amigo, aparece un bloque azul con las series que ambos siguen ("Ambos leen: Berserk, Vinland Saga")</li><li>🎯 Meta diaria configurable — barra de progreso diario visible en el header ("Hoy: 3/5 capítulos"). Al completarla se activa confetti 🎉. Toca el título para cambiar la meta</li><li>📈 Estadísticas personales mejoradas — el dashboard ahora muestra racha de días, score promedio (manga y anime), y tasa de completación además de los contadores existentes</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v2.8 — 2026-04</div><ul class="patch-ver-items"><li>✏️ Cambiar @username — botón en Amigos para actualizar el @username desde cero o cambiarlo si ya tienes uno; formulario desplegable con campo editable</li><li>📱 Layout mobile corregido — tabs con scroll horizontal (no se apilan); stat cards 2x2; filtros con scroll horizontal; toolbar apila búsqueda y orden; catálogo 2 columnas compactas</li><li>📖 Capítulos obras en publicación — ya no muestra "?"; se fetchea endpoint individual de MAL y se muestra el cap real publicado; campo muestra "cargando..." mientras espera</li><li>🖼️ Portadas en perfil propio — sección En progreso del tab Perfil ahora muestra portada real de la serie (si existe), con fallback a inicial del título</li><li>📍 Sin salto automático — al interactuar con cualquier serie de la lista, la posición de scroll se preserva exactamente; ya no sube al primer manga</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v2.7 — 2026-04</div><ul class="patch-ver-items"><li>🔥 Racha de lectura — detecta si marcaste capítulos hoy y ayer; muestra banner "X días seguidos" con animación de fuego; el contador persiste en localStorage por cuenta</li><li>▶ Continuar leyendo — sección fija al tope con scroll horizontal tipo Netflix; muestra las 6 series en progreso con portada, progreso, barra y botón +1 sin expandir la tarjeta</li><li>✨ Animación dopamina +1 — al presionar +1 aparece una animación centrada en pantalla (1 segundo) con partículas de colores que explotan; activa el circuito de recompensa</li><li>🔍 Recomendaciones por similitud de tags — nuevo tab "Descubrir" que consulta la Jikan API con los géneros/tags del usuario y sugiere manga y anime similares con score, razón y botón para agregar</li><li>💡 Onboarding con ejemplos — cuando la lista está vacía, aparece una grilla de 4 títulos de ejemplo (Jujutsu Kaisen, One Piece, Naruto, Mob Psycho 100) que se agregan con un clic</li><li>⚡ Modo lectura rápida — FAB flotante (⚡) accesible en cualquier tab; abre un panel rápido con las series en progreso y botón +1 por serie sin necesidad de expandir ni buscar</li><li>👤 Perfil público mejorado — nueva vista de perfil con cover, avatar de Google, stats (manga/anime/leídos/racha), lista de series en progreso y botón de compartir con link público</li></ul></div><ul class="patch-ver-items"><li>🔧 Fix "sin dato" en obras en publicación — raíz del problema: el dropdown recreaba todo el DOM al recibir el resultado async de AniList/MangaDex, lo que borraba visualmente el conteo aunque el dato ya existía en memoria</li><li>⚡ Actualización quirúrgica del dropdown — nueva lógica en <code>renderJikanDrop()</code>: si el dropdown ya existe, solo se parchea el nodo de conteo de cada ítem (via <code>data-malid</code>) en lugar de destruir y reconstruir el DOM; el input de búsqueda ya no pierde el foco durante el enriquecimiento</li><li>🏗 Helper <code>_jikanCountHTML()</code> — función extraída para centralizar la lógica de renderizado del conteo (buscando… / Cap. N últ. / sin dato); compartida entre la construcción inicial y la actualización quirúrgica</li><li>🎯 AniList priorizada para obras activas — <code>getBestCount()</code> ya ejecuta AniList y MangaDex en paralelo junto a Jikan; el fix asegura que ese resultado llegue al DOM correctamente incluso si el dropdown lleva más de 500ms abierto</li><li>💾 Sin pérdida de progreso de usuarios — el progreso (caps marcados, estado, tags) vive en Firebase Firestore y se indexa por ID interno de Mangu, completamente independiente del identificador de API; cualquier cambio de fuente de datos es transparente</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v3.1 — 2026-04</div><ul class="patch-ver-items"><li>📸 Foto de perfil persistente — la foto URL personalizada ahora se lee desde localStorage en CADA render (no solo al abrir el panel); soluciona el bug donde la foto desaparecía al cambiar de tab o recargar</li><li>🖼 Banner con cobertura Jikan automática — cuando la serie activa no tiene URL HTTP (fue agregada manualmente), la app consulta Jikan API en background para obtener la portada; al recibir la respuesta el banner se actualiza sin recargar la página</li><li>👤 Card de perfil propio con banner — el panel "Amigos" ahora muestra tu perfil con el mismo banner visual que los perfiles de amigos: cover difuminado de tu serie más activa (o degradado hash), avatar solapado, caps totales y series en curso visibles</li><li>📚 🎬 En progreso separado por tipo — el perfil expandido de amigos ahora tiene dos tabs dentro de "En progreso": Manga (N) y Anime (N), con selección persistente entre visitas al perfil</li><li>✨ Transición entre tabs — cambiar entre Manga / Anime / Dashboard / Amigos ahora aplica una animación fadeIn+slideUp de 180ms para una experiencia más fluida</li><li>📋 Notas del parche restauradas — recuperadas todas las versiones eliminadas accidentalmente (v1.0 a v2.6 completas)</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v3.0 — 2026-04</div><ul class="patch-ver-items"><li>🔒 Privacidad total — eliminado displayName de Google de todos los renders: tarjetas de amigos, perfil expandido, solicitudes recibidas y panel propio. Solo se muestra el @username elegido por el usuario</li><li>🎨 Tarjeta de amigo v5 — rediseño completo: banner con cover HTTP de la serie activa difuminado, título y % en el banner, barra de progreso, chips de series en común, franja de comparación de caps totales</li><li>👤 Perfil expandido v2 — banner más alto con cover HTTP difuminado o degradado hash, stats reorganizadas (caps / eps / completados / total), franja de comparación personal, series en común integradas, listas con contenedor unificado y fondo alternado por fila</li><li>📡 Feed de actividad — panel cronológico agrupado por día (Hoy/Ayer/fecha) con eventos de los últimos 7 días de todos los amigos: caps marcados, series completadas, progreso con %; avatares con color hash</li><li>🖼 Foto de perfil vía URL — botón "🖼 Foto" en panel propio para pegar URL externa; sin Firebase Storage; se sincroniza al public_profile automáticamente</li><li>🔧 Fix banner — excluidas imágenes Base64 comprimidas (40x57px) del banner por baja resolución; solo se usan URLs HTTP (Jikan/MAL)</li><li>🚫 Banner de invitación removido del panel de amigos (parche futuro)</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v2.9 — 2026-04</div><ul class="patch-ver-items"><li>🔊 Sonido +1 universal — el sonido de feedback ahora se activa desde cualquier punto de marcaje: botón +1 de la lista, píldora de progreso, panel de Continuar Leyendo y panel de Lectura Rápida ⚡</li><li>📖 Cap. en publicación corregido — el dropdown de búsqueda Jikan ya no muestra "cargando..." para obras en emisión; muestra el conteo real si está disponible, y solo el estado "En publicación" si no hay número exacto</li><li>🔄 Refrescar en Descubrir — nuevo botón "🔄 Refrescar" en el tab Descubrir para obtener nuevas recomendaciones sin necesidad de recargar la app</li><li>🎨 Banner de color en perfil de amigo — el perfil de amigo ahora muestra un banner de color generado a partir del username (hash → matiz HSL), similar a MAL/Letterboxd</li><li>📊 Stats mejoradas en perfil de amigo — se muestran capítulos totales leídos y episodios totales vistos, con íconos de color en cada stat</li><li>🤝 Series en común — al ver el perfil de un amigo, aparece un bloque azul con las series que ambos siguen ("Ambos leen: Berserk, Vinland Saga")</li><li>🎯 Meta diaria configurable — barra de progreso diario visible en el header ("Hoy: 3/5 capítulos"). Al completarla se activa confetti 🎉. Toca el título para cambiar la meta</li><li>📈 Estadísticas personales mejoradas — el dashboard ahora muestra racha de días, score promedio (manga y anime), y tasa de completación además de los contadores existentes</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v2.8 — 2026-04</div><ul class="patch-ver-items"><li>✏️ Cambiar @username — botón en Amigos para actualizar el @username desde cero o cambiarlo si ya tienes uno; formulario desplegable con campo editable</li><li>📱 Layout mobile corregido — tabs con scroll horizontal (no se apilan); stat cards 2x2; filtros con scroll horizontal; toolbar apila búsqueda y orden; catálogo 2 columnas compactas</li><li>📖 Capítulos obras en publicación — ya no muestra "?"; se fetchea endpoint individual de MAL y se muestra el cap real publicado; campo muestra "cargando..." mientras espera</li><li>🖼️ Portadas en perfil propio — sección En progreso del tab Perfil ahora muestra portada real de la serie (si existe), con fallback a inicial del título</li><li>📍 Sin salto automático — al interactuar con cualquier serie de la lista, la posición de scroll se preserva exactamente; ya no sube al primer manga</li></ul></div><div class="patch-version"><div class="patch-ver-tag">Parche v2.7 — 2026-04</div><ul class="patch-ver-items"><li>🔥 Racha de lectura — detecta si marcaste capítulos hoy y ayer; muestra banner "X días seguidos" con animación de fuego; el contador persiste en localStorage por cuenta</li><li>▶ Continuar leyendo — sección fija al tope con scroll horizontal tipo Netflix; muestra las 6 series en progreso con portada, progreso, barra y botón +1 sin expandir la tarjeta</li><li>✨ Animación dopamina +1 — al presionar +1 aparece una animación centrada en pantalla (1 segundo) con partículas de colores que explotan; activa el circuito de recompensa</li><li>🔍 Recomendaciones por similitud de tags — nuevo tab "Descubrir" que consulta la Jikan API con los géneros/tags del usuario y sugiere manga y anime similares con score, razón y botón para agregar</li><li>💡 Onboarding con ejemplos — cuando la lista está vacía, aparece una grilla de 4 títulos de ejemplo (Jujutsu Kaisen, One Piece, Naruto, Mob Psycho 100) que se agregan con un clic</li><li>⚡ Modo lectura rápida — FAB flotante (⚡) accesible en cualquier tab; abre un panel rápido con las series en progreso y botón +1 por serie sin necesidad de expandir ni buscar</li><li>👤 Perfil público mejorado — nueva vista de perfil con cover, avatar de Google, stats (manga/anime/leídos/racha), lista de series en progreso y botón de compartir con link público</li></ul></div>`;
 // ═══════════════════════════════════════════════════════════════════
 // FIN PARCHE 2.8
 // ═══════════════════════════════════════════════════════════════════
