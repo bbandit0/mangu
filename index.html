@@ -601,6 +601,7 @@ html::after{
 .fn-btn.sec:hover{background:rgba(255,255,255,.1);color:var(--t1)}
 /* Perfil de amigo mejorado */
 .fn-profile{background:var(--bg3);border:1px solid rgba(99,179,237,.2);border-radius:22px;overflow:hidden;margin-bottom:20px;animation:slideDown .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.fn-profile-banner-v5{height:110px;position:relative;overflow:hidden;background:var(--bg2)}
 .fn-profile-banner{height:90px;position:relative;overflow:hidden}
 .fn-profile-banner::before{content:"";position:absolute;inset:0;background:inherit;filter:blur(0px)}
 .fn-profile-banner::after{content:"";position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(transparent,var(--bg3))}
@@ -1128,94 +1129,126 @@ async function _renderFriendsPanelInner(container){
       pData=doc.exists?doc.data():null;
     }
     if(!pData){container.innerHTML=`<div class="fn-status error">No se pudo cargar el perfil</div>`;return;}
-    const av=pData.avatarUrl?`<img class="fn-profile-avatar" src="${pData.avatarUrl}">`:
-      `<div class="fn-profile-avatar-ph">&#128100;</div>`;
+    // ── solo username — sin displayName (privacidad)
+    const _pUsername=pData.username||"usuario";
+    // Avatar
+    const _pAv=pData.avatarUrl
+      ?`<img class="fn-profile-avatar" src="${pData.avatarUrl}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+`<div class="fn-profile-avatar-ph" style="display:none">${_pUsername.charAt(0).toUpperCase()}</div>`
+      :`<div class="fn-profile-avatar-ph">${_pUsername.charAt(0).toUpperCase()}</div>`;
     const allSeries=[...(pData.allManga||pData.topManga||[]).map(s=>({...s,type:"M"})),
                      ...(pData.allAnime||pData.topAnime||[]).map(s=>({...s,type:"A"}))];
     const reading=allSeries.filter(s=>s.status==="reading").sort((a,b)=>(b.lastUpdated||0)-(a.lastUpdated||0));
     const completed=allSeries.filter(s=>s.status==="completed").sort((a,b)=>(b.lastUpdated||0)-(a.lastUpdated||0)).slice(0,8);
     const paused=allSeries.filter(s=>s.status==="paused"||s.status==="plan").sort((a,b)=>(b.lastUpdated||0)-(a.lastUpdated||0)).slice(0,5);
+    // stats globales
+    const totalMangaCh=(pData.allManga||pData.topManga||[]).reduce((s,x)=>s+(x.completed||0),0);
+    const totalAnimeEp=(pData.allAnime||pData.topAnime||[]).reduce((s,x)=>s+(x.completed||0),0);
+    // banner color hash desde username
+    const _uh=_pUsername;let _hv=0;for(let i=0;i<_uh.length;i++){_hv=(_hv*31+_uh.charCodeAt(i))&0xFFFFFF;}_hv=_hv%360;
+    const _b1=`hsl(${_hv},65%,30%)`,_b2=`hsl(${(_hv+55)%360},60%,22%)`,_b3=`hsl(${(_hv+115)%360},55%,17%)`;
+    // Serie más activa para el banner del perfil
+    const _topS=reading[0]||null;
+    const _topCover=_topS?.cover||"";
+    const _topPct=_topS&&_topS.total>0?Math.round((_topS.completed||0)/_topS.total*100):0;
+    // Banners mejorado
+    const _profileBannerHtml=`<div class="fn-profile-banner-v5">
+      ${_topCover&&_topCover.length>10
+        ?`<img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(12px) brightness(.45) saturate(1.5);transform:scale(1.1)" src="${_topCover}" onerror="this.remove()">`
+        :`<div style="position:absolute;inset:0;background:linear-gradient(135deg,${_b1} 0%,${_b2} 55%,${_b3} 100%)"><div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 14px)"></div></div>`
+      }
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05) 0%,rgba(0,0,0,.75) 100%)"></div>
+      ${_topS?`<div style="position:absolute;bottom:10px;left:20px;right:20px;display:flex;align-items:center;gap:8px;z-index:2">
+        <span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.8);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">▶ ${_topS.title}</span>
+        <span style="font-size:10px;font-family:'Space Mono',monospace;color:rgba(255,255,255,.55)">${_topPct}%</span>
+      </div>`:""}
+    </div>`;
+    // series en común
+    const myMangaTitles=new Set(data.manga.map(s=>s.title.toLowerCase().trim()));
+    const myAnimeTitles=new Set(data.anime.map(s=>s.title.toLowerCase().trim()));
+    const commonManga=(pData.allManga||pData.topManga||[]).filter(s=>myMangaTitles.has((s.title||"").toLowerCase().trim())).map(s=>s.title).slice(0,6);
+    const commonAnime=(pData.allAnime||pData.topAnime||[]).filter(s=>myAnimeTitles.has((s.title||"").toLowerCase().trim())).map(s=>s.title).slice(0,6);
+    const allCommon=[...commonManga,...commonAnime];
+    // buildList mejorado
     const buildList=(arr,emptyMsg)=>{
       if(!arr.length) return `<div class="fn-status">${emptyMsg}</div>`;
-      return arr.map(s=>{
-        // Aceptar URL HTTP (Jikan) o Base64 comprimida subida al perfil publico (Parche 2.5)
+      return `<div style="display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.06)">` + arr.map((s,idx)=>{
         const coverSrc=(s.cover&&typeof s.cover==="string"&&s.cover.length>10)?s.cover:"";
         const cvr=coverSrc
-          ?`<img class="fn-series-cover" src="${coverSrc}" loading="lazy" decoding="async" onerror="this.style.display='none';var ph=this.nextElementSibling;if(ph){ph.style.display='flex';}" ><div class="fn-series-cover-ph" style="display:none;font-size:15px;font-weight:800;color:${s.type==='M'?'var(--am)':'var(--aa)'}">${s.title.charAt(0)}</div>`
-          :`<div class="fn-series-cover-ph" style="display:flex;font-size:15px;font-weight:800;color:${s.type==='M'?'var(--am)':'var(--aa)'}">${s.title.charAt(0)}</div>`;
+          ?`<img class="fn-series-cover" src="${coverSrc}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+`<div class="fn-series-cover-ph" style="display:none;color:${s.type==='M'?'var(--am)':'var(--aa)'}">${s.title.charAt(0)}</div>`
+          :`<div class="fn-series-cover-ph" style="display:flex;color:${s.type==='M'?'var(--am)':'var(--aa)'}">${s.title.charAt(0)}</div>`;
         const pct=s.total>0?Math.round((s.completed||0)/s.total*100):0;
         const lastCh=s.lastChapter||(s.completed)||0;
         const chLabel=s.type==="M"?"Cap.":"Ep.";
-        const progText=s.total>0
-          ?`${chLabel} <b style="color:var(--t1);font-size:11px">${lastCh}</b> / ${s.total} &nbsp;·&nbsp; ${pct}%`
-          :`${chLabel} <b style="color:var(--t1);font-size:11px">${lastCh}</b>`;
-        const typeBadge=s.type==="M"
-          ?`<span style="flex-shrink:0;font-size:9px;font-weight:700;color:${ac};background:var(--amd);padding:2px 7px;border-radius:10px">MANGA</span>`
-          :`<span style="flex-shrink:0;font-size:9px;font-weight:700;color:var(--aa);background:var(--aad);padding:2px 7px;border-radius:10px">ANIME</span>`;
-        return `<div class="fn-series-item">
+        const clr=s.type==="M"?ac:"var(--aa)";
+        return `<div class="fn-series-item" style="background:${idx%2===0?'rgba(255,255,255,.02)':'rgba(255,255,255,.01)'}">
           ${cvr}
           <div class="fn-series-info">
             <div class="fn-series-title">${s.title}</div>
-            <div class="fn-series-prog">${progText}</div>
-            <div class="fn-series-pbar"><div class="fn-series-pfill" style="width:${pct}%;background:${s.type==="M"?ac:"var(--aa)"}"></div></div>
+            <div class="fn-series-prog">${chLabel} <b style="color:var(--t1)">${lastCh}</b>${s.total>0?` / ${s.total} &nbsp;·&nbsp; <span style="color:${clr}">${pct}%</span>`:""}</div>
+            <div class="fn-series-pbar"><div class="fn-series-pfill" style="width:${pct}%;background:${clr}"></div></div>
           </div>
-          ${typeBadge}
+          <span style="flex-shrink:0;font-size:9px;font-weight:700;color:${clr};background:${s.type==='M'?'var(--amd)':'var(--aad)'};padding:2px 7px;border-radius:10px;border:1px solid ${s.type==='M'?'rgba(99,179,237,.2)':'rgba(104,211,145,.2)'}">${s.type==="M"?"MANGA":"ANIME"}</span>
         </div>`;
-      }).join("");
+      }).join("") + `</div>`;
     };
     const readingManga=reading.filter(s=>s.type==="M");
     const readingAnime=reading.filter(s=>s.type==="A");
     const vuid=friendsState.viewingUid;
+    // Compare personal
+    const myTotalCaps=data.manga.reduce((s,x)=>s+x.completed.length,0)+data.anime.reduce((s,x)=>s+x.completed.length,0);
+    const friendTotalCaps=totalMangaCh+totalAnimeEp;
+    const diffCaps=Math.abs(myTotalCaps-friendTotalCaps);
+    const compareText=myTotalCaps>friendTotalCaps
+      ?`Tú llevas <b style="color:${ac}">${diffCaps} caps más</b> en total`
+      :myTotalCaps<friendTotalCaps
+      ?`@${_pUsername} te lleva <b style="color:var(--dng)">${diffCaps} caps</b>`
+      :`Están <b style="color:var(--suc)">empatados</b> en caps totales`;
     container.innerHTML=`
-      <div class="fn-profile">
-        <button class="fn-btn sec" onclick="friendsState.view='list';friendsState.viewingUid=null;friendsState.viewingData=null;renderFriendsPanel()" style="margin-bottom:16px;font-size:12px">&larr; Volver</button>
-        ${(()=>{const uname=pData.username||pData.displayName||"U";let h=0;for(let i=0;i<uname.length;i++){h=(h*31+uname.charCodeAt(i))&0xFFFFFF;}const hue=h%360;const b1=`hsl(${hue},65%,32%)`;const b2=`hsl(${(hue+50)%360},60%,24%)`;const b3=`hsl(${(hue+110)%360},55%,20%)`;return `<div class="fn-profile-banner" style="background:linear-gradient(135deg,${b1} 0%,${b2} 55%,${b3} 100%)"><div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 12px)"></div></div>`;})()}
-        <div class="fn-profile-header">
-          ${av}
-          <div class="fn-profile-info">
-            <div class="fn-profile-name">@${pData.username||pData.displayName||"Usuario"}</div>
-            ${(pData.displayName&&pData.username&&pData.displayName!==pData.username&&pData.displayName!==("@"+pData.username))?`<div class="fn-profile-uname" style="color:var(--t3);opacity:.7">${pData.displayName}</div>`:""} 
-          </div>
-          <button class="fn-remove-btn" onclick="if(confirm('Eliminar de amigos?'))fnRemoveFriend('${vuid}')">Eliminar</button>
+      <div class="fn-profile" style="padding:0">
+        <div style="padding:14px 16px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.05)">
+          <button class="fn-btn sec" onclick="friendsState.view='list';friendsState.viewingUid=null;friendsState.viewingData=null;renderFriendsPanel()" style="font-size:11px;padding:6px 12px">&larr; Volver</button>
+          <span style="flex:1"></span>
+          <button style="padding:6px 12px;border:1px solid rgba(231,76,76,.3);background:rgba(231,76,76,.07);color:var(--t3);font-size:10px;border-radius:10px;cursor:pointer;font-weight:600;font-family:'Outfit',sans-serif;transition:.15s" onmouseover="this.style.color='var(--dng)';this.style.borderColor='var(--dng)'" onmouseout="this.style.color='var(--t3)';this.style.borderColor='rgba(231,76,76,.3)'" onclick="if(confirm('¿Eliminar a @${_pUsername} de amigos?'))fnRemoveFriend('${vuid}')">✕ Eliminar</button>
         </div>
-        ${(()=>{const totalMangaCh=(pData.allManga||pData.topManga||[]).reduce((s,x)=>s+(x.completed||0),0);const totalAnimEp=(pData.allAnime||pData.topAnime||[]).reduce((s,x)=>s+(x.completed||0),0);return `<div class="fn-profile-stats">
-          <div class="fn-ps"><div class="fn-ps-v" style="color:${ac}">${pData.mangaCount||0}</div><div class="fn-ps-l">📚 Manga</div></div>
-          <div class="fn-ps"><div class="fn-ps-v" style="color:var(--aa)">${pData.animeCount||0}</div><div class="fn-ps-l">🎬 Anime</div></div>
-          <div class="fn-ps"><div class="fn-ps-v" style="color:var(--suc)">${reading.length}</div><div class="fn-ps-l">En curso</div></div>
-          <div class="fn-ps"><div class="fn-ps-v" style="color:var(--fav);font-size:14px">${totalMangaCh}</div><div class="fn-ps-l">📖 Caps</div></div>
-          <div class="fn-ps"><div class="fn-ps-v" style="color:var(--inf);font-size:14px">${totalAnimEp}</div><div class="fn-ps-l">▶ Eps</div></div>
-        </div>`;})()}
-        ${(()=>{
-          const myMangaTitles=new Set(data.manga.map(s=>s.title.toLowerCase().trim()));
-          const myAnimeTitles=new Set(data.anime.map(s=>s.title.toLowerCase().trim()));
-          const friendManga=(pData.allManga||pData.topManga||[]);
-          const friendAnime=(pData.allAnime||pData.topAnime||[]);
-          const commonManga=friendManga.filter(s=>myMangaTitles.has((s.title||"").toLowerCase().trim())).map(s=>s.title).slice(0,5);
-          const commonAnime=friendAnime.filter(s=>myAnimeTitles.has((s.title||"").toLowerCase().trim())).map(s=>s.title).slice(0,5);
-          let html="";
-          if(commonManga.length>0){html+=`<div class="friends-section" style="margin-bottom:10px;padding:12px;background:rgba(99,179,237,.07);border:1px solid rgba(99,179,237,.2);border-radius:var(--rm)"><div style="font-size:11px;font-weight:700;color:${ac};text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📚 Ambos leen</div><div style="display:flex;flex-wrap:wrap;gap:6px">${commonManga.map(t=>`<span style="background:rgba(99,179,237,.12);border:1px solid rgba(99,179,237,.25);color:var(--t1);font-size:11px;padding:3px 10px;border-radius:12px">${t}</span>`).join("")}</div></div>`;}
-          if(commonAnime.length>0){html+=`<div class="friends-section" style="margin-bottom:14px;padding:12px;background:rgba(104,211,145,.07);border:1px solid rgba(104,211,145,.2);border-radius:var(--rm)"><div style="font-size:11px;font-weight:700;color:var(--aa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎬 Ambos ven</div><div style="display:flex;flex-wrap:wrap;gap:6px">${commonAnime.map(t=>`<span style="background:rgba(104,211,145,.12);border:1px solid rgba(104,211,145,.25);color:var(--t1);font-size:11px;padding:3px 10px;border-radius:12px">${t}</span>`).join("")}</div></div>`;}
-          return html;
-        })()}
-        ${readingManga.length>0?`
-        <div class="friends-section" style="margin-bottom:14px">
-          <div class="fn-profile-list-title">📚 Manga en progreso (${readingManga.length})</div>
-          ${buildList(readingManga,"—")}
-        </div>`:""}
-        ${readingAnime.length>0?`
-        <div class="friends-section" style="margin-bottom:14px">
-          <div class="fn-profile-list-title">🎬 Anime en progreso (${readingAnime.length})</div>
-          ${buildList(readingAnime,"—")}
-        </div>`:""}
-        ${reading.length===0?`<div class="fn-status" style="margin-bottom:14px">Nada en progreso actualmente</div>`:""}
+        ${_profileBannerHtml}
+        <div style="display:flex;align-items:flex-end;gap:14px;padding:0 20px 16px;margin-top:-32px;position:relative;z-index:1;border-bottom:1px solid rgba(255,255,255,.06)">
+          ${_pAv}
+          <div style="flex:1;min-width:0;padding-bottom:2px">
+            <div class="fn-profile-name">@${_pUsername}</div>
+            <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+              <span style="font-size:10px;color:var(--t3);font-family:'Space Mono',monospace">${pData.mangaCount||0} manga</span>
+              <span style="font-size:10px;color:var(--t3)">·</span>
+              <span style="font-size:10px;color:var(--t3);font-family:'Space Mono',monospace">${pData.animeCount||0} anime</span>
+              <span style="font-size:10px;color:var(--t3)">·</span>
+              <span style="font-size:10px;color:var(--suc);font-family:'Space Mono',monospace">${reading.length} en curso</span>
+            </div>
+          </div>
+        </div>
+        <div class="fn-profile-stats" style="grid-template-columns:repeat(4,1fr)">
+          <div class="fn-ps"><div class="fn-ps-v" style="color:${ac}">${totalMangaCh}</div><div class="fn-ps-l">📖 Caps</div></div>
+          <div class="fn-ps"><div class="fn-ps-v" style="color:var(--aa)">${totalAnimeEp}</div><div class="fn-ps-l">▶ Eps</div></div>
+          <div class="fn-ps"><div class="fn-ps-v" style="color:var(--wrn)">${completed.length}</div><div class="fn-ps-l">✅ Complet.</div></div>
+          <div class="fn-ps"><div class="fn-ps-v" style="color:var(--purple)">${pData.mangaCount+pData.animeCount||0}</div><div class="fn-ps-l">🗂 Total</div></div>
+        </div>
+        <div style="margin:14px 16px;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;font-size:11px;color:var(--t2)">${compareText}</div>
+        ${allCommon.length>0?`
+        <div style="margin:0 16px 14px;padding:12px 14px;background:rgba(99,179,237,.07);border:1px solid rgba(99,179,237,.18);border-radius:12px">
+          <div style="font-size:9px;font-weight:700;color:${ac};text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📚 Ambos leen / ven</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">${allCommon.map(t=>`<span style="background:rgba(99,179,237,.12);border:1px solid rgba(99,179,237,.22);color:var(--t1);font-size:10px;padding:3px 9px;border-radius:10px">${t}</span>`).join("")}</div>
+        </div>`:""} 
+        ${reading.length>0?`
+        <div style="padding:14px 16px 6px">
+          <div class="fn-profile-list-title" style="padding:0 0 10px">▶ En progreso (${reading.length})</div>
+          ${buildList(reading,"—")}
+        </div>`:`<div class="fn-status" style="margin:14px 16px">Nada en progreso actualmente</div>`}
         ${completed.length>0?`
-        <div class="friends-section" style="margin-bottom:14px">
-          <div class="fn-profile-list-title">✅ Últimos completados</div>
+        <div style="padding:14px 16px 6px">
+          <div class="fn-profile-list-title" style="padding:0 0 10px">✅ Últimos completados</div>
           ${buildList(completed,"—")}
         </div>`:""}
         ${paused.length>0?`
-        <div class="friends-section">
-          <div class="fn-profile-list-title">⏸ En pausa / Pendientes</div>
+        <div style="padding:14px 16px 14px">
+          <div class="fn-profile-list-title" style="padding:0 0 10px">⏸ En pausa / Pendientes</div>
           ${buildList(paused,"—")}
         </div>`:""}
       </div>`;
@@ -1368,36 +1401,97 @@ async function _renderFriendsPanelInner(container){
   }
 
   // Solicitudes recibidas — siempre visible
+  if(received.length>0){
   html+=`<div class="friends-section"><div class="friends-section-lbl">📨 Solicitudes recibidas (${received.length})</div>`;
   if(receivedError){
     html+=`<div class="fn-status error">Error al leer solicitudes: ${receivedError}<br><small>Revisa las reglas de Firestore</small></div>`;
-  }else if(received.length===0){
-    html+=`<div class="fn-status">Sin solicitudes pendientes</div>`;
   }else{
     received.forEach(req=>{
-      const avR=req.avatarUrl?`<img class="fn-fc-avatar" src="${req.avatarUrl}">`:
-        `<div class="fn-fc-avatar-ph">&#128100;</div>`;
+      const _reqUn=req.username||"usuario";
+      const avR=req.avatarUrl?`<img class="fn-fc-avatar" src="${req.avatarUrl}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+`<div class="fn-fc-avatar-ph" style="display:none">${_reqUn.charAt(0).toUpperCase()}</div>`
+        :`<div class="fn-fc-avatar-ph">${_reqUn.charAt(0).toUpperCase()}</div>`;
       html+=`<div class="fn-req-card">${avR}
-        <div><div class="fn-req-name">@${req.username||req.displayName||"Usuario"}</div><div class="fn-req-user">${req.username?"":req.displayName||""}</div></div>
+        <div><div class="fn-req-name">@${_reqUn}</div></div>
         <div class="fn-req-btns" style="margin-left:auto">
           <button class="fn-req-btn accept" data-accept="${req.id}" data-dname="${(req.displayName||"").replace(/"/g,"&quot;")}" data-uname="${req.username||""}" data-avatar="${req.avatarUrl||""}">✓ Aceptar</button>
           <button class="fn-req-btn reject" data-reject="${req.id}">✕</button>
         </div></div>`;
     });
   }
-  html+=`</div>`;
+  html+=`</div>`;}
 
-  // Lista de amigos
-  html+=`<div class="friends-section"><div class="friends-section-lbl">Mis amigos (${friends.length})</div>`;
-  if(friends.length===0){
-    html+=`<div class="fn-status">Aun no tienes amigos. Busca por @username para agregar.</div>`;
-  }else{
+  // ── FEED DE ACTIVIDAD — generado desde los perfiles públicos de amigos
+  if(friends.length>0){
+    // Recopilar eventos de todos los amigos (usando perfiles ya cargados más adelante — aquí generamos el feed)
+    const _feedEvents=[];
+    // Pre-cargar perfiles para el feed (se reusan en las tarjetas abajo)
+    const _friendProfiles=new Map();
     for(const f of friends){
-      let fProfile=null;
       try{
         const fDoc=await withTimeout(fbDb.collection("public_profiles").doc(f.uid).get());
-        fProfile=fDoc.exists?fDoc.data():null;
-      }catch(e){console.warn("fProfile load:",e.message);}
+        if(fDoc.exists)_friendProfiles.set(f.uid,fDoc.data());
+      }catch(e){}
+    }
+    // Extraer eventos: serie más reciente actualizada por cada amigo
+    for(const [uid,fp] of _friendProfiles){
+      const un=fp.username||"usuario";
+      const allF=[...(fp.allManga||fp.topManga||[]).map(s=>({...s,type:"M",uid,un})),
+                  ...(fp.allAnime||fp.topAnime||[]).map(s=>({...s,type:"A",uid,un}))];
+      // Top 3 más recientes
+      allF.sort((a,b)=>(b.lastUpdated||0)-(a.lastUpdated||0));
+      allF.slice(0,3).forEach(s=>{
+        if(!s.lastUpdated) return;
+        const ageMs=Date.now()-(s.lastUpdated||0);
+        if(ageMs>7*24*3600*1000) return; // solo últimos 7 días
+        _feedEvents.push({un,uid,title:s.title,type:s.type,completed:s.completed||0,total:s.total||0,
+          status:s.status,lastUpdated:s.lastUpdated,ageMs});
+      });
+    }
+    _feedEvents.sort((a,b)=>a.ageMs-b.ageMs);
+    if(_feedEvents.length>0){
+      html+=`<div class="friends-section"><div class="friends-section-lbl" style="display:flex;align-items:center;gap:6px">📡 Actividad reciente</div><div class="fn-feed">`;
+      // Agrupar por día
+      let lastDay="";
+      _feedEvents.slice(0,12).forEach(ev=>{
+        const d=new Date(ev.lastUpdated);
+        const today=new Date();const yesterday=new Date(today);yesterday.setDate(today.getDate()-1);
+        const dayKey=d.toDateString();
+        const dayLabel=dayKey===today.toDateString()?"Hoy":dayKey===yesterday.toDateString()?"Ayer":d.toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"short"});
+        if(dayKey!==lastDay){html+=`<div class="fn-feed-day-lbl">${dayLabel}</div>`;lastDay=dayKey;}
+        // Color avatar por username hash
+        let _fh=0;const _fs=ev.un;for(let i=0;i<_fs.length;i++)_fh=(_fh*31+_fs.charCodeAt(i))&0xFFFFFF;_fh=_fh%360;
+        const _fclr=`hsl(${_fh},60%,42%)`;
+        const _fclr2=`hsl(${(_fh+50)%360},55%,35%)`;
+        // Hora relativa
+        const ageH=Math.floor(ev.ageMs/3600000);
+        const ageMin=Math.floor(ev.ageMs/60000);
+        const timeStr=ageMin<60?`hace ${ageMin}m`:ageH<24?`hace ${ageH}h`:`hace ${Math.floor(ageH/24)}d`;
+        // Acción
+        const clr=ev.type==="M"?ac:"var(--aa)";
+        const typeLabel=ev.type==="M"?"manga":"anime";
+        const chLabel=ev.type==="M"?"Cap.":"Ep.";
+        let actionHtml="";
+        const pct=ev.total>0?Math.round(ev.completed/ev.total*100):0;
+        if(ev.status==="completed"){
+          actionHtml=`Completó <strong>${ev.title}</strong> — ${ev.completed} ${ev.type==="M"?"caps":"eps"} ✓<div style="margin-top:4px"><span class="fn-feed-badge completed">Completado</span></div>`;
+        } else {
+          actionHtml=`${chLabel} <strong>${ev.completed}</strong>${ev.total>0?` / ${ev.total}`:""} de <strong>${ev.title}</strong><div style="margin-top:4px"><span class="fn-feed-badge ${typeLabel}">${ev.type==="M"?"Manga":"Anime"}</span>${ev.total>0?`<span style="font-size:9px;color:var(--t3);margin-left:6px;font-family:'Space Mono',monospace">${pct}%</span>`:""}</div>`;
+        }
+        html+=`<div class="fn-feed-item">
+          <div class="fn-feed-avatar" style="background:linear-gradient(135deg,${_fclr},${_fclr2})">${ev.un.charAt(0).toUpperCase()}</div>
+          <div class="fn-feed-body">
+            <div class="fn-feed-user">@${ev.un}</div>
+            <div class="fn-feed-action">${actionHtml}</div>
+          </div>
+          <div class="fn-feed-time">${timeStr}</div>
+        </div>`;
+      });
+      html+=`</div></div>`;
+    }
+    // ── Lista de amigos con tarjetas v5 (usando perfiles ya cargados)
+    html+=`<div class="friends-section"><div class="friends-section-lbl">Mis amigos (${friends.length})</div>`;
+    for(const f of friends){
+      const fProfile=_friendProfiles.get(f.uid)||null;
       // ── Tarjeta de amigo v5 ──
       const nm=fProfile?.username||f.username||"@"+((fProfile?.displayName||f.displayName||"usuario").split(" ")[0].toLowerCase());
       const un=fProfile?.username||f.username||"";
@@ -1473,8 +1567,11 @@ async function _renderFriendsPanelInner(container){
         </div>
       </div>`;
     }
+    html+=`</div>`; // cierre friends-section lista
+  } else {
+    html+=`<div class="friends-section"><div class="friends-section-lbl">Mis amigos (0)</div><div class="fn-status">Aún no tienes amigos. Busca por @username para agregar.</div></div>`;
   }
-  html+=`</div></div>`;
+  html+=`</div>`; // cierre friends-panel
   container.innerHTML=html;
 
   // Event listeners
