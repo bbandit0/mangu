@@ -1290,20 +1290,34 @@ async function _renderFriendsPanelInner(container){
       const _ck=((_topS.type==="A"?"anime":"manga")+":"+_topS.title).toLowerCase().trim();
       const _cv=_coverUrlCache.get(_ck);
       if(_cv&&_cv!=="pending") _topCoverUrl=_cv;
-      else if(!_cv) fnFetchCoverUrl(_topS.title,_topS.type==="A"?"anime":"manga").then(url=>{if(url){friendsState.viewingData=null;renderFriendsPanel();}});
+      else if(!_cv) fnFetchCoverUrl(_topS.title,_topS.type==="A"?"anime":"manga").then(url=>{
+        if(url){
+          // Actualización quirúrgica del banner del perfil expandido
+          const bannerEl=document.getElementById("fp-banner-img");
+          if(bannerEl){
+            bannerEl.style.cssText=`position:absolute;inset:0;z-index:0;transition:opacity .7s ease;background:url('${url}') center 25%/cover;filter:blur(14px) brightness(.32) saturate(1.8);transform:scale(1.15);opacity:1`;
+            const lbl=document.getElementById("fp-banner-lbl");
+            if(lbl) lbl.style.display="flex";
+          } else {
+            friendsState.viewingData=null;
+            renderFriendsPanel();
+          }
+        }
+      });
     }
     const _topPct=_topS&&_topS.total>0?Math.round((_topS.completed||0)/_topS.total*100):0;
-    // Banner mejorado
-    const _profileBannerHtml=`<div class="fn-profile-banner-v5">
-      ${_topCoverUrl
-        ?`<img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(14px) brightness(.45) saturate(1.5);transform:scale(1.15)" src="${_topCoverUrl}" onerror="this.remove()">`
-        :`<div style="position:absolute;inset:0;background:linear-gradient(135deg,${_b1} 0%,${_b2} 55%,${_b3} 100%)"><div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 14px)"></div></div>`
-      }
-      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05) 0%,rgba(0,0,0,.78) 100%)"></div>
-      ${_topS?`<div style="position:absolute;bottom:10px;left:20px;right:20px;display:flex;align-items:center;gap:8px;z-index:2">
-        <span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.82);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">▶ ${_topS.title}</span>
-        <span style="font-size:9px;font-family:'Space Mono',monospace;color:rgba(255,255,255,.5)">${_topPct}%</span>
-      </div>`:""}
+    // Banner mejorado — pre-calcular estilos para evitar template literals anidados
+    const _profBannerBg=_topCoverUrl
+      ?`background:url('${_topCoverUrl}') center 25%/cover;filter:blur(14px) brightness(.32) saturate(1.8);transform:scale(1.15);opacity:1`
+      :`background:linear-gradient(135deg,${_b1} 0%,${_b2} 55%,${_b3} 100%);opacity:0`;
+    const _profBannerFallback=_topCoverUrl?""
+      :`<div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 18px),radial-gradient(ellipse 90% 90% at 15% 60%,rgba(104,211,145,.18) 0%,transparent 55%),radial-gradient(ellipse 70% 90% at 88% 20%,rgba(99,179,237,.15) 0%,transparent 55%)"></div>`;
+    const _profBannerLblDisplay=_topCoverUrl?"flex":"none";
+    const _profileBannerHtml=`<div class="fn-profile-banner-v5" style="position:relative;overflow:hidden">
+      ${_profBannerFallback}
+      <div id="fp-banner-img" style="position:absolute;inset:0;z-index:0;transition:opacity .7s ease;${_profBannerBg}"></div>
+      <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.78) 100%)"></div>
+      ${_topS?`<div id="fp-banner-lbl" style="position:absolute;bottom:10px;left:20px;right:20px;display:${_profBannerLblDisplay};align-items:center;gap:8px;z-index:2"><span style="font-size:10px;font-weight:700;color:rgba(255,255,255,.82);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 6px rgba(0,0,0,.9)">&#9654; ${_topS.title}</span><span style="font-size:9px;font-family:Space Mono,monospace;color:rgba(255,255,255,.5);background:rgba(0,0,0,.5);padding:1px 6px;border-radius:4px;flex-shrink:0">${_topPct}%</span></div>`:""}
     </div>`;
     // series en común
     const myMangaTitles=new Set(data.manga.map(s=>s.title.toLowerCase().trim()));
@@ -1311,6 +1325,8 @@ async function _renderFriendsPanelInner(container){
     const commonManga=(pData.allManga||pData.topManga||[]).filter(s=>myMangaTitles.has((s.title||"").toLowerCase().trim())).map(s=>s.title).slice(0,6);
     const commonAnime=(pData.allAnime||pData.topAnime||[]).filter(s=>myAnimeTitles.has((s.title||"").toLowerCase().trim())).map(s=>s.title).slice(0,6);
     const allCommon=[...commonManga,...commonAnime];
+    // Compatibilidad — definir _pCompat en este scope
+    const _pCompat=calcCompatibility(data,pData);
     // buildList mejorado
     const buildList=(arr,emptyMsg)=>{
       if(!arr.length) return `<div class="fn-status">${emptyMsg}</div>`;
