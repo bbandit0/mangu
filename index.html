@@ -350,44 +350,56 @@ html::after{
 }
 
 /* ── RECOMENDACIONES ── */
-.reco-section{margin:20px 0 0}
-.reco-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.reco-title-wrap{display:flex;align-items:center;gap:8px}
-.reco-icon-box{width:28px;height:28px;border-radius:8px;background:rgba(155,125,255,.14);border:1px solid rgba(155,125,255,.24);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.reco-label{font-size:13px;font-weight:700;color:var(--t1)}
-.reco-sublabel{font-size:10px;color:var(--t3);margin-top:1px}
-.reco-new-tag{font-size:8px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(155,125,255,.14);color:var(--purple);border:1px solid rgba(155,125,255,.24)}
-.reco-context{font-size:10px;color:var(--t3);margin-bottom:10px;padding:8px 10px;background:rgba(155,125,255,.06);border:1px solid rgba(155,125,255,.12);border-radius:8px;line-height:1.5}
-.reco-context b{color:var(--purple)}
-.reco-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+/* ── DISCOVER SECTION v2 ── */
+.reco-section{margin:0}
+.reco-page-header{padding:20px 0 16px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:0}
+.reco-page-title{font-size:22px;font-weight:800;color:var(--t1);font-family:'Space Mono',monospace;letter-spacing:-1px;margin-bottom:2px}
+.reco-page-title span{background:linear-gradient(120deg,#a78bfa,#63b3ed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.reco-page-sub{font-size:11px;color:var(--t3);font-family:'Outfit',sans-serif}
+.reco-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:0;padding:16px 0 10px}
+.reco-title-wrap{display:flex;align-items:center;gap:10px}
+.reco-icon-box{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,rgba(155,125,255,.22),rgba(99,179,237,.16));border:1px solid rgba(155,125,255,.35);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;box-shadow:0 4px 14px rgba(155,125,255,.15)}
+.reco-label{font-size:14px;font-weight:700;color:var(--t1)}
+.reco-sublabel{font-size:10px;color:var(--t3);margin-top:2px}
+.reco-new-tag{font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;background:linear-gradient(135deg,rgba(155,125,255,.2),rgba(99,179,237,.15));color:#c4b5fd;border:1px solid rgba(155,125,255,.35);letter-spacing:.3px}
+.reco-context{font-size:11px;color:var(--t2);margin-bottom:16px;padding:10px 14px;background:linear-gradient(135deg,rgba(155,125,255,.07),rgba(99,179,237,.05));border:1px solid rgba(155,125,255,.18);border-radius:12px;line-height:1.5;display:flex;align-items:center;gap:8px}
+.reco-context::before{content:'🎯';font-size:14px;flex-shrink:0}
+.reco-context b{color:#c4b5fd}
+.reco-section-lbl{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:1.2px;margin:16px 0 10px;display:flex;align-items:center;gap:10px}
+.reco-section-lbl::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.reco-row{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .reco-row::-webkit-scrollbar{display:none}
-.reco-card{flex-shrink:0;width:128px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;cursor:pointer;transition:.2s;position:relative}
-.reco-card:hover{border-color:rgba(155,125,255,.3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(155,125,255,.1)}
+.reco-card{flex-shrink:0;width:140px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);position:relative}
+.reco-card:hover{border-color:rgba(155,125,255,.4);transform:translateY(-4px) scale(1.02);box-shadow:0 16px 40px rgba(155,125,255,.18),0 4px 12px rgba(0,0,0,.4)}
 .reco-card:active{transform:scale(.97)}
-.reco-card-cover{width:100%;height:168px;display:flex;align-items:center;justify-content:center;font-size:48px}
-.reco-card-score{position:absolute;top:7px;right:7px;font-size:8px;font-weight:700;padding:2px 6px;border-radius:8px;background:rgba(10,14,26,.82);color:#fbbf24;backdrop-filter:blur(4px)}
-.reco-card-body{padding:8px 10px 10px}
-.reco-card-title{font-size:10px;font-weight:600;color:var(--t1);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.reco-card-reason{font-size:9px;color:var(--t3);line-height:1.4;margin-bottom:6px}
-.reco-card-tag{font-size:8px;font-weight:700;padding:2px 6px;border-radius:6px;background:rgba(155,125,255,.11);color:var(--purple);border:1px solid rgba(155,125,255,.2)}
-.reco-empty{font-size:11px;color:var(--t3);padding:14px;text-align:center}
+.reco-card-cover{width:100%;height:190px;display:flex;align-items:center;justify-content:center;font-size:52px;background-size:cover;background-position:center;position:relative}
+.reco-card-cover::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+.reco-card-score{position:absolute;top:8px;right:8px;font-size:9px;font-weight:700;padding:3px 7px;border-radius:20px;background:rgba(0,0,0,.8);color:#fbbf24;backdrop-filter:blur(6px);display:flex;align-items:center;gap:3px;z-index:2}
+.reco-card-body{padding:10px 11px 12px}
+.reco-card-title{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reco-card-reason{font-size:9px;color:var(--t3);line-height:1.5;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.reco-card-footer{display:flex;align-items:center;justify-content:space-between}
+.reco-card-tag{font-size:8px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(155,125,255,.13);color:#a78bfa;border:1px solid rgba(155,125,255,.25);letter-spacing:.2px}
+.reco-add-hint{font-size:8px;color:var(--t3)}
+.reco-empty{font-size:12px;color:var(--t3);padding:24px;text-align:center;background:rgba(255,255,255,.02);border-radius:12px;border:1px dashed rgba(255,255,255,.06)}
 
 /* ── PERFIL PÚBLICO MEJORADO ── */
 /* ── PERFIL PERSONAL v4.0 ── */
 .pubprof-wrap{background:var(--bg2);border:1px solid rgba(99,179,237,.18);border-radius:24px;overflow:hidden;margin-top:16px;box-shadow:0 12px 48px rgba(0,0,0,.4)}
-.pubprof-cover{height:130px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(99,179,237,.7) 0%,rgba(155,125,255,.6) 35%,rgba(104,211,145,.5) 65%,rgba(251,191,36,.4) 100%)}
-.pubprof-cover::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 14px),radial-gradient(ellipse 80% 80% at 80% 50%,rgba(255,255,255,.08),transparent)}
-.pubprof-cover::after{content:"";position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,var(--bg2))}
+.pubprof-cover{height:180px;position:relative;overflow:hidden;background:linear-gradient(135deg,#0d1b35 0%,#1a1040 40%,#0d2535 100%)}
+.pubprof-cover::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 120% 80% at 20% 50%,rgba(99,179,237,.35) 0%,transparent 55%),radial-gradient(ellipse 80% 100% at 85% 30%,rgba(155,125,255,.3) 0%,transparent 55%),radial-gradient(ellipse 60% 60% at 50% 120%,rgba(104,211,145,.2) 0%,transparent 60%),repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 20px)}
+.pubprof-cover::after{content:"";position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,var(--bg2))}
 /* orbes decorativos en el cover */
 .pubprof-cover-orb1{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(rgba(99,179,237,.4),transparent 70%);top:-30px;right:40px;pointer-events:none}
 .pubprof-cover-orb2{position:absolute;width:80px;height:80px;border-radius:50%;background:radial-gradient(rgba(155,125,255,.45),transparent 70%);bottom:-10px;right:10px;pointer-events:none}
-.pubprof-av-wrap{position:absolute;bottom:-32px;left:20px;z-index:2}
-.pubprof-av{width:72px;height:72px;border-radius:50%;border:4px solid var(--bg2);background:linear-gradient(135deg,var(--am),var(--aa));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;overflow:hidden;box-shadow:0 6px 24px rgba(99,179,237,.5),0 0 0 2px rgba(99,179,237,.3)}
+.pubprof-av-wrap{position:absolute;bottom:-36px;left:20px;z-index:2}
+.pubprof-av{width:80px;height:80px;border-radius:50%;border:4px solid var(--bg2);background:linear-gradient(135deg,var(--am),var(--aa));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#fff;overflow:hidden;box-shadow:0 8px 28px rgba(99,179,237,.5),0 0 0 2px rgba(99,179,237,.4),0 0 0 6px rgba(99,179,237,.1)}
 .pubprof-av img{width:100%;height:100%;object-fit:cover}
-.pubprof-body{padding:44px 18px 0}
+.pubprof-body{padding:48px 20px 0}
 /* Nombre + handle */
-.pubprof-name{font-size:22px;font-weight:700;color:var(--am);font-family:"Space Mono",monospace;letter-spacing:-.5px;text-shadow:0 0 28px rgba(99,179,237,.35)}
-.pubprof-handle{font-size:11px;color:var(--t3);margin-bottom:0;font-family:"Space Mono",monospace;margin-top:3px}
+.pubprof-name{font-size:24px;font-weight:800;color:#fff;font-family:"Space Mono",monospace;letter-spacing:-1px;text-shadow:0 0 32px rgba(99,179,237,.4);display:flex;align-items:center;gap:8px}
+.pubprof-name-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:linear-gradient(135deg,rgba(99,179,237,.2),rgba(155,125,255,.15));border:1px solid rgba(99,179,237,.3);color:var(--am);letter-spacing:.3px;vertical-align:middle}
+.pubprof-handle{font-size:11px;color:var(--t3);margin-bottom:0;font-family:"Space Mono",monospace;margin-top:4px}
 /* Fila de acción rápida: share + racha */
 .pubprof-action-row{display:flex;align-items:center;gap:10px;margin:12px 0 16px}
 .pubprof-streak-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:linear-gradient(135deg,rgba(251,191,36,.18),rgba(251,191,36,.08));border:1px solid rgba(251,191,36,.35);border-radius:20px;font-size:12px;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;flex-shrink:0}
@@ -629,13 +641,14 @@ html::after{
 .tab-content-fade{animation:tabFadeIn .18s ease-out}
 
 /* ── MY PROFILE BANNER CARD ── */
-.fn-my-banner-card{border-radius:16px;overflow:hidden;border:1px solid rgba(99,179,237,.22);margin-bottom:0;position:relative}
-.fn-my-banner{height:70px;position:relative;overflow:hidden;background:var(--bg2)}
-.fn-my-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(10px) brightness(.45) saturate(1.4);transform:scale(1.1)}
-.fn-my-banner-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05),rgba(0,0,0,.7))}
-.fn-my-banner-inner{padding:0 14px 10px;margin-top:-22px;position:relative;z-index:1;display:flex;align-items:flex-end;gap:12px;background:rgba(14,18,32,.6)}
-.fn-my-banner-avatar{width:46px;height:46px;border-radius:50%;border:3px solid rgba(14,18,32,.8);flex-shrink:0;object-fit:cover;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff}
-.fn-my-banner-info{flex:1;min-width:0}
+.fn-my-banner-card{border-radius:20px;overflow:hidden;border:1px solid rgba(99,179,237,.25);margin-bottom:0;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.fn-my-banner{height:100px;position:relative;overflow:hidden;background:linear-gradient(135deg,#0d1b35 0%,#1a1040 50%,#0d2535 100%)}
+.fn-my-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 100% 120% at 20% 50%,rgba(99,179,237,.3) 0%,transparent 55%),radial-gradient(ellipse 70% 100% at 85% 20%,rgba(155,125,255,.25) 0%,transparent 55%),repeating-linear-gradient(135deg,rgba(255,255,255,.02) 0,rgba(255,255,255,.02) 1px,transparent 1px,transparent 18px);z-index:1;pointer-events:none}
+.fn-my-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(12px) brightness(.35) saturate(1.8);transform:scale(1.12)}
+.fn-my-banner-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.02),rgba(8,14,28,.85));z-index:2}
+.fn-my-banner-inner{padding:0 16px 14px;margin-top:-28px;position:relative;z-index:3;display:flex;align-items:flex-end;gap:14px;background:transparent}
+.fn-my-banner-avatar{width:56px;height:56px;border-radius:50%;border:3px solid rgba(10,18,36,.9);flex-shrink:0;object-fit:cover;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.5),0 0 0 2px rgba(99,179,237,.35)}
+.fn-my-banner-info{flex:1;min-width:0;padding-bottom:2px}
 .fn-my-banner-controls{display:flex;gap:5px;align-self:center;margin-left:auto}
 
 /* ── PROFILE INLINE TABS (manga/anime split) ── */
@@ -679,8 +692,8 @@ html::after{
 .fn-friend-card-v5{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:20px;overflow:hidden;margin-bottom:12px;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 4px 24px rgba(0,0,0,.3)}
 .fn-friend-card-v5:hover{border-color:rgba(99,179,237,.35);transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.45)}
 /* Banner que usa cover de serie activa */
-.fn-fc-v5-banner{position:relative;width:100%;height:80px;border-radius:10px 10px 0 0;overflow:hidden;background:linear-gradient(135deg,var(--bg3) 0%,var(--bg4) 100%);}
-.fn-fc-v5-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(8px) brightness(.55) saturate(1.4);transform:scale(1.1)}
+.fn-fc-v5-banner{position:relative;width:100%;height:95px;border-radius:14px 14px 0 0;overflow:hidden;background:linear-gradient(135deg,#0d1b35 0%,#1a1040 50%,#0d2535 100%);}
+.fn-fc-v5-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:blur(10px) brightness(.4) saturate(1.6);transform:scale(1.12)}
 .fn-fc-v5-banner-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,rgba(0,0,0,.7) 100%)}
 /* Chip de racha en banner */
 .fn-fc-v5-streak{position:absolute;top:8px;right:10px;display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:linear-gradient(135deg,rgba(251,191,36,.25),rgba(251,191,36,.12));border:1px solid rgba(251,191,36,.4);border-radius:12px;font-size:10px;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;z-index:2}
@@ -1380,13 +1393,14 @@ async function _renderFriendsPanelInner(container){
       <div class="fn-my-banner" style="${_myTopCoverUrl?"":`background:${_myBg}`}">
         ${_myTopCoverUrl?`<img class="fn-my-banner-img" src="${_myTopCoverUrl}" onerror="this.remove()">`:""}
         <div class="fn-my-banner-grad"></div>
-        ${_myTopS?`<div style="position:absolute;bottom:6px;left:12px;right:60px;z-index:2;font-size:9px;color:rgba(255,255,255,.7);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">▶ ${_myTopS.title}</div>`:""}
+        <div style="position:absolute;top:8px;right:12px;z-index:4;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(0,0,0,.55);color:rgba(255,255,255,.4);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.07)">✦ mi perfil</div>
+        ${_myTopS?`<div style="position:absolute;bottom:9px;left:14px;right:90px;z-index:4;font-size:9px;color:rgba(255,255,255,.55);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">▶ ${_myTopS.title}</div>`:""}
       </div>
       <div class="fn-my-banner-inner">
         ${_myAvInner}
         <div class="fn-my-banner-info">
-          <div style="font-size:14px;font-weight:700;color:var(--am);font-family:'Space Mono',monospace">@${myUsername}</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:2px;font-family:'Space Mono',monospace">${_myTotalCaps} caps · ${_myReadingAll.length} en curso</div>
+          <div style="font-size:15px;font-weight:800;color:#fff;font-family:'Space Mono',monospace;letter-spacing:-.5px;text-shadow:0 0 20px rgba(99,179,237,.35)">@${myUsername}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:3px;font-family:'Space Mono',monospace">${_myTotalCaps} caps · ${_myReadingAll.length} en curso</div>
         </div>
         <div class="fn-my-banner-controls">
           <button class="fn-btn sec" id="fn-change-user-btn" style="font-size:11px;padding:5px 10px">✏️ @</button>
@@ -3099,14 +3113,16 @@ async function p28RenderRecoSection(root){
   sec.className="reco-section";
   const topTags=allTags.slice(0,3).join(", ");
   sec.innerHTML=`
-    <div class="reco-hdr">
-      <div class="reco-title-wrap">
-        <div class="reco-icon-box">✨</div>
-        <div><div class="reco-label">Descubrir</div><div class="reco-sublabel">Basado en tus tags · Jikan API</div></div>
+    <div class="reco-page-header">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="reco-page-title">✦ <span>Descubrir</span></div>
+          <div class="reco-page-sub">Recomendaciones basadas en tus tags · Jikan API</div>
+        </div>
+        <button id="reco-refresh-btn" onclick="p28RecoCache={manga:[],anime:[],tagsKey:''};render();showToast('🔄 Buscando nuevas recomendaciones...');" style="background:linear-gradient(135deg,rgba(155,125,255,.16),rgba(99,179,237,.1));border:1px solid rgba(155,125,255,.35);color:#c4b5fd;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;padding:7px 14px;border-radius:20px;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px;letter-spacing:.2px">↺ Refrescar</button>
       </div>
-      <button id="reco-refresh-btn" onclick="p28RecoCache={manga:[],anime:[],tagsKey:''};render();showToast('🔄 Buscando nuevas recomendaciones...');" style="background:rgba(155,125,255,.12);border:1px solid rgba(155,125,255,.3);color:#9b7dff;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;cursor:pointer;transition:.15s;white-space:nowrap">🔄 Refrescar</button>
     </div>
-    <div class="reco-context">🎯 Tus tags: <b>${topTags}</b></div>
+    <div class="reco-context" style="margin-top:16px">Tus tags: <b>${topTags}</b></div>
     <div id="reco-manga-wrap"></div>
     <div id="reco-anime-wrap"></div>`;
   root.appendChild(sec);
@@ -3121,14 +3137,14 @@ async function p28RenderRecoSection(root){
     items.forEach(r=>{
       const card=document.createElement("div");
       card.className="reco-card";
-      const bgStyle=r.image?`background:url('${r.image}') center/cover`:`background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:44px`;
+      const bgStyle=r.image?`background:url('${r.image}') center/cover no-repeat`:`background:linear-gradient(135deg,rgba(155,125,255,.2),rgba(99,179,237,.12));display:flex;align-items:center;justify-content:center;font-size:52px`;
       card.innerHTML=`
         ${r.score?`<div class="reco-card-score">⭐ ${r.score.toFixed(1)}</div>`:""}
         <div class="reco-card-cover" style="${bgStyle}">${r.image?"":"📚"}</div>
         <div class="reco-card-body">
           <div class="reco-card-title">${r.title}</div>
           <div class="reco-card-reason">${r.reason}</div>
-          <span class="reco-card-tag">${r.tag}</span>
+          <div class="reco-card-footer"><span class="reco-card-tag">${r.tag}</span><span class="reco-add-hint">+ ver</span></div>
         </div>`;
       card.addEventListener("click",()=>{
         // Pre-rellena el formulario con el título y cambia al tab correspondiente
@@ -3139,7 +3155,7 @@ async function p28RenderRecoSection(root){
       row.appendChild(card);
     });
     const seclbl=document.createElement("div");
-    seclbl.style.cssText="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px";
+    seclbl.className="reco-section-lbl";
     seclbl.textContent=lbl;
     wrap.appendChild(seclbl);
     wrap.appendChild(row);
@@ -3187,7 +3203,9 @@ function p28RenderPublicProfile(root){
 
   const wrap=document.createElement("div");
   wrap.className="pubprof-wrap";
-  const avContent=photoURL?`<img src="${photoURL}" alt="avatar">`:`<span>${displayName.charAt(0).toUpperCase()}</span>`;
+  const _profCustomPhoto=(()=>{try{return localStorage.getItem("fn-custom-photo-"+(fbUser?.uid||""))||"";}catch(e){return "";}})();
+  const _profPhotoSrc=_profCustomPhoto||friendsState.customPhotoUrl||photoURL||"";
+  const avContent=_profPhotoSrc?`<img src="${_profPhotoSrc}" alt="avatar" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:`<span>${(username||displayName||"?").charAt(0).toUpperCase()}</span>`;
 
   // Chips de géneros
   const genreChips=genres.length>0
@@ -3207,8 +3225,8 @@ function p28RenderPublicProfile(root){
       <div class="pubprof-av-wrap"><div class="pubprof-av">${avContent}</div></div>
     </div>
     <div class="pubprof-body">
-      <div class="pubprof-name">${username?"@"+username:displayName}</div>
-      <div class="pubprof-handle">${username?displayName+" · mangu.app/@"+username:"Sin @username — regístralo en Amigos →"}</div>
+      <div class="pubprof-name">${username?"@"+username:displayName}<span class="pubprof-name-badge">${username?"mangu":"no @username"}</span></div>
+      <div class="pubprof-handle">${username?"mangu.app/@"+username:"Regístralo en Amigos →"}</div>
       <div class="pubprof-action-row">${streakChip}${timeChip}</div>
       <div class="pubprof-stats">
         <div class="pp-sc"><span class="pp-sc-v" style="color:var(--am)">📚 ${mCount}</span><span class="pp-sc-l">Manga</span></div>
