@@ -406,15 +406,26 @@ html::after{
 .skel-banner-inner{width:100%;height:100%;background:rgba(255,255,255,.06);animation:skeletonPulse 1.6s ease-in-out infinite;border-radius:inherit}
 
 
-/* ── HISTORIAL DE ACTIVIDAD (v4.0) ── */
-.hist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);border-radius:12px;margin-bottom:6px;transition:.15s}
-.hist-item:hover{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.09)}
-.hist-icon{font-size:16px;line-height:1;flex-shrink:0;margin-top:2px;width:22px;text-align:center}
+/* ── HISTORIAL DE ACTIVIDAD v4.1 — visual mejorado ── */
+.hist-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;margin-bottom:6px;transition:background .14s,border-color .14s}
+.hist-item:hover{background:rgba(99,179,237,.07);border-color:rgba(99,179,237,.15)}
+.hist-icon-wrap{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:1px}
+.hist-icon-wrap.chapter{background:rgba(99,179,237,.12);border:1px solid rgba(99,179,237,.2)}
+.hist-icon-wrap.complete{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.2)}
+.hist-icon-wrap.add{background:rgba(155,125,255,.12);border:1px solid rgba(155,125,255,.2)}
+.hist-icon-wrap.status{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.18)}
 .hist-body{flex:1;min-width:0}
-.hist-text{font-size:12px;color:var(--t1);line-height:1.45}
-.hist-text strong{font-weight:700}
-.hist-meta{display:block;font-size:10px;color:var(--t3);margin-top:3px;font-family:'Space Mono',monospace}
-.hist-time{font-size:10px;color:var(--t3);white-space:nowrap;font-family:'Space Mono',monospace;flex-shrink:0;margin-top:2px}
+.hist-title{font-size:12px;color:var(--t1);line-height:1.45;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-sub{font-size:10px;color:var(--t3);font-family:'Space Mono',monospace;margin-top:3px;display:flex;align-items:center;gap:6px}
+.hist-badge{display:inline-block;padding:1px 7px;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.hist-badge.m{background:rgba(99,179,237,.12);color:#7ec8f4;border:1px solid rgba(99,179,237,.2)}
+.hist-badge.a{background:rgba(104,211,145,.1);color:#68d391;border:1px solid rgba(104,211,145,.18)}
+.hist-time{font-size:9px;color:var(--t3);font-family:'Space Mono',monospace;white-space:nowrap;flex-shrink:0;margin-top:3px}
+/* Sub-tabs del historial */
+.hist-subtab-bar{display:flex;gap:3px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:3px;margin-bottom:14px}
+.hist-subtab{flex:1;padding:8px 6px;border:1px solid transparent;background:transparent;color:var(--t2);font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border-radius:10px;text-align:center;transition:.15s;white-space:nowrap}
+.hist-subtab:hover{color:var(--t1);background:rgba(255,255,255,.06)}
+.hist-subtab.active{background:rgba(99,179,237,.12);border-color:rgba(99,179,237,.28);color:#7ec8f4}
 .fn-feed-day-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--t3);margin:14px 0 8px 2px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,.05)}
 
 .compat-bar-wrap{padding:10px 16px 12px;border-top:1px solid rgba(255,255,255,.05)}
@@ -427,21 +438,20 @@ html::after{
 .compat-badge-big{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;font-family:'Space Mono',monospace;font-size:14px;font-weight:700;margin-bottom:12px}
 
 
-/* ── PERFIL PÚBLICO MEJORADO v5.0 ── */
-.pubprof-wrap{background:rgba(10,16,28,.9);border:1px solid rgba(99,179,237,.15);border-radius:24px;margin-top:16px;box-shadow:0 16px 60px rgba(0,0,0,.5);overflow:hidden}
-/* Cover banner — más alto, más impactante */
-.pubprof-cover{height:200px;position:relative;overflow:hidden;background:linear-gradient(135deg,#0d1b35 0%,#1a1040 40%,#0d2535 100%)}
+/* ── PERFIL PÚBLICO v6.0 ── */
+.pubprof-wrap{background:rgba(10,16,28,.95);border:1px solid rgba(99,179,237,.15);border-radius:22px;margin-top:16px;box-shadow:0 16px 60px rgba(0,0,0,.5);overflow:hidden}
+.pubprof-cover{height:185px;position:relative;overflow:hidden;background:linear-gradient(135deg,#0d1b35 0%,#1a1040 40%,#0d2535 100%)}
 .pubprof-cover-inner{position:absolute;inset:0;overflow:hidden}
-.pubprof-cover::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 130% 90% at 15% 50%,rgba(99,179,237,.4) 0%,transparent 55%),radial-gradient(ellipse 90% 110% at 88% 25%,rgba(155,125,255,.35) 0%,transparent 55%),radial-gradient(ellipse 70% 60% at 50% 120%,rgba(104,211,145,.22) 0%,transparent 60%),repeating-linear-gradient(135deg,rgba(255,255,255,.022) 0,rgba(255,255,255,.022) 1px,transparent 1px,transparent 22px)}
-.pubprof-cover::after{content:"";position:absolute;bottom:0;left:0;right:0;height:100px;z-index:2;background:linear-gradient(transparent,rgba(10,16,28,.98))}
-.pubprof-cover-orb1{position:absolute;width:220px;height:220px;border-radius:50%;background:radial-gradient(rgba(99,179,237,.22),transparent 68%);top:-60px;right:10px;pointer-events:none;z-index:1}
-.pubprof-cover-orb2{position:absolute;width:100px;height:100px;border-radius:50%;background:radial-gradient(rgba(155,125,255,.4),transparent 68%);bottom:20px;right:60px;pointer-events:none;z-index:1}
-/* Avatar — más grande, ring visible */
-.pubprof-av-wrap{position:absolute;bottom:-44px;left:22px;z-index:4}
-.pubprof-av{width:88px;height:88px;border-radius:50%;border:4px solid rgba(10,16,28,.98);background:linear-gradient(135deg,var(--am),var(--aa));display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:#fff;overflow:hidden;box-shadow:0 0 0 2px rgba(99,179,237,.5),0 0 0 5px rgba(99,179,237,.12),0 12px 32px rgba(0,0,0,.6)}
-.pubprof-av img{width:100%;height:100%;object-fit:cover}
-/* Body con padding top para el avatar */
-.pubprof-body{padding:54px 22px 0}
+/* Banner image — same technique as community cards (proven to work) */
+.pubprof-cover-img{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:140%;height:140%;object-fit:cover;object-position:center center;filter:blur(16px) brightness(.3) saturate(1.7);pointer-events:none}
+.pubprof-cover::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 120% 80% at 15% 50%,rgba(99,179,237,.32) 0%,transparent 55%),radial-gradient(ellipse 80% 100% at 88% 25%,rgba(155,125,255,.28) 0%,transparent 55%),repeating-linear-gradient(135deg,rgba(255,255,255,.02) 0,rgba(255,255,255,.02) 1px,transparent 1px,transparent 22px)}
+.pubprof-cover::after{content:"";position:absolute;bottom:0;left:0;right:0;height:80px;z-index:2;background:linear-gradient(transparent,rgba(10,16,28,.98))}
+/* Avatar — correct overlap positioning */
+.pubprof-av-wrap{position:absolute;bottom:-38px;left:20px;z-index:4}
+.pubprof-av{width:76px;height:76px;border-radius:50%;border:4px solid rgba(10,16,28,.98);background:linear-gradient(135deg,var(--am),var(--aa));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;overflow:hidden;box-shadow:0 0 0 2px rgba(99,179,237,.45),0 8px 24px rgba(0,0,0,.6)}
+.pubprof-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+/* Body padding accounts for avatar height correctly */
+.pubprof-body{padding:48px 20px 0}
 /* Nombre + badges en la misma línea */
 .pubprof-name{font-size:22px;font-weight:800;color:#fff;font-family:"Space Mono",monospace;letter-spacing:-1px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .pubprof-name-badge{font-size:9px;font-weight:700;padding:3px 10px;border-radius:20px;background:linear-gradient(135deg,rgba(99,179,237,.22),rgba(155,125,255,.18));border:1px solid rgba(99,179,237,.35);color:var(--am);letter-spacing:.4px}
@@ -2277,10 +2287,39 @@ async function searchJikan(query,tabType){
   if(!query||query.length<2){jikanResults=[];removeJikanDrop();return;}
   const ep=tabType==="manga"?"manga":"anime";
   try{
-    const res=await fetch(`https://api.jikan.moe/v4/${ep}?q=${encodeURIComponent(query)}&limit=6`);
+    const res=await fetch(`https://api.jikan.moe/v4/${ep}?q=${encodeURIComponent(query)}&limit=12`);
     if(!res.ok){jikanResults=[];return;}
     const json=await res.json();
-    jikanResults=(json.data||[]).slice(0,6);
+    const raw=(json.data||[]);
+    // ── Deduplicar por título base para evitar mostrar cada temporada por separado ──
+    // Estrategia: normalizar título quitando patrones de temporada ("Season 2", "2nd Season",
+    // "Part 2", "Cour 2", números romanos al final, etc.) y agrupar.
+    // Se conserva solo la primera entrada de cada grupo (la más relevante según el score de Jikan).
+    function _baseTitle(t){
+      return (t||"")
+        .replace(/\s*[:·]\s*(season|part|cour)\s*\d+.*/i,"")
+        .replace(/\s*(2nd|3rd|\d+th|second|third|fourth|fifth)\s+(season|cour|part).*/i,"")
+        .replace(/\s*season\s*\d+.*/i,"")
+        .replace(/\s*\d+(st|nd|rd|th)\s*season.*/i,"")
+        .replace(/\s*\(?season\)?.*/i,"")
+        .replace(/\s+[IVX]{1,4}$/, "") // Roman numerals at end
+        .trim().toLowerCase();
+    }
+    const seen=new Map();
+    const deduped=[];
+    for(const item of raw){
+      const titleEn=(item.title_english||"").trim();
+      const titleJa=(item.title||"").trim();
+      // Use English title if available, otherwise Japanese
+      const displayTitle=titleEn||titleJa;
+      const base=_baseTitle(displayTitle)||_baseTitle(titleJa);
+      if(!seen.has(base)){
+        seen.set(base,true);
+        deduped.push(item);
+        if(deduped.length>=6)break;
+      }
+    }
+    jikanResults=deduped;
   }catch(e){jikanResults=[];}
 
   // Mostrar dropdown inmediatamente con lo que tiene Jikan (caps para finalizados conocidos)
@@ -3429,7 +3468,7 @@ async function p28RenderPublicProfile(root){
   wrap.className="pubprof-wrap";
   const _profCustomPhoto=(()=>{try{return localStorage.getItem("fn-custom-photo-"+(fbUser?.uid||""))||"";}catch(e){return "";}})();
   const _profPhotoSrc=_profCustomPhoto||friendsState.customPhotoUrl||photoURL||"";
-  const avContent=_profPhotoSrc?`<img src="${_profPhotoSrc}" alt="avatar" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:`<span>${(username||displayName||"?").charAt(0).toUpperCase()}</span>`;
+  const avContent=_profPhotoSrc?`<img src="${_profPhotoSrc}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display='none'">`:`<span>${(username||displayName||"?").charAt(0).toUpperCase()}</span>`;
 
   const genreChips=genres.length>0
     ?`<div class="pubprof-genres">${genres.map(([g])=>`<span class="pubprof-genre-chip">${g}</span>`).join("")}</div>`
@@ -3439,25 +3478,17 @@ async function p28RenderPublicProfile(root){
     :`<div class="pubprof-streak-chip" style="opacity:.4">🔥 Sin racha</div>`;
   const timeChip=`<div class="pubprof-time-chip">⏱ ${ti.val} invertidas</div>`;
 
-  // Pre-calculate banner styles (avoids nested template literal parsing issues)
-  // Banner como <img> con inset negativo para evitar blur edge-bleed
-  const _bannerImgStyle=_bannerUrl
-    ?`position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;object-position:center 25%;filter:blur(18px) brightness(.32) saturate(1.8);z-index:0;opacity:1;transition:opacity .6s ease;display:block`
-    :"position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);z-index:0;opacity:0;transition:opacity .6s ease;display:block";
-  const _bannerLblDisplay=_bannerUrl?"flex":"none";
+  // Banner label
   const _bannerLblHtml=_bannerSeries
-    ?`<div id="pubprof-banner-lbl" style="position:absolute;bottom:10px;left:20px;right:20px;z-index:3;display:${_bannerLblDisplay};align-items:center;gap:8px"><span style="font-size:10px;font-weight:700;color:rgba(255,255,255,.82);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 6px rgba(0,0,0,.9)">&#9654; ${_bannerSeries.title}</span>${_bannerSeries.total>0?'<span style="font-size:9px;font-family:Space Mono,monospace;color:rgba(255,255,255,.5);background:rgba(0,0,0,.5);padding:1px 6px;border-radius:4px;flex-shrink:0">'+ _bannerPct +'%</span>':""}</div>`
+    ?`<div id="pubprof-banner-lbl" style="position:absolute;bottom:9px;left:14px;right:14px;z-index:3;display:flex;align-items:center;gap:7px"><span style="font-size:9px;font-weight:600;color:rgba(255,255,255,.7);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 4px rgba(0,0,0,.9)">&#9654; ${_bannerSeries.title}</span>${_bannerSeries.total>0?'<span style="font-size:9px;font-family:Space Mono,monospace;color:rgba(255,255,255,.5);background:rgba(0,0,0,.5);padding:1px 6px;border-radius:4px;flex-shrink:0">'+ _bannerPct +'%</span>':""}</div>`
     :"";
 
   wrap.innerHTML=`
     <div class="pubprof-cover">
       <div class="pubprof-cover-inner">
-        <img id="pubprof-banner-img" src="${_bannerUrl||''}" onerror="this.style.opacity='0'" style="${_bannerImgStyle}" alt="">
-        <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(0,0,0,.7) 100%)"></div>
-        <div class="pubprof-cover-orb1" style="z-index:2"></div>
-        <div class="pubprof-cover-orb2" style="z-index:2"></div>
-        ${_bannerLblHtml}
+        <img id="pubprof-banner-img" class="pubprof-cover-img" src="${_bannerUrl||''}" style="opacity:${_bannerUrl?1:0}" onerror="this.style.opacity=0" alt="">
       </div>
+      ${_bannerLblHtml}
       <div class="pubprof-av-wrap"><div class="pubprof-av">${avContent}</div></div>
     </div>
     <div class="pubprof-body">
@@ -3686,13 +3717,13 @@ function renderHistoryTab(root){
   // ── Subtabs: Yo / Amigos ──
   let histSubTab=window._histSubTab||"me";
   const stBar=document.createElement("div");
-  stBar.style.cssText="display:flex;gap:3px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:3px;margin-bottom:16px";
+  stBar.className="hist-subtab-bar";
   const stMe=document.createElement("button");
-  stMe.className="fn-com-tab"+(histSubTab==="me"?" active":"");
+  stMe.className="hist-subtab"+(histSubTab==="me"?" active":"");
   stMe.textContent="📋 Mi actividad";
   stMe.onclick=()=>{window._histSubTab="me";renderHistoryTab(root.parentNode||document.getElementById("app"));};
   const stFr=document.createElement("button");
-  stFr.className="fn-com-tab"+(histSubTab==="friends"?" active":"");
+  stFr.className="hist-subtab"+(histSubTab==="friends"?" active":"");
   stFr.textContent="👥 Mis amigos";
   stFr.onclick=()=>{window._histSubTab="friends";renderHistoryTab(root.parentNode||document.getElementById("app"));};
   stBar.append(stMe,stFr);
@@ -3750,25 +3781,30 @@ function _renderMyHistory(wrap,ac){
     g.events.forEach(ev=>{
       const item=document.createElement("div");
       item.className="hist-item";
-      let icon="",colorStyle="",text="";
+      let iconClass="chapter",iconEmoji="📖",titleTxt="",subTxt="";
       const typeLabel=ev.mediaType==="manga"?"Manga":"Anime";
+      const bCls=ev.mediaType==="manga"?"m":"a";
       const chLabel=ev.mediaType==="manga"?"Cap.":"Ep.";
       if(ev.type==="chapter"){
-        icon="📖";colorStyle=`color:${ac}`;
+        iconClass="chapter";iconEmoji="📖";
         const pct=ev.total>0?Math.round(ev.completed/ev.total*100):0;
-        text=`${chLabel} <strong>${ev.chapter}</strong> — <span style="${colorStyle}">${ev.title}</span><span class="hist-meta">${typeLabel} · ${ev.completed}/${ev.total} · ${pct}%</span>`;
+        titleTxt=`${ev.title}`;
+        subTxt=`<span class="hist-badge ${bCls}">${typeLabel}</span> <span>${chLabel} ${ev.chapter} marcado</span> <span style="color:var(--t3)">${ev.completed}/${ev.total} · ${pct}%</span>`;
       } else if(ev.type==="complete"){
-        icon="🎉";colorStyle="color:var(--suc)";
-        text=`<strong>Completado:</strong> <span style="${colorStyle}">${ev.title}</span><span class="hist-meta">${ev.total} ${chLabel.toLowerCase()}s totales</span>`;
+        iconClass="complete";iconEmoji="🎉";
+        titleTxt=ev.title;
+        subTxt=`<span class="hist-badge ${bCls}">${typeLabel}</span> <span style="color:var(--suc)">Completada</span> <span style="color:var(--t3)">${ev.total} ${chLabel.toLowerCase()}s</span>`;
       } else if(ev.type==="add"){
-        icon="➕";colorStyle="color:var(--purple)";
-        text=`<strong>Agregado:</strong> <span style="${colorStyle}">${ev.title}</span><span class="hist-meta">${typeLabel}${ev.total>0?` · ${ev.total} ${chLabel.toLowerCase()}s`:""}</span>`;
+        iconClass="add";iconEmoji="➕";
+        titleTxt=ev.title;
+        subTxt=`<span class="hist-badge ${bCls}">${typeLabel}</span> <span>Agregada</span>${ev.total>0?` <span style="color:var(--t3)">${ev.total} ${chLabel.toLowerCase()}s</span>`:""}`;
       } else if(ev.type==="status"){
-        icon="🔄";colorStyle="color:var(--wrn)";
-        text=`<strong>Estado:</strong> <span style="${colorStyle}">${ev.title}</span><span class="hist-meta">${ev.status}</span>`;
+        iconClass="status";iconEmoji="🔄";
+        titleTxt=ev.title;
+        subTxt=`<span>Estado: ${ev.status}</span>`;
       }
       const timeStr=_histTimeAgo(ev.ts);
-      item.innerHTML=`<div class="hist-icon">${icon}</div><div class="hist-body"><div class="hist-text">${text}</div></div><div class="hist-time">${timeStr}</div>`;
+      item.innerHTML=`<div class="hist-icon-wrap ${iconClass}">${iconEmoji}</div><div class="hist-body"><div class="hist-title">${titleTxt}</div><div class="hist-sub">${subTxt}</div></div><div class="hist-time">${timeStr}</div>`;
       wrap.appendChild(item);
     });
   });
