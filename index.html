@@ -395,8 +395,28 @@ html::after{
 .reco-add-hint{font-size:8px;color:var(--t3)}
 .reco-empty{font-size:12px;color:var(--t3);padding:24px;text-align:center;background:rgba(255,255,255,.02);border-radius:12px;border:1px dashed rgba(255,255,255,.06)}
 @keyframes shimmer{from{opacity:.6}to{opacity:1}}
+@keyframes skeletonPulse{0%,100%{opacity:.35}50%{opacity:.65}}
+.skel-line{height:11px;border-radius:5px;background:rgba(255,255,255,.07);animation:skeletonPulse 1.6s ease-in-out infinite;margin-bottom:7px}
+.skel-line.short{width:50%}.skel-line.med{width:72%}.skel-line.full{width:100%}
+.skel-avatar{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.07);flex-shrink:0;animation:skeletonPulse 1.6s ease-in-out infinite}
+.skel-cover{width:42px;height:60px;border-radius:7px;background:rgba(255,255,255,.07);flex-shrink:0;animation:skeletonPulse 1.6s ease-in-out infinite}
+.skel-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:13px 16px;display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.skel-stat-v{height:26px;border-radius:5px;background:rgba(255,255,255,.09);width:55%;margin:0 auto 7px;animation:skeletonPulse 1.6s ease-in-out infinite}
+.skel-stat-l{height:7px;border-radius:4px;background:rgba(255,255,255,.05);width:38%;margin:0 auto;animation:skeletonPulse 1.6s ease-in-out infinite}
+.skel-banner-inner{width:100%;height:100%;background:rgba(255,255,255,.06);animation:skeletonPulse 1.6s ease-in-out infinite;border-radius:inherit}
 
-/* ── COMPATIBILIDAD DE GUSTOS ── */
+
+/* ── HISTORIAL DE ACTIVIDAD (v4.0) ── */
+.hist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);border-radius:12px;margin-bottom:6px;transition:.15s}
+.hist-item:hover{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.09)}
+.hist-icon{font-size:16px;line-height:1;flex-shrink:0;margin-top:2px;width:22px;text-align:center}
+.hist-body{flex:1;min-width:0}
+.hist-text{font-size:12px;color:var(--t1);line-height:1.45}
+.hist-text strong{font-weight:700}
+.hist-meta{display:block;font-size:10px;color:var(--t3);margin-top:3px;font-family:'Space Mono',monospace}
+.hist-time{font-size:10px;color:var(--t3);white-space:nowrap;font-family:'Space Mono',monospace;flex-shrink:0;margin-top:2px}
+.fn-feed-day-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--t3);margin:14px 0 8px 2px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,.05)}
+
 .compat-bar-wrap{padding:10px 16px 12px;border-top:1px solid rgba(255,255,255,.05)}
 .compat-bar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .compat-bar-lbl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px}
@@ -664,8 +684,16 @@ html::after{
 .streak-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,191,36,.06));border:1px solid rgba(251,191,36,.3);border-radius:20px;font-size:12px;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;vertical-align:middle}
 
 /* ── TAB FADE TRANSITION ── */
-@keyframes tabFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.tab-content-fade{animation:tabFadeIn .18s ease-out}
+@keyframes tabFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tabSlideLeft{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes tabSlideRight{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+.tab-content-fade{animation:tabFadeIn .22s cubic-bezier(.34,1.3,.64,1)}
+.tab-slide-left{animation:tabSlideLeft .2s cubic-bezier(.34,1.2,.64,1)}
+.tab-slide-right{animation:tabSlideRight .2s cubic-bezier(.34,1.2,.64,1)}
+::view-transition-old(root){animation:80ms cubic-bezier(.4,0,1,1) both fade-out}
+::view-transition-new(root){animation:180ms cubic-bezier(0,0,.2,1) 80ms both fade-in}
+@keyframes fade-out{to{opacity:0}}
+@keyframes fade-in{from{opacity:0}}
 
 /* ── MY PROFILE BANNER CARD ── */
 .fn-my-banner-card{border-radius:20px;overflow:hidden;border:1px solid rgba(99,179,237,.25);margin-bottom:0;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.4)}
@@ -811,6 +839,11 @@ html::after{
 // (onSnapshot) — cualquier edición en el cel se ve en el PC
 // instantáneamente sin hacer nada manual.
 // ═══════════════════════════════════════════════════════════════════
+// ── SEGURIDAD: la apiKey de Firebase es pública por diseño (se envía al browser),
+// pero DEBES restringirla en Google Cloud Console → APIs & Services → Credentials
+// → Application restrictions: HTTP referrers → agregar solo bbandit0.github.io/*
+// Y configurar Firestore Security Rules para que solo usuarios autenticados lean/escriban.
+// Más info: https://firebase.google.com/docs/projects/api-keys
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBHNVcM547Y4SK43sZuh6P-8TKtdPDxG54",
   authDomain: "manga-tracker-fad56.firebaseapp.com",
@@ -819,6 +852,10 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "852661427743",
   appId: "1:852661427743:web:3446004609d33c0ce0ff2a"
 };
+// Validar que Firestore Rules estén publicadas (solo avisa en consola, no bloquea)
+if(location.hostname==="localhost"||location.hostname==="127.0.0.1"){
+  console.warn("[MANGU] Modo local detectado. Asegúrate de que las Firestore Security Rules estén publicadas en producción.");
+}
 const FIREBASE_ENABLED = FIREBASE_CONFIG.apiKey !== "";
 let fb=null,fbAuth=null,fbDb=null,fbUser=null,fbUnsub=null,fbUnsubFriends=null,pendingRequestsCount=0;
 if(FIREBASE_ENABLED){try{fb=firebase.initializeApp(FIREBASE_CONFIG);fbAuth=firebase.auth();fbDb=firebase.firestore();
@@ -1231,7 +1268,13 @@ function calcCompatibility(myData, friendProfile){
 async function renderFriendsPanel(){
   const container=document.getElementById("friends-panel-container");
   if(!container) return;
-  container.innerHTML=`<div style="text-align:center;padding:30px;color:var(--t3);font-size:12px">Cargando...</div>`;
+  // Skeleton loading — muestra la estructura antes de que lleguen los datos
+  container.innerHTML=`
+    <div style="padding:0 0 8px">
+      <div class="skel-card"><div class="skel-avatar"></div><div style="flex:1"><div class="skel-line med"></div><div class="skel-line short" style="margin-bottom:0"></div></div></div>
+      <div class="skel-card"><div class="skel-avatar"></div><div style="flex:1"><div class="skel-line full"></div><div class="skel-line med" style="margin-bottom:0"></div></div></div>
+      <div class="skel-card"><div class="skel-avatar"></div><div style="flex:1"><div class="skel-line med"></div><div class="skel-line short" style="margin-bottom:0"></div></div></div>
+    </div>`;
   if(!fbUser){
     container.innerHTML=`<div class="fn-status">Inicia sesion con Google para usar el sistema de amigos</div>`;
     return;
@@ -2659,8 +2702,18 @@ function render(){
 // FIX P2.8: Preservar posición de scroll para que abrir un segundo manga no suba al primero
 const _scrollY=window.scrollY;
 const root=document.getElementById("app");root.innerHTML="";const icon=tab==="manga"?"📚":"🎬";const ac=tab==="manga"?theme.accentManga:theme.accentAnime;const lbl=tab==="manga"?"capítulos":"episodios";const animeCls=tab==="anime"?" anime":"";
-// Tab fade — aplicar clase al app container con cada render
-requestAnimationFrame(()=>{root.classList.remove("tab-content-fade");void root.offsetWidth;root.classList.add("tab-content-fade");});
+// Tab transitions — View Transitions API si el browser lo soporta, CSS fallback si no
+requestAnimationFrame(()=>{
+  if(document.startViewTransition){
+    // Las View Transitions ya aplican la transición internamente; solo marcar el DOM
+    root.classList.remove("tab-content-fade","tab-slide-left","tab-slide-right");
+    root.classList.add("tab-content-fade");
+  } else {
+    root.classList.remove("tab-content-fade","tab-slide-left","tab-slide-right");
+    void root.offsetWidth;
+    root.classList.add("tab-content-fade");
+  }
+});
 // Header
 const hdr=h("div","hdr");
 // BANNER: imagen como fondo del header, sin logo de texto
@@ -2823,14 +2876,22 @@ if(tab==="dashboard"){
   return;
 }
 
+// ── Helper para envolver render con View Transitions si disponible ──
+function transitionRender(fn){
+  if(document.startViewTransition){document.startViewTransition(()=>{fn();});}
+  else{fn();}
+}
 // ═══ MAIN ═══
-const tabs=h("div","tabs");tabs.appendChild(h("button",`tab ${tab==="manga"?"am":""}`,`${svg.book} Manga <span class="tab-c">(${data.manga.length})</span>`,{onclick:()=>{tab="manga";filterStatus="all";filterTag="all";showFavsOnly=false;jikanResults=[];newTitle="";newTotal="";newCover="";newCoverIsUrl=false;newTags=[];newStatus="reading";window._pendingJikanId=null;window._pendingJikanPublishing=false;render();}}));tabs.appendChild(h("button",`tab ${tab==="anime"?"aa":""}`,`${svg.tv} Anime <span class="tab-c">(${data.anime.length})</span>`,{onclick:()=>{tab="anime";filterStatus="all";filterTag="all";showFavsOnly=false;jikanResults=[];newTitle="";newTotal="";newCover="";newCoverIsUrl=false;newTags=[];newStatus="reading";window._pendingJikanId=null;window._pendingJikanPublishing=false;render();}}));
+const tabs=h("div","tabs");tabs.appendChild(h("button",`tab ${tab==="manga"?"am":""}`,`${svg.book} Manga <span class="tab-c">(${data.manga.length})</span>`,{onclick:()=>{tab="manga";filterStatus="all";filterTag="all";showFavsOnly=false;jikanResults=[];newTitle="";newTotal="";newCover="";newCoverIsUrl=false;newTags=[];newStatus="reading";window._pendingJikanId=null;window._pendingJikanPublishing=false;transitionRender(render);}}));tabs.appendChild(h("button",`tab ${tab==="anime"?"aa":""}`,`${svg.tv} Anime <span class="tab-c">(${data.anime.length})</span>`,{onclick:()=>{tab="anime";filterStatus="all";filterTag="all";showFavsOnly=false;jikanResults=[];newTitle="";newTotal="";newCover="";newCoverIsUrl=false;newTags=[];newStatus="reading";window._pendingJikanId=null;window._pendingJikanPublishing=false;transitionRender(render);}}));
 // P2.8: Tab Descubrir
-const discBtn=h("button",`tab ${tab==="discover"?"am":""}`,`✨ Descubrir`,{onclick:()=>{tab="discover";showSettings=false;showPatch=false;render();}});
+const discBtn=h("button",`tab ${tab==="discover"?"am":""}`,`✨ Descubrir`,{onclick:()=>{tab="discover";showSettings=false;showPatch=false;transitionRender(render);}});
 tabs.appendChild(discBtn);
 // P2.8: Tab Perfil
-const profBtn=h("button",`tab ${tab==="profile"?"am":""}`,`👤 Perfil`,{onclick:()=>{tab="profile";showSettings=false;showPatch=false;render();}});
+const profBtn=h("button",`tab ${tab==="profile"?"am":""}`,`👤 Perfil`,{onclick:()=>{tab="profile";showSettings=false;showPatch=false;transitionRender(render);}});
 tabs.appendChild(profBtn);
+// v4.0: Tab Historial
+const histBtn=h("button",`tab ${tab==="history"?"am":""}`,`📋 Historial`,{onclick:()=>{tab="history";showSettings=false;showPatch=false;transitionRender(render);}});
+tabs.appendChild(histBtn);
 root.appendChild(tabs);
 
 // ── P2.8: Tab Descubrir ──
@@ -2843,6 +2904,11 @@ if(tab==="discover"){
 // ── P2.8: Tab Perfil ──
 if(tab==="profile"){
   p28RenderPublicProfile(root);
+  return;
+}
+// ── v4.0: Tab Historial ──
+if(tab==="history"){
+  renderHistoryTab(root);
   return;
 }
 const list=data[tab];const tRead=list.reduce((s,x)=>s+x.completed.length,0);const tAll=list.reduce((s,x)=>s+x.total,0);
@@ -2863,7 +2929,7 @@ const sl=h("div","slist");
 let displayList=[...filtered];
 if(pinnedId){const pi=displayList.findIndex(x=>x.id===pinnedId);if(pi>0){const item=displayList.splice(pi,1)[0];displayList.unshift(item);}}
 displayList.forEach(s=>{const pct=s.total>0?(s.completed.length/s.total)*100:0;const isExp=expanded[s.id];const st=SM[s.status];const sc=h("div","scard");sc.setAttribute("data-id",s.id);const sh=h("div","shdr");sh.onclick=()=>{expanded[s.id]=!expanded[s.id];render();};sh.innerHTML=`${s.cover?`<img class="cthm" src="${s.cover}">`:`<div class="cph">${icon}</div>`}<div class="sinf"><div class="stit">${s.favorite?`<span class="fav-star">★</span>`:""}${s.title}</div><div class="smeta"><span class="sprg">${s.completed.length}/${s.total>0?(s.jikanPublishing?s.total+" caps (en emisión)":s.total):(s.jikanPublishing?"? (en emisión)":"?")}</span>${st?`<span class="sbadge ${s.status}">${st.key==="reading"&&tab==="anime"?"👁️":st.icon}</span>`:""}${s.rewatch?`<span class="sbadge rewatch">🔄</span>`:""}${s.score?`<span class="sscore" style="color:${scoreColor(s.score)}">${s.score}</span>`:""}<span class="slast">${s.lastUpdated?timeAgo(s.lastUpdated):""}</span>${s.characters?.length?`<span class="slast">👤${s.characters.length}</span>`:""}</div>${s.total>0?`<div class="pbar"><div class="pfill" style="width:${pct}%;background:${ac}"></div></div>`:`<div style="font-size:9px;color:var(--am);margin-top:4px;font-family:monospace">${s.jikanPublishing?"⏳ caps actualizándose...":""}</div>`}</div>`;
-const sa=h("div","sact");const nxt=nextChapter(s);if(nxt){const qbCls=["qnext",theme.qnextStyle==="colored"?"qn-colored":"",theme.qnextStyle==="large"?"qn-large":"",theme.qnextStyle==="colored-large"?"qn-colored qn-large":""].join(" ").trim();const qb=h("button",qbCls,"+1");if(theme.qnextStyle==="colored"||theme.qnextStyle==="colored-large")qb.style.background=ac;qb.onclick=e=>{e.stopPropagation();const x=data[tab].find(z=>z.id===s.id);if(!x)return;x.completed.push(nxt);x.completed.sort((a,b)=>a-b);x.lastUpdated=Date.now();const wasCompleted=x.completed.length===x.total;if(wasCompleted)x.status="completed";else if(x.status==="plan")x.status="reading";p28TouchStreak();const streak=p28GetStreak();p29PlayTick();p29BumpGoal();save();if(wasCompleted){p28ShowPlusAnim(tab,x.title,streak);setTimeout(()=>p29ShowConfetti(ac),300);}else{p28ShowPlusAnim(tab,x.title,streak);}setTimeout(()=>{render();showToast(`${tab==="manga"?"Cap.":"Ep."} ${nxt} ✓${wasCompleted?" · 🎉 ¡Serie completada!":""}`);},200);};sa.appendChild(qb);}sa.appendChild(h("button","ib dng",svg.trash,{onclick:e=>{e.stopPropagation();showModal("Eliminar",`¿Eliminar <b>${s.title}</b>?`,"🗑",()=>{data[tab]=data[tab].filter(x=>x.id!==s.id);save();render();showToast(`"${s.title}" eliminado`);});}}));sa.appendChild(h("div","ib",isExp?svg.chu:svg.chd));sh.appendChild(sa);sc.appendChild(sh);
+const sa=h("div","sact");const nxt=nextChapter(s);if(nxt){const qbCls=["qnext",theme.qnextStyle==="colored"?"qn-colored":"",theme.qnextStyle==="large"?"qn-large":"",theme.qnextStyle==="colored-large"?"qn-colored qn-large":""].join(" ").trim();const qb=h("button",qbCls,"+1");if(theme.qnextStyle==="colored"||theme.qnextStyle==="colored-large")qb.style.background=ac;qb.onclick=e=>{e.stopPropagation();const x=data[tab].find(z=>z.id===s.id);if(!x)return;x.completed.push(nxt);x.completed.sort((a,b)=>a-b);x.lastUpdated=Date.now();const wasCompleted=x.completed.length===x.total;if(wasCompleted){x.status="completed";actLogComplete(x.title,tab,x.total);}else if(x.status==="plan")x.status="reading";actLogChapter(x.title,tab,nxt,x.completed.length,x.total);p28TouchStreak();const streak=p28GetStreak();p29PlayTick();p29BumpGoal();save();if(wasCompleted){p28ShowPlusAnim(tab,x.title,streak);setTimeout(()=>p29ShowConfetti(ac),300);}else{p28ShowPlusAnim(tab,x.title,streak);}setTimeout(()=>{render();showToast(`${tab==="manga"?"Cap.":"Ep."} ${nxt} ✓${wasCompleted?" · 🎉 ¡Serie completada!":""}`);},200);};sa.appendChild(qb);}sa.appendChild(h("button","ib dng",svg.trash,{onclick:e=>{e.stopPropagation();showModal("Eliminar",`¿Eliminar <b>${s.title}</b>?`,"🗑",()=>{data[tab]=data[tab].filter(x=>x.id!==s.id);save();render();showToast(`"${s.title}" eliminado`);});}}));sa.appendChild(h("div","ib",isExp?svg.chu:svg.chd));sh.appendChild(sa);sc.appendChild(sh);
 // ── Expanded panel ──
 if(isExp){const cp=h("div","cpnl");
 // ── SECCIÓN ESTADO ──
@@ -2918,7 +2984,7 @@ const ctl=h("div","cctl");
 const nxtCh=nextChapter(s);
 const pillBtn=h("button","qnext-pill",null);pillBtn.disabled=!nxtCh;
 pillBtn.innerHTML=`<span style="font-size:13px;font-weight:700">+1</span>${nxtCh?`<span class="cap-num">${tab==="manga"?"cap.":"ep."} ${nxtCh}</span>`:"<span class='cap-num'>completo</span>"}`;
-pillBtn.onclick=e=>{e.stopPropagation();if(!nxtCh)return;const x=data[tab].find(z=>z.id===s.id);if(!x)return;x.completed.push(nxtCh);x.completed.sort((a,b)=>a-b);x.lastUpdated=Date.now();const wasCompleted=x.completed.length===x.total;if(wasCompleted)x.status="completed";else if(x.status==="plan")x.status="reading";p28TouchStreak();const streak=p28GetStreak();p29PlayTick();p29BumpGoal();save();if(wasCompleted){p28ShowPlusAnim(tab,x.title,streak);setTimeout(()=>p29ShowConfetti(ac),300);}else{p28ShowPlusAnim(tab,x.title,streak);}setTimeout(()=>{render();showToast(`${tab==="manga"?"Cap.":"Ep."} ${nxtCh} ✓${wasCompleted?" · 🎉 ¡Serie completada!":""}`);},200);};
+pillBtn.onclick=e=>{e.stopPropagation();if(!nxtCh)return;const x=data[tab].find(z=>z.id===s.id);if(!x)return;x.completed.push(nxtCh);x.completed.sort((a,b)=>a-b);x.lastUpdated=Date.now();const wasCompleted=x.completed.length===x.total;if(wasCompleted){x.status="completed";actLogComplete(x.title,tab,x.total);}else if(x.status==="plan")x.status="reading";actLogChapter(x.title,tab,nxtCh,x.completed.length,x.total);p28TouchStreak();const streak=p28GetStreak();p29PlayTick();p29BumpGoal();save();if(wasCompleted){p28ShowPlusAnim(tab,x.title,streak);setTimeout(()=>p29ShowConfetti(ac),300);}else{p28ShowPlusAnim(tab,x.title,streak);}setTimeout(()=>{render();showToast(`${tab==="manga"?"Cap.":"Ep."} ${nxtCh} ✓${wasCompleted?" · 🎉 ¡Serie completada!":""}`);},200);};
 ctl.appendChild(pillBtn);
 const cbtns=h("div","");cbtns.style.cssText="display:flex;gap:5px;flex-wrap:wrap";
 cbtns.appendChild(h("button","bs",svg.edit+" Total",{onclick:()=>{editTotal=editTotal===s.id?null:s.id;editTotalVal=String(s.total);render();}}));
@@ -3508,8 +3574,9 @@ function p28RenderQuickReadFAB(){
       const x=data[type].find(z=>z.id===s.id);
       if(!x||!nc)return;
       x.completed.push(nc);x.completed.sort((a,b)=>a-b);x.lastUpdated=Date.now();
-      if(x.completed.length===x.total)x.status="completed";
+      if(x.completed.length===x.total){x.status="completed";actLogComplete(x.title,type,x.total);}
       else if(x.status==="plan")x.status="reading";
+      actLogChapter(x.title,type,nc,x.completed.length,x.total);
       p28TouchStreak();const _fabStreak=p28GetStreak();p29PlayTick();p29BumpGoal();save();
       p28ShowPlusAnim(type,x.title,_fabStreak);
       item.querySelector(".qr-item-prog").textContent=`${lbl}. ${x.completed.length}/${x.total}`;
@@ -3540,6 +3607,48 @@ const P28_PATCH_NOTES=`<div class="patch-version"><div class="patch-ver-tag">Par
 // FIN PARCHE 2.8
 // ═══════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════
+// HISTORIAL DE ACTIVIDAD PERSONAL (v4.0)
+// Registra acciones del usuario en localStorage, máximo 200 entradas
+// ═══════════════════════════════════════════════════════════════════
+const ACT_KEY_PREFIX="mangu-activity-";
+function actGetKey(){return ACT_KEY_PREFIX+(fbUser?fbUser.uid:"local");}
+function actLog(type,payload){
+  try{
+    const key=actGetKey();
+    let log=[];
+    try{log=JSON.parse(localStorage.getItem(key)||"[]");}catch(e){log=[];}
+    log.unshift({ts:Date.now(),type,...payload});
+    if(log.length>200)log=log.slice(0,200);
+    localStorage.setItem(key,JSON.stringify(log));
+  }catch(e){}
+}
+function actGet(limit=60){
+  try{
+    const key=actGetKey();
+    const log=JSON.parse(localStorage.getItem(key)||"[]");
+    return log.slice(0,limit);
+  }catch(e){return [];}
+}
+function actClear(){
+  try{localStorage.removeItem(actGetKey());}catch(e){}
+}
+// Registrar cuando se agrega una serie
+function actLogAdd(title,mediaType,total){
+  actLog("add",{title,mediaType,total});
+}
+// Registrar cuando se marca un capítulo/episodio
+function actLogChapter(title,mediaType,chapter,completed,total){
+  actLog("chapter",{title,mediaType,chapter,completed,total});
+}
+// Registrar cuando se completa una serie
+function actLogComplete(title,mediaType,total){
+  actLog("complete",{title,mediaType,total});
+}
+// Registrar cuando se cambia el estado de una serie
+function actLogStatus(title,mediaType,status){
+  actLog("status",{title,mediaType,status});
+}
 // ═══ ACTIONS ═══
 function markChapter(sid,n,cellEl,ac){const x=data[tab].find(z=>z.id===sid);if(!x)return;const wasRead=x.completed.includes(n);
   if(wasRead){
@@ -3553,7 +3662,8 @@ function markChapter(sid,n,cellEl,ac){const x=data[tab].find(z=>z.id===sid);if(!
     doUnmarkSingle();return;
   }
   for(let i=1;i<=n;i++){if(!x.completed.includes(i))x.completed.push(i);}x.completed.sort((a,b)=>a-b);
-  x.lastUpdated=Date.now();const wasCompleted=x.completed.length===x.total&&x.total>0;if(wasCompleted)x.status="completed";else if(x.completed.length>0&&x.status==="plan")x.status="reading";
+  x.lastUpdated=Date.now();const wasCompleted=x.completed.length===x.total&&x.total>0;if(wasCompleted){x.status="completed";actLogComplete(x.title,tab,x.total);}else if(x.completed.length>0&&x.status==="plan")x.status="reading";
+  actLogChapter(x.title,tab,n,x.completed.length,x.total);
   p28TouchStreak();const streak=p28GetStreak();p29PlayTick();save();
   p28ShowPlusAnim(tab,x.title,streak);
   if(wasCompleted){setTimeout(()=>p29ShowConfetti(ac),300);setTimeout(()=>showToast("🎉 ¡Serie completada!"),500);}
@@ -3570,7 +3680,7 @@ function markChapter(sid,n,cellEl,ac){const x=data[tab].find(z=>z.id===sid);if(!
   }
   if(cellEl){if(wasRead){cellEl.classList.remove("rd");cellEl.style.background="";cellEl.style.borderColor="";}else{cellEl.classList.add("rd");cellEl.style.background=ac;cellEl.style.borderColor=ac;}}const card=cellEl?.closest(".scard");if(card){const prg=card.querySelector(".sprg");if(prg)prg.textContent=`${x.completed.length}/${x.total}`;const pfill=card.querySelector(".pfill");if(pfill)pfill.style.width=`${x.total>0?(x.completed.length/x.total)*100:0}%`;}}
 function doAdd(){const t=document.getElementById("add-title")?.value.trim();if(!t)return;const ni=document.getElementById("add-total");const rawVal=ni?.value;const totalVal=parseInt(rawVal)||0;const isPublishing=window._pendingJikanPublishing||false;// FIX: obras en publicación pueden tener total=0 temporalmente
-if(!isPublishing&&(!totalVal||totalVal<1)){if(ni){ni.style.borderColor="var(--dng)";ni.style.boxShadow="0 0 0 3px rgba(231,76,76,.2)";ni.focus();}showToast("⚠️ Ingresa el número de capítulos");return;}if(isPublishing&&(!totalVal||totalVal<1)){showToast("📌 Agregado en publicación — ingresa los caps desde el panel");}if(ni){ni.style.borderColor="";ni.style.boxShadow="";}const now=Date.now();const newId=now.toString();data[tab].push(migrate({id:newId,title:t,total:Math.max(totalVal,0),completed:[],cover:newCover||"",coverIsUrl:newCoverIsUrl||false,status:newStatus||"reading",tags:[...newTags],notes:"",score:0,favorite:false,lastUpdated:now,createdAt:now,startDate:"",endDate:"",seasons:[],characters:[],jikanId:window._pendingJikanId||null,jikanPublishing:isPublishing}));const _jId=window._pendingJikanId;const _jPub=isPublishing;newCover="";newCoverIsUrl=false;newTags=[];newStatus="reading";newTitle="";newTotal="";window._pendingJikanId=null;window._pendingJikanPublishing=false;save();render();showToast(`"${t}" agregado ✓`);// FIX: Si obra en publicación con total=0, fetchear caps reales ahora
+if(!isPublishing&&(!totalVal||totalVal<1)){if(ni){ni.style.borderColor="var(--dng)";ni.style.boxShadow="0 0 0 3px rgba(231,76,76,.2)";ni.focus();}showToast("⚠️ Ingresa el número de capítulos");return;}if(isPublishing&&(!totalVal||totalVal<1)){showToast("📌 Agregado en publicación — ingresa los caps desde el panel");}if(ni){ni.style.borderColor="";ni.style.boxShadow="";}const now=Date.now();const newId=now.toString();data[tab].push(migrate({id:newId,title:t,total:Math.max(totalVal,0),completed:[],cover:newCover||"",coverIsUrl:newCoverIsUrl||false,status:newStatus||"reading",tags:[...newTags],notes:"",score:0,favorite:false,lastUpdated:now,createdAt:now,startDate:"",endDate:"",seasons:[],characters:[],jikanId:window._pendingJikanId||null,jikanPublishing:isPublishing}));const _jId=window._pendingJikanId;const _jPub=isPublishing;newCover="";newCoverIsUrl=false;newTags=[];newStatus="reading";newTitle="";newTotal="";window._pendingJikanId=null;window._pendingJikanPublishing=false;save();render();showToast(`"${t}" agregado ✓`);actLogAdd(t,tab,Math.max(totalVal,0));// FIX: Si obra en publicación con total=0, fetchear caps reales ahora
 // FIX: Si obra en publicación con total=0, fetchear caps con getBestCount (MangaDex+AniList+Jikan)
 if(_jPub&&_jId&&totalVal<1){
   const _tabSnap=tab;
@@ -3587,8 +3697,206 @@ if(_jPub&&_jId&&totalVal<1){
   })();
 }}
 function doUpdTotal(sid){const v=parseInt(editTotalVal);if(!v||v<1)return;const x=data[tab].find(z=>z.id===sid);if(x){x.total=v;x.completed=x.completed.filter(c=>c<=v);x.lastUpdated=Date.now();}editTotal=null;save();render();}
-// ═══ INIT ═══
-applyTheme();
+// ═══════════════════════════════════════════════════════════════════
+// HISTORIAL DE ACTIVIDAD — Tab v4.0
+// Muestra el log personal + feed de amigos en una sola pantalla
+// ═══════════════════════════════════════════════════════════════════
+function renderHistoryTab(root){
+  const ac=theme.accentManga||"#63b3ed";
+  const wrap=document.createElement("div");
+  wrap.style.cssText="padding-top:4px";
+
+  // ── Subtabs: Yo / Amigos ──
+  let histSubTab=window._histSubTab||"me";
+  const stBar=document.createElement("div");
+  stBar.style.cssText="display:flex;gap:3px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:3px;margin-bottom:16px";
+  const stMe=document.createElement("button");
+  stMe.className="fn-com-tab"+(histSubTab==="me"?" active":"");
+  stMe.textContent="📋 Mi actividad";
+  stMe.onclick=()=>{window._histSubTab="me";renderHistoryTab(root.parentNode||document.getElementById("app"));};
+  const stFr=document.createElement("button");
+  stFr.className="fn-com-tab"+(histSubTab==="friends"?" active":"");
+  stFr.textContent="👥 Mis amigos";
+  stFr.onclick=()=>{window._histSubTab="friends";renderHistoryTab(root.parentNode||document.getElementById("app"));};
+  stBar.append(stMe,stFr);
+  wrap.appendChild(stBar);
+
+  if(histSubTab==="me"){
+    _renderMyHistory(wrap,ac);
+  } else {
+    _renderFriendsHistoryFeed(wrap,ac);
+  }
+  root.appendChild(wrap);
+}
+
+function _renderMyHistory(wrap,ac){
+  const log=actGet(80);
+  // Header con botón limpiar
+  const hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px";
+  const title=document.createElement("div");
+  title.style.cssText="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px";
+  title.textContent=`${log.length} eventos registrados`;
+  const clrBtn=document.createElement("button");
+  clrBtn.className="fn-btn sec";
+  clrBtn.style.cssText="font-size:10px;padding:4px 10px;color:var(--dng);border-color:rgba(231,76,76,.3)";
+  clrBtn.textContent="🗑 Limpiar";
+  clrBtn.onclick=()=>{if(confirm("¿Borrar todo el historial?")){{actClear();tab="history";render();}}};
+  hdr.append(title,clrBtn);
+  wrap.appendChild(hdr);
+
+  if(log.length===0){
+    const empty=document.createElement("div");
+    empty.style.cssText="text-align:center;padding:40px 20px;color:var(--t3);font-size:12px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:14px";
+    empty.innerHTML="📋 Sin actividad registrada aún<br><span style='font-size:10px;opacity:.6'>Los capítulos que marques aparecerán aquí</span>";
+    wrap.appendChild(empty);
+    return;
+  }
+
+  // Agrupar por día
+  const grouped={};
+  log.forEach(ev=>{
+    const d=new Date(ev.ts);
+    const today=new Date();const yesterday=new Date(today);yesterday.setDate(today.getDate()-1);
+    const dk=d.toDateString();
+    const dayLabel=dk===today.toDateString()?"Hoy":dk===yesterday.toDateString()?"Ayer":d.toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"short"});
+    if(!grouped[dk])grouped[dk]={label:dayLabel,events:[]};
+    grouped[dk].events.push(ev);
+  });
+
+  Object.values(grouped).forEach(g=>{
+    const dayLbl=document.createElement("div");
+    dayLbl.className="fn-feed-day-lbl";
+    dayLbl.textContent=g.label;
+    wrap.appendChild(dayLbl);
+
+    g.events.forEach(ev=>{
+      const item=document.createElement("div");
+      item.className="hist-item";
+      let icon="",colorStyle="",text="";
+      const typeLabel=ev.mediaType==="manga"?"Manga":"Anime";
+      const chLabel=ev.mediaType==="manga"?"Cap.":"Ep.";
+      if(ev.type==="chapter"){
+        icon="📖";colorStyle=`color:${ac}`;
+        const pct=ev.total>0?Math.round(ev.completed/ev.total*100):0;
+        text=`${chLabel} <strong>${ev.chapter}</strong> — <span style="${colorStyle}">${ev.title}</span><span class="hist-meta">${typeLabel} · ${ev.completed}/${ev.total} · ${pct}%</span>`;
+      } else if(ev.type==="complete"){
+        icon="🎉";colorStyle="color:var(--suc)";
+        text=`<strong>Completado:</strong> <span style="${colorStyle}">${ev.title}</span><span class="hist-meta">${ev.total} ${chLabel.toLowerCase()}s totales</span>`;
+      } else if(ev.type==="add"){
+        icon="➕";colorStyle="color:var(--purple)";
+        text=`<strong>Agregado:</strong> <span style="${colorStyle}">${ev.title}</span><span class="hist-meta">${typeLabel}${ev.total>0?` · ${ev.total} ${chLabel.toLowerCase()}s`:""}</span>`;
+      } else if(ev.type==="status"){
+        icon="🔄";colorStyle="color:var(--wrn)";
+        text=`<strong>Estado:</strong> <span style="${colorStyle}">${ev.title}</span><span class="hist-meta">${ev.status}</span>`;
+      }
+      const timeStr=_histTimeAgo(ev.ts);
+      item.innerHTML=`<div class="hist-icon">${icon}</div><div class="hist-body"><div class="hist-text">${text}</div></div><div class="hist-time">${timeStr}</div>`;
+      wrap.appendChild(item);
+    });
+  });
+}
+
+function _renderFriendsHistoryFeed(wrap,ac){
+  if(!fbUser){
+    const el=document.createElement("div");
+    el.style.cssText="text-align:center;padding:40px 20px;color:var(--t3);font-size:12px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:14px;margin-top:4px";
+    el.innerHTML="🔒 Inicia sesión con Google para ver la actividad de tus amigos";
+    wrap.appendChild(el);
+    return;
+  }
+  // Mostrar skeleton mientras carga
+  const feedContainer=document.createElement("div");
+  feedContainer.id="hist-friends-feed";
+  const skelHtml=[1,2,3,4].map(()=>`<div class="skel-card"><div class="skel-avatar"></div><div style="flex:1"><div class="skel-line full"></div><div class="skel-line med" style="margin-bottom:0"></div></div></div>`).join("");
+  feedContainer.innerHTML=skelHtml;
+  wrap.appendChild(feedContainer);
+
+  // Carga asíncrona del feed real
+  (async()=>{
+    try{
+      if(!fbDb)return;
+      const fSnap=await withTimeout(fbDb.collection("users").doc(fbUser.uid).collection("friends_accepted").get());
+      const friends=fSnap.docs.map(d=>({id:d.id,...d.data()}));
+      if(friends.length===0){
+        feedContainer.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--t3);font-size:12px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:14px">Sin amigos aún — agrégalos desde el panel Comunidad</div>`;
+        return;
+      }
+      const events=[];
+      for(const f of friends){
+        try{
+          const pd=await withTimeout(fbDb.collection("public_profiles").doc(f.uid).get());
+          if(!pd.exists)continue;
+          const fp=pd.data();
+          const un=fp.username||"usuario";
+          const all=[...(fp.allManga||fp.topManga||[]).map(s=>({...s,_type:"manga",_un:un})),
+                     ...(fp.allAnime||fp.topAnime||[]).map(s=>({...s,_type:"anime",_un:un}))];
+          all.sort((a,b)=>(b.lastUpdated||0)-(a.lastUpdated||0));
+          all.slice(0,4).forEach(s=>{
+            if(!s.lastUpdated)return;
+            const ageMs=Date.now()-s.lastUpdated;
+            if(ageMs>14*24*3600*1000)return; // últimos 14 días
+            events.push({ts:s.lastUpdated,ageMs,un,uid:f.uid,title:s.title,
+              type:s._type,completed:s.completed||0,total:s.total||0,status:s.status,
+              avatarUrl:fp.avatarUrl||""});
+          });
+        }catch(e){}
+      }
+      events.sort((a,b)=>b.ts-a.ts);
+      if(events.length===0){
+        feedContainer.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--t3);font-size:12px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:14px">Tus amigos no tienen actividad reciente (últimos 14 días)</div>`;
+        return;
+      }
+      // Construir el feed HTML
+      let html="";
+      let lastDay="";
+      events.slice(0,40).forEach(ev=>{
+        const d=new Date(ev.ts);
+        const today=new Date();const yesterday=new Date(today);yesterday.setDate(today.getDate()-1);
+        const dk=d.toDateString();
+        const dayLabel=dk===today.toDateString()?"Hoy":dk===yesterday.toDateString()?"Ayer":d.toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"short"});
+        if(dk!==lastDay){html+=`<div class="fn-feed-day-lbl">${dayLabel}</div>`;lastDay=dk;}
+        let _h=0;for(let i=0;i<ev.un.length;i++)_h=(_h*31+ev.un.charCodeAt(i))&0xFFFFFF;
+        const clr=`hsl(${_h%360},60%,42%)`;const clr2=`hsl(${(_h%360+50)%360},55%,35%)`;
+        const avHtml=ev.avatarUrl
+          ?`<img src="${ev.avatarUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(255,255,255,.1)" onerror="this.style.display='none'">`
+          :`<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,${clr},${clr2});display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:15px;flex-shrink:0">${ev.un.charAt(0).toUpperCase()}</div>`;
+        const typeAc=ev.type==="manga"?ac:"var(--aa)";
+        const chLabel=ev.type==="manga"?"Cap.":"Ep.";
+        const pct=ev.total>0?Math.round(ev.completed/ev.total*100):0;
+        let actionHtml="";
+        if(ev.status==="completed"){
+          actionHtml=`Completó <strong style="color:var(--suc)">${ev.title}</strong><span class="hist-meta">✅ ${ev.completed} ${ev.type==="manga"?"caps":"eps"}</span>`;
+        } else {
+          actionHtml=`<strong style="color:${typeAc}">${ev.title}</strong> — ${chLabel} ${ev.completed}${ev.total>0?`/${ev.total}`:""}<span class="hist-meta">${ev.type==="manga"?"Manga":"Anime"}${ev.total>0?` · ${pct}%`:""}</span>`;
+        }
+        html+=`<div class="fn-feed-item">
+          ${avHtml}
+          <div class="fn-feed-body">
+            <div class="fn-feed-user">@${ev.un}</div>
+            <div class="fn-feed-action" style="font-size:12px">${actionHtml}</div>
+          </div>
+          <div class="fn-feed-time">${_histTimeAgo(ev.ts)}</div>
+        </div>`;
+      });
+      feedContainer.innerHTML=html;
+    }catch(e){
+      feedContainer.innerHTML=`<div style="text-align:center;padding:24px;color:var(--t3);font-size:12px">Error al cargar el feed — <button class="fn-btn sec" style="font-size:10px" onclick="window._histSubTab='friends';render()">Reintentar</button></div>`;
+    }
+  })();
+}
+
+function _histTimeAgo(ts){
+  const ms=Date.now()-ts;
+  const min=Math.floor(ms/60000);
+  if(min<1)return "ahora";
+  if(min<60)return `${min}m`;
+  const h=Math.floor(ms/3600000);
+  if(h<24)return `${h}h`;
+  const d=Math.floor(ms/86400000);
+  if(d<7)return `${d}d`;
+  return new Date(ts).toLocaleDateString("es-CL",{day:"numeric",month:"short"});
+}
 // ── P2.8: inyectar FAB en render original ──
 const _p28_origRender=render;
 window.render=function render(){_p28_origRender();p28RenderQuickReadFAB();};
