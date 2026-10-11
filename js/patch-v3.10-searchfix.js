@@ -1,8 +1,20 @@
 /* =========================================================
-   MANGU — patch v3.10 · Buscador robusto
-   - Delegación de eventos en document: sobrevive a render()
-   - AniList primero, Jikan como fallback
-   - Mensajes visibles de error / sin conexión
+   MANGU — patch v3.10 (rev. 2) · Buscador de manga robusto
+   ---------------------------------------------------------
+   Problema: el buscador de MANGA de ui.js depende solo de Jikan.
+   Si Jikan falla o no responde, searchJikan() deja jikanResults=[]
+   en silencio y nunca dibuja el desplegable.
+
+   Solución: se reemplaza window.searchJikan SOLO para manga:
+     1. AniList primero (timeout 7 s), resultados convertidos al
+        formato Jikan para reutilizar el flujo ORIGINAL de ui.js:
+        renderJikanDrop() → selectJikanResult() → tarjeta de
+        selección, badge de caps y géneros auto-marcados.
+     2. Conteo real de capítulos con _getMangaCount() (proxy
+        MangaDex / Kitsu / Jikan), igual que el original.
+     3. Si AniList falla o no trae nada → búsqueda original Jikan.
+   Anime no se toca (ya usaba AniList primero).
+   Diseño: 100 % el original. No inyecta CSS.
    Cargar DESPUÉS de patch-v3.9.js
    ========================================================= */
 (function () {
@@ -10,208 +22,119 @@
   if (window._p310Loaded) return;
   window._p310Loaded = true;
 
-  var DEBOUNCE = 450, MIN_CHARS = 3;
-  var timer = null, seq = 0, filling = false;
-
-  /* ---------- estilos ---------- */
-  if (!document.getElementById('p310-style')) {
-    var st = document.createElement('style');
-    st.id = 'p310-style';
-    st.textContent =
-      '.p310-dd{position:absolute;z-index:99999;background:#0a1020;border:1px solid #131d2e;border-radius:12px;max-height:360px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,.55)}' +
-      '.p310-it{display:flex;gap:10px;align-items:center;padding:8px 10px;cursor:pointer;border-bottom:1px solid #0f1826}' +
-      '.p310-it:last-child{border-bottom:none}' +
-      '.p310-it:hover{background:#131d2e}' +
-      '.p310-it img{width:36px;height:52px;object-fit:cover;border-radius:4px;flex:none;background:#131d2e}' +
-      '.p310-t{color:#c8dae8;font-size:13px;font-weight:600;line-height:1.25}' +
-      '.p310-s{color:#6b85a3;font-size:11px;margin-top:3px}' +
-      '.p310-msg{padding:12px 14px;color:#6b85a3;font-size:12px}';
-    document.head.appendChild(st);
+  var _origSearch = window.searchJikan;
+  if (typeof _origSearch !== 'function') {
+    console.warn('[MANGU v3.10] searchJikan no existe — parche no aplicado');
+    return;
   }
 
-  /* ---------- utilidades ---------- */
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  var AL_TIMEOUT = 7000;
+  var seq = 0;
+
+  function timeout(ms) {
+    return new Promise(function (_, rej) {
+      setTimeout(function () { rej(new Error('timeout')); }, ms);
     });
   }
 
-  function isAnime() {
-    var shell = document.querySelector('.mng-add-shell');
-    if (shell) return /agregar anime/i.test(shell.textContent);
-    try { if (typeof tab !== 'undefined') return tab === 'anime'; } catch (e) {}
-    return false;
-  }
-
-  function getBox(input) {
-    var box = document.getElementById('p310-dd');
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'p310-dd';
-      box.className = 'p310-dd';
-      document.body.appendChild(box);
-    }
-    var r = input.getBoundingClientRect();
-    box.style.left = (r.left + window.scrollX) + 'px';
-    box.style.top = (r.bottom + window.scrollY + 6) + 'px';
-    box.style.width = r.width + 'px';
-    return box;
-  }
-
-  function closeBox() {
-    var b = document.getElementById('p310-dd');
-    if (b) b.remove();
-  }
-
-  /* ---------- APIs ---------- */
-  function searchAniList(q, anime) {
+  /* ---------- AniList → formato Jikan ---------- */
+  function aniListManga(q) {
     var query =
-      'query($s:String,$t:MediaType){Page(perPage:8){media(search:$s,type:$t,isAdult:false){' +
-      'id idMal title{romaji english} chapters episodes status format startDate{year} genres coverImage{large medium}}}}';
-    return fetch('https://graphql.anilist.co', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ query: query, variables: { s: q, t: anime ? 'ANIME' : 'MANGA' } })
-    }).then(function (r) {
-      if (!r.ok) throw new Error('AniList ' + r.status);
-      return r.json();
-    }).then(function (j) {
+      'query($s:String){Page(perPage:10){media(search:$s,type:MANGA,isAdult:false){' +
+      'id idMal format status chapters volumes averageScore synonyms ' +
+      'title{romaji english} startDate{year} endDate{year} genres ' +
+      'coverImage{extraLarge large medium}}}}';
+    return Promise.race([
+      fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ query: query, variables: { s: q } })
+      }).then(function (r) {
+        if (!r.ok) throw new Error('AniList ' + r.status);
+        return r.json();
+      }),
+      timeout(AL_TIMEOUT)
+    ]).then(function (j) {
       var list = (j && j.data && j.data.Page && j.data.Page.media) || [];
-      return list.map(function (m) {
-        return {
-          title: m.title.romaji || m.title.english,
-          total: anime ? m.episodes : m.chapters,
-          cover: (m.coverImage && (m.coverImage.large || m.coverImage.medium)) || '',
-          genres: m.genres || [],
-          year: (m.startDate && m.startDate.year) || '',
-          format: m.format || '',
-          status: m.status || '',
-          malId: m.idMal || null,
-          anilistId: m.id
-        };
-      });
+      return list
+        .filter(function (m) { return m.format === 'MANGA'; }) // excluye one-shot y novelas (como el original)
+        .slice(0, 6)
+        .map(toJikan);
     });
   }
 
-  function searchJikan(q, anime) {
-    var url = 'https://api.jikan.moe/v4/' + (anime ? 'anime' : 'manga') +
-      '?q=' + encodeURIComponent(q) + '&limit=8&sfw=true';
-    return fetch(url).then(function (r) {
-      if (!r.ok) throw new Error('Jikan ' + r.status);
-      return r.json();
-    }).then(function (j) {
-      return (j.data || []).map(function (m) {
-        var from = anime ? (m.aired && m.aired.prop && m.aired.prop.from)
-                         : (m.published && m.published.prop && m.published.prop.from);
-        return {
-          title: m.title,
-          total: anime ? m.episodes : m.chapters,
-          cover: (m.images && m.images.jpg && m.images.jpg.image_url) || '',
-          genres: (m.genres || []).map(function (g) { return g.name; }),
-          year: (from && from.year) || '',
-          format: m.type || '',
-          status: m.status || '',
-          malId: m.mal_id || null,
-          anilistId: null
-        };
-      });
-    });
+  function toJikan(m) {
+    var en = (m.title && m.title.english) || null;
+    var ro = (m.title && m.title.romaji) || en || '';
+    var cov = m.coverImage || {};
+    var releasing = m.status === 'RELEASING';
+    return {
+      mal_id: m.idMal || null,
+      title: ro,
+      title_english: en,
+      title_synonyms: m.synonyms || [],
+      _displayTitle: en || ro,
+      images: { jpg: {
+        image_url: cov.medium || cov.large || '',
+        large_image_url: cov.extraLarge || cov.large || cov.medium || ''
+      } },
+      type: 'Manga',
+      chapters: m.chapters || null,
+      volumes: m.volumes || null,
+      publishing: releasing,
+      score: m.averageScore ? m.averageScore / 10 : null,
+      genres: (m.genres || []).map(function (g) { return { name: g }; }),
+      themes: [],
+      demographics: [],
+      published: { prop: {
+        from: { year: (m.startDate && m.startDate.year) || null },
+        to: { year: (m.endDate && m.endDate.year) || null }
+      } },
+      _accEps: m.chapters || 0,
+      _seasonCount: 1,
+      _anyAiring: releasing,
+      _latestMalId: m.idMal || null,
+      _p310: true
+    };
   }
 
-  /* ---------- búsqueda ---------- */
-  function run(input) {
-    input = document.getElementById('add-title') || input;
-    var q = (input.value || '').trim();
+  /* ---------- nueva searchJikan ---------- */
+  window.searchJikan = function (query, tabType) {
+    if (tabType !== 'manga') return _origSearch.apply(this, arguments);
+    if (!query || query.length < 2) return _origSearch.apply(this, arguments);
+
     var my = ++seq;
-    if (q.length < MIN_CHARS) { closeBox(); return; }
+    var self = this, args = arguments;
 
-    if (!navigator.onLine) {
-      getBox(input).innerHTML = '<div class="p310-msg">⚠️ Sin conexión a internet</div>';
-      return;
-    }
-
-    var anime = isAnime();
-    getBox(input).innerHTML = '<div class="p310-msg">Buscando…</div>';
-    var firstErr = null;
-
-    searchAniList(q, anime)
-      .catch(function (e) { firstErr = e; return []; })
-      .then(function (res) {
-        if (res.length) return res;
-        return searchJikan(q, anime).catch(function (e) { firstErr = firstErr || e; return []; });
+    return aniListManga(query)
+      .catch(function (e) {
+        console.warn('[MANGU v3.10] AniList falló, uso Jikan:', e.message);
+        return [];
       })
       .then(function (res) {
-        if (my !== seq) return; // llegó una búsqueda más nueva
-        var inp = document.getElementById('add-title');
-        if (!inp) { closeBox(); return; }
-        var box = getBox(inp);
+        if (my !== seq) return; // el usuario siguió escribiendo
+        if (!res.length) return _origSearch.apply(self, args); // fallback Jikan original
 
-        if (!res.length) {
-          if (firstErr) console.warn('[MANGU p310]', firstErr);
-          box.innerHTML = '<div class="p310-msg">' +
-            (firstErr ? '❌ Error de API: ' + esc(firstErr.message) : 'Sin resultados') + '</div>';
-          return;
-        }
+        jikanResults = res;          // variable global de tracker.js
+        removeJikanDrop();
+        renderJikanDrop('manga');    // desplegable ORIGINAL
 
-        window._p310Results = res;
-        box.innerHTML = res.map(function (m, i) {
-          var info = [m.format, m.year,
-            m.total ? m.total + (anime ? ' eps' : ' caps') : 'en emisión'].filter(Boolean).join(' · ');
-          return '<div class="p310-it" data-i="' + i + '">' +
-            '<img src="' + esc(m.cover) + '" loading="lazy" alt="">' +
-            '<div><div class="p310-t">' + esc(m.title) + '</div>' +
-            '<div class="p310-s">' + esc(info) + '</div></div></div>';
-        }).join('');
+        // Conteo real de capítulos (mismo método que el original)
+        return Promise.all(res.map(function (item) {
+          if (!item.mal_id) { item._latestChapter = item.chapters || 0; return; }
+          var title = item._displayTitle || item.title || '';
+          return _getMangaCount(item.mal_id, title, item.chapters || 0)
+            .catch(function () { return 0; })
+            .then(function (best) {
+              if (my !== seq) return;
+              var live = jikanResults.find(function (x) { return x.mal_id === item.mal_id; });
+              if (!live) return;
+              live._latestChapter = best || 0;
+              renderJikanDrop('manga');
+            });
+        }));
       });
-  }
+  };
 
-  /* ---------- selección ---------- */
-  function setVal(el, v) {
-    if (!el) return;
-    filling = true;
-    el.value = v;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-    filling = false;
-  }
-
-  function pick(m) {
-    if (!m) return;
-    var shell = document.querySelector('.mng-add-shell') || document;
-    setVal(document.getElementById('add-title'), m.title);
-    if (m.total) {
-      setVal(shell.querySelector('input[type="number"], input[placeholder*="mero de"]'), m.total);
-    }
-    var coverInp = shell.querySelector('#add-cover, input[id*="cover"]');
-    if (coverInp && m.cover) setVal(coverInp, m.cover);
-    window._p310Pick = m; // portada, géneros, malId disponibles aquí
-    closeBox();
-    if (typeof showToast === 'function') showToast('✓ ' + m.title);
-  }
-
-  /* ---------- eventos (delegados: sobreviven a render) ---------- */
-  document.addEventListener('input', function (e) {
-    if (filling || !e.target || e.target.id !== 'add-title') return;
-    clearTimeout(timer);
-    var t = e.target;
-    timer = setTimeout(function () { run(t); }, DEBOUNCE);
-  }, true);
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { closeBox(); return; }
-    if (e.key === 'Enter' && e.target && e.target.id === 'add-title') {
-      clearTimeout(timer);
-      run(e.target);
-    }
-  }, true);
-
-  document.addEventListener('click', function (e) {
-    var it = e.target.closest && e.target.closest('.p310-it');
-    if (it) { pick((window._p310Results || [])[+it.dataset.i]); return; }
-    if (!e.target || e.target.id !== 'add-title') closeBox();
-  });
-
-  window.addEventListener('resize', closeBox);
-
-  console.log('[MANGU v3.10] Buscador robusto activado ✓');
+  console.log('[MANGU v3.10] Buscador manga: AniList → Jikan ✓');
 })();
